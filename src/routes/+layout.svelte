@@ -13,4 +13,5 @@
 {#if protectedRoutes.has($page.url.pathname)}
 	{@render children()}
 {:else}
+	{@render children()}
 {/if}
