@@ -52,4 +52,4 @@
 
 <SidebarHeader title={"Clientes"} {actions} />
 
-<DataTable {columns} data={dataClientes} />
+<DataTable {columns} data={data.clientes} />

@@ -3,28 +3,49 @@ import type { Usuarios } from "$lib/server/db/schema";
 import { createRawSnippet } from "svelte";
 import { renderComponent, renderSnippet } from "$lib/components/ui/data-table";
 import DataTableActions from "./data-table-actions.svelte";
-
+import DataSortableButton from "./data-sortable-button.svelte";
 
 export const columns: ColumnDef<Usuarios>[] = [
   {
     accessorKey: "casillero",
-    header: "Casillero",
+    header: ({ column }) =>
+      renderComponent(DataSortableButton, {
+        title: "Casillero",
+        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+      }),
+    enableHiding: false
   },
   {
     accessorKey: "nombre",
-    header: "Nombre"
+    header: ({ column }) =>
+      renderComponent(DataSortableButton, {
+        title: "Nombre",
+        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+      }),
   },
   {
     accessorKey: "apellido",
-    header: "Apellido",
+    header: ({ column }) =>
+      renderComponent(DataSortableButton, {
+        title: "Apellido",
+        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+      }),
   },
   {
     accessorKey: "correo",
-    header: "Correo",
+    header: ({ column }) =>
+      renderComponent(DataSortableButton, {
+        title: "Correo",
+        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+      }),
   },
   {
     accessorKey: "cedula",
-    header: "Cedula",
+    header: ({ column }) =>
+      renderComponent(DataSortableButton, {
+        title: "Cedula",
+        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+      }),
   },
   {
     accessorKey: "telefono",
@@ -57,7 +78,6 @@ export const columns: ColumnDef<Usuarios>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      // You can pass whatever you need from `row.original` to the component
       return renderComponent(DataTableActions, { id: String(row.original.id) });
     },
   },
