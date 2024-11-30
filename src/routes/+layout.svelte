@@ -1,17 +1,23 @@
+<svelte:options runes={true} />
+
 <script lang="ts">
-	import "../app.css";
-	import { Toaster } from "$lib/components/ui/sonner";
-	import { page } from "$app/stores";
+  import "../app.css";
+  import { Toaster } from "$lib/components/ui/sonner";
+  import { page } from "$app/stores";
+  import SidebarPage from "$lib/components/sidebar-page.svelte";
 
-	let protectedRoutes = new Set(["/login", "/registrar", "/password_update"]);
+  let protectedRoutes = new Set(["/login", "/registrar", "/password_update"]);
 
-	let { children } = $props();
+  let { children } = $props();
+  let { user } = $page.data;
 </script>
 
 <Toaster position="top-right" richColors />
 
 {#if protectedRoutes.has($page.url.pathname)}
-	{@render children()}
+  {@render children()}
 {:else}
-	{@render children()}
+  <SidebarPage {user}>
+    {@render children()}
+  </SidebarPage>
 {/if}
