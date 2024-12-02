@@ -20,6 +20,9 @@
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
+  import { page } from "$app/stores";
+  import { goto } from "$app/navigation";
+  import { onMount } from "svelte";
 
   type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
@@ -30,7 +33,7 @@
   let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
   let sorting = $state<SortingState>([]);
   let columnFilters = $state<ColumnFiltersState>([]);
-  let globalFilter = $state<any>([]);
+  let globalFilter = $state<any>($page.url.searchParams.get("search") ?? "");
   let columnVisibility = $state<VisibilityState>({});
 
   const table = createSvelteTable({
@@ -97,15 +100,20 @@
       }
     },
   });
+  $effect(() => {
+    const search = $page.url.searchParams.get("search");
+    table.setGlobalFilter(search);
+  });
 </script>
 
 <div class="m-4">
   <div class="flex items-center py-4">
     <Input
       placeholder="Buscador"
-      value={""}
+      value={globalFilter}
       onchange={(e) => {
         table.setGlobalFilter(String(e.currentTarget.value));
+        goto(`?search=${e.currentTarget.value}`);
       }}
       oninput={(e) => {
         table.setGlobalFilter(String(e.currentTarget.value));

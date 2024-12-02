@@ -5,41 +5,10 @@
     import type { Usuarios } from "$lib/server/db/schema";
     import DataTable from "./data-table.svelte";
     import { columns } from "./columns";
+    import Layout from "$lib/components/layout.svelte";
+    import { page } from "$app/stores";
 
     let { data }: { data: PageData } = $props();
-
-    const dataClientes: Usuarios[] = [
-        {
-            id: 10,
-            casillero: 1,
-            nombre: "Pedro",
-            apellido: "Perez",
-            cedula: "123456789",
-            precio: 2.75,
-            telefono: "123456789",
-            correo: "p@p.com",
-            nacimiento: new Date("01/01/2000"),
-            sexo: "Masculino",
-            sucursalId: 1,
-            createdAt: new Date("01/01/2000"),
-            updatedAt: new Date("01/01/2000"),
-        },
-        {
-            id: 2,
-            casillero: 2,
-            nombre: "Pedro",
-            apellido: "Perez",
-            cedula: "123456789",
-            precio: 2.75,
-            telefono: "123456789",
-            correo: "p@p.com",
-            nacimiento: new Date("01/01/2000"),
-            sexo: "Masculino",
-            sucursalId: 1,
-            createdAt: new Date("01/01/2000"),
-            updatedAt: new Date("01/01/2000"),
-        },
-    ];
 </script>
 
 <svelte:head>
