@@ -1,11 +1,12 @@
 <script>
-  import SnippetHeader from "$lib/components/sidebar-header.svelte";
+  import InnerLayout from "$lib/components/inner-layout.svelte";
 
   import { Button } from "$lib/components/ui/button";
 </script>
 
 {#snippet actions()}
-  <Button href="/facturar">Facturar</Button>
+  <Button href="/facturas">Facturas</Button>
 {/snippet}
 
-<SnippetHeader title={"Facturas"} {actions} />
+<InnerLayout title={"Facturas"} {actions}>
+</InnerLayout>
