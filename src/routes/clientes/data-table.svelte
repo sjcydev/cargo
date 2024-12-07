@@ -106,98 +106,96 @@
   });
 </script>
 
-<div class="m-4">
-  <div class="flex items-center py-4">
-    <Input
-      placeholder="Buscador"
-      value={globalFilter}
-      onchange={(e) => {
-        table.setGlobalFilter(String(e.currentTarget.value));
-        goto(`?search=${e.currentTarget.value}`);
-      }}
-      oninput={(e) => {
-        table.setGlobalFilter(String(e.currentTarget.value));
-      }}
-      class="max-w-sm"
-    />
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger>
-        {#snippet child({ props })}
-          <Button {...props} variant="outline" class="ml-auto">Columnas</Button>
-        {/snippet}
-      </DropdownMenu.Trigger>
-      <DropdownMenu.Content align="end">
-        {#each table
-          .getAllColumns()
-          .filter((col) => col.getCanHide()) as column (column.id)}
-          <DropdownMenu.CheckboxItem
-            class="capitalize"
-            controlledChecked
-            checked={column.getIsVisible()}
-            onCheckedChange={(value) => column.toggleVisibility(!!value)}
-          >
-            {column.id}
-          </DropdownMenu.CheckboxItem>
-        {/each}
-      </DropdownMenu.Content>
-    </DropdownMenu.Root>
-  </div>
-  <div class="rounded-md border">
-    <Table.Root>
-      <Table.Header>
-        {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
-          <Table.Row>
-            {#each headerGroup.headers as header (header.id)}
-              <Table.Head>
-                {#if !header.isPlaceholder}
-                  <FlexRender
-                    content={header.column.columnDef.header}
-                    context={header.getContext()}
-                  />
-                {/if}
-              </Table.Head>
-            {/each}
-          </Table.Row>
-        {/each}
-      </Table.Header>
-      <Table.Body>
-        {#each table.getRowModel().rows as row (row.id)}
-          <Table.Row data-state={row.getIsSelected() && "selected"}>
-            {#each row.getVisibleCells() as cell (cell.id)}
-              <Table.Cell>
+<div class="flex items-center pb-4">
+  <Input
+    placeholder="Buscador"
+    value={globalFilter}
+    onchange={(e) => {
+      table.setGlobalFilter(String(e.currentTarget.value));
+      goto(`?search=${e.currentTarget.value}`);
+    }}
+    oninput={(e) => {
+      table.setGlobalFilter(String(e.currentTarget.value));
+    }}
+    class="max-w-sm"
+  />
+  <DropdownMenu.Root>
+    <DropdownMenu.Trigger>
+      {#snippet child({ props })}
+        <Button {...props} variant="outline" class="ml-auto">Columnas</Button>
+      {/snippet}
+    </DropdownMenu.Trigger>
+    <DropdownMenu.Content align="end">
+      {#each table
+        .getAllColumns()
+        .filter((col) => col.getCanHide()) as column (column.id)}
+        <DropdownMenu.CheckboxItem
+          class="capitalize"
+          controlledChecked
+          checked={column.getIsVisible()}
+          onCheckedChange={(value) => column.toggleVisibility(!!value)}
+        >
+          {column.id}
+        </DropdownMenu.CheckboxItem>
+      {/each}
+    </DropdownMenu.Content>
+  </DropdownMenu.Root>
+</div>
+<div class="rounded-md border">
+  <Table.Root>
+    <Table.Header>
+      {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
+        <Table.Row>
+          {#each headerGroup.headers as header (header.id)}
+            <Table.Head>
+              {#if !header.isPlaceholder}
                 <FlexRender
-                  content={cell.column.columnDef.cell}
-                  context={cell.getContext()}
+                  content={header.column.columnDef.header}
+                  context={header.getContext()}
                 />
-              </Table.Cell>
-            {/each}
-          </Table.Row>
-        {:else}
-          <Table.Row>
-            <Table.Cell colspan={columns.length} class="h-24 text-center">
-              0 resultados
+              {/if}
+            </Table.Head>
+          {/each}
+        </Table.Row>
+      {/each}
+    </Table.Header>
+    <Table.Body>
+      {#each table.getRowModel().rows as row (row.id)}
+        <Table.Row data-state={row.getIsSelected() && "selected"}>
+          {#each row.getVisibleCells() as cell (cell.id)}
+            <Table.Cell>
+              <FlexRender
+                content={cell.column.columnDef.cell}
+                context={cell.getContext()}
+              />
             </Table.Cell>
-          </Table.Row>
-        {/each}
-      </Table.Body>
-    </Table.Root>
-  </div>
-  <div class="flex items-center justify-end space-x-2 py-4">
-    <Button
-      variant="outline"
-      size="sm"
-      onclick={() => table.previousPage()}
-      disabled={!table.getCanPreviousPage()}
-    >
-      Previous
-    </Button>
-    <Button
-      variant="outline"
-      size="sm"
-      onclick={() => table.nextPage()}
-      disabled={!table.getCanNextPage()}
-    >
-      Next
-    </Button>
-  </div>
+          {/each}
+        </Table.Row>
+      {:else}
+        <Table.Row>
+          <Table.Cell colspan={columns.length} class="h-24 text-center">
+            0 resultados
+          </Table.Cell>
+        </Table.Row>
+      {/each}
+    </Table.Body>
+  </Table.Root>
+</div>
+<div class="flex items-center justify-end space-x-2 py-4">
+  <Button
+    variant="outline"
+    size="sm"
+    onclick={() => table.previousPage()}
+    disabled={!table.getCanPreviousPage()}
+  >
+    Previous
+  </Button>
+  <Button
+    variant="outline"
+    size="sm"
+    onclick={() => table.nextPage()}
+    disabled={!table.getCanNextPage()}
+  >
+    Next
+  </Button>
 </div>

@@ -1,13 +1,15 @@
 import type { ColumnDef } from "@tanstack/table-core";
-import type { Usuarios } from "$lib/server/db/schema";
+import type { Usuarios, Sucursales } from "$lib/server/db/schema";
 import { createRawSnippet } from "svelte";
 import { renderComponent, renderSnippet } from "$lib/components/ui/data-table";
 import DataTableActions from "./data-table-actions.svelte";
 import DataSortableButton from "./data-sortable-button.svelte";
 
-export const columns: ColumnDef<Usuarios>[] = [
+export const columns: ColumnDef<Usuarios & { sucursal: Sucursales }>[] = [
   {
+    accessorFn: (row) => row.casillero,
     accessorKey: "casillero",
+    id: "casillero",
     header: ({ column }) =>
       renderComponent(DataSortableButton, {
         title: "Casillero",
@@ -16,7 +18,9 @@ export const columns: ColumnDef<Usuarios>[] = [
     enableHiding: false
   },
   {
+    accessorFn: (row) => row.nombre,
     accessorKey: "nombre",
+    id: "nombre",
     header: ({ column }) =>
       renderComponent(DataSortableButton, {
         title: "Nombre",
@@ -24,7 +28,9 @@ export const columns: ColumnDef<Usuarios>[] = [
       }),
   },
   {
+    accessorFn: (row) => row.apellido,
     accessorKey: "apellido",
+    id: "apellido",
     header: ({ column }) =>
       renderComponent(DataSortableButton, {
         title: "Apellido",
@@ -32,7 +38,9 @@ export const columns: ColumnDef<Usuarios>[] = [
       }),
   },
   {
+    accessorFn: (row) => row.correo,
     accessorKey: "correo",
+    id: "correo",
     header: ({ column }) =>
       renderComponent(DataSortableButton, {
         title: "Correo",
@@ -40,7 +48,9 @@ export const columns: ColumnDef<Usuarios>[] = [
       }),
   },
   {
+    accessorFn: (row) => row.cedula,
     accessorKey: "cedula",
+    id: "cedula",
     header: ({ column }) =>
       renderComponent(DataSortableButton, {
         title: "Cedula",
@@ -48,15 +58,31 @@ export const columns: ColumnDef<Usuarios>[] = [
       }),
   },
   {
+    accessorFn: (row) => row.telefono,
     accessorKey: "telefono",
+    id: "telefono",
     header: "Telefono",
   },
   {
+    accessorFn: (row) => row.sucursal,
+    id: "sucursal",
     accessorKey: "sucursal",
     header: "Sucursal",
+    cell: ({ row }) => {
+      const sucursal = createRawSnippet<[Sucursales]>((getSucursal) => {
+        const sucursal = getSucursal();
+        return {
+          render: () => (`<div>${sucursal.nombre}</div>`)
+        }
+      });
+
+      return renderSnippet(sucursal, row.original.sucursal);
+    }
   },
   {
+    accessorFn: (row) => row.nacimiento,
     accessorKey: "nacimiento",
+    id: "nacimiento",
     header: "Nacimiento",
     cell: ({ row }) => {
       const formatter = new Intl.DateTimeFormat('es-PA', {
@@ -76,7 +102,9 @@ export const columns: ColumnDef<Usuarios>[] = [
     }
   },
   {
+    accessorFn: (row) => row.sexo,
     accessorKey: "sexo",
+    id: "sexo",
     header: "Sexo",
   },
   {
