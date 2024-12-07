@@ -8,6 +8,27 @@
       "when": 1732720516845,
       "tag": "0000_initial_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1733562882655,
+      "tag": "0001_make_sucursal_not_null",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1733580268024,
+      "tag": "0002_rol_not_null",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1733582181928,
+      "tag": "0003_sucursal_nullable",
+      "breakpoints": true
     }
   ]
 }

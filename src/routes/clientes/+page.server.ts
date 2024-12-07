@@ -1,38 +1,43 @@
-import type { PageServerLoad } from './$types';
-import { db } from '$lib/server/db';
-import { sucursales, usuarios } from '$lib/server/db/schema';
-import { desc, eq, sql } from 'drizzle-orm';
+import type { PageServerLoad } from "./$types";
+import { db } from "$lib/server/db";
+import { sucursales, usuarios } from "$lib/server/db/schema";
+import { desc, eq, sql } from "drizzle-orm";
+import { redirect } from "@sveltejs/kit";
 
 export const load = (async ({ locals }) => {
-    // select usuarios and include only the sucursal nombre
-    // const clientes = await db.select({
-    //     id: usuarios.id,
-    //     nombre: usuarios.nombre,
-    //     apellido: usuarios.apellido,
-    //     cedula: usuarios.cedula,
-    //     correo: usuarios.correo,
-    //     telefono: usuarios.telefono,
-    //     casillero: usuarios.casillero,
-    //     nacimiento: usuarios.nacimiento,
-    //     sexo: usuarios.sexo,
-    //     precio: usuarios.precio,
-    //     createdAt: usuarios.createdAt,
-    //     updatedAt: usuarios.updatedAt,
-    //     sucursalId: usuarios.sucursalId,
-    //     sucursal: sucursales.nombre
-    // })
-    //     .from(usuarios)
-    //     .innerJoin(sucursales, eq(usuarios.sucursalId, sucursales.sucursalId));
+  const { user } = locals;
 
-    const sucursalesUsuarios = await db.query.sucursales.findMany({ with: { usuarios: { orderBy: [desc(usuarios.casillero)], with: { sucursal: true } } } })
+  if (!user) {
+    throw redirect(302, "/login");
+  }
 
-    const todos = await db.query.usuarios.findMany({
-        with: { sucursal: true },
-        orderBy: [desc(usuarios.id)],
+  if (user.rol !== "ADMIN") {
+    const bySucursal = await db.query.sucursales.findMany({
+      where: eq(sucursales.sucursalId, user.sucursalId!),
+      with: {
+        usuarios: {
+          orderBy: [desc(usuarios.id)],
+          with: { sucursal: true },
+        },
+      },
     });
 
+    return { todos: [], bySucursal, user };
+  }
 
-    const user = locals.user
+  const bySucursal = await db.query.sucursales.findMany({
+    with: {
+      usuarios: {
+        orderBy: [desc(usuarios.casillero)],
+        with: { sucursal: true },
+      },
+    },
+  });
 
-    return { todos, bySucursal: sucursalesUsuarios, user };
+  const todos = await db.query.usuarios.findMany({
+    with: { sucursal: true },
+    orderBy: [desc(usuarios.id)],
+  });
+
+  return { todos, bySucursal, user };
 }) satisfies PageServerLoad;

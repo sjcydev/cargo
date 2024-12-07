@@ -1,11 +1,11 @@
 import type { ColumnDef } from "@tanstack/table-core";
-import type { Usuarios, Sucursales } from "$lib/server/db/schema";
+import type { UsuariosWithSucursal, Sucursales } from "$lib/server/db/schema";
 import { createRawSnippet } from "svelte";
 import { renderComponent, renderSnippet } from "$lib/components/ui/data-table";
 import DataTableActions from "./data-table-actions.svelte";
 import DataSortableButton from "./data-sortable-button.svelte";
 
-export const columns: ColumnDef<Usuarios & { sucursal: Sucursales }>[] = [
+export const columns: ColumnDef<UsuariosWithSucursal>[] = [
   {
     accessorFn: (row) => row.casillero,
     accessorKey: "casillero",
@@ -15,7 +15,7 @@ export const columns: ColumnDef<Usuarios & { sucursal: Sucursales }>[] = [
         title: "Casillero",
         onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
       }),
-    enableHiding: false
+    enableHiding: false,
   },
   {
     accessorFn: (row) => row.nombre,
@@ -72,12 +72,12 @@ export const columns: ColumnDef<Usuarios & { sucursal: Sucursales }>[] = [
       const sucursal = createRawSnippet<[Sucursales]>((getSucursal) => {
         const sucursal = getSucursal();
         return {
-          render: () => (`<div>${sucursal.nombre}</div>`)
-        }
+          render: () => `<div>${sucursal?.nombre}</div>`,
+        };
       });
 
       return renderSnippet(sucursal, row.original.sucursal);
-    }
+    },
   },
   {
     accessorFn: (row) => row.nacimiento,
@@ -85,21 +85,22 @@ export const columns: ColumnDef<Usuarios & { sucursal: Sucursales }>[] = [
     id: "nacimiento",
     header: "Nacimiento",
     cell: ({ row }) => {
-      const formatter = new Intl.DateTimeFormat('es-PA', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
+      const formatter = new Intl.DateTimeFormat("es-PA", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
       });
 
       const nac = createRawSnippet<[Date | null]>((getNacimiento) => {
         const nacimiento = getNacimiento();
         return {
-          render: () => (`<div>${formatter.format(nacimiento ?? new Date())}</div>`)
-        }
+          render: () =>
+            `<div>${formatter.format(nacimiento ?? new Date())}</div>`,
+        };
       });
 
       return renderSnippet(nac, row.original.nacimiento);
-    }
+    },
   },
   {
     accessorFn: (row) => row.sexo,
