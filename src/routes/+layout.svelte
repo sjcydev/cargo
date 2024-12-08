@@ -6,7 +6,12 @@
   import { page } from "$app/stores";
   import SidebarPage from "$lib/components/sidebar-page.svelte";
 
-  let protectedRoutes = new Set(["/login", "/registrar", "/password_update"]);
+  let protectedRoutes = new Set([
+    "/login",
+    "/registrar",
+    "/password_update",
+    "/onboarding",
+  ]);
 
   let { children } = $props();
   let { user } = $page.data;

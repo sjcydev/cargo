@@ -15,10 +15,7 @@ import { zod } from "sveltekit-superforms/adapters";
 
 export const load: PageServerLoad = async () => {
   const sucursales = await db.query.sucursales.findMany();
-
-  if (sucursales.length === 0) {
-    throw redirect(302, "/onboarding");
-  }
+  const users = await db.query.users.findMany();
 
   return {
     form: await superValidate(zod(userSignUpSchema)),
@@ -40,12 +37,7 @@ export const actions: Actions = {
       correo,
       nombre: currNombre,
       apellido: currApellido,
-      secret,
     } = form.data;
-
-    if (secret !== SECRET_CODE) {
-      return setError(form, "secret", "Codigo secreto invalido");
-    }
 
     const userId = generateUserId();
     const passwordHash = await hash(password, {

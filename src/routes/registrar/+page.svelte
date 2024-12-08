@@ -25,9 +25,9 @@
   <form class="w-full max-w-sm" method="POST" use:enhance>
     <Card.Root>
       <Card.Header>
-        <Card.Title class="text-xl">Sign Up</Card.Title>
+        <Card.Title class="text-xl">Registro</Card.Title>
         <Card.Description
-          >Enter your information to create an account</Card.Description
+          >Ingrese sus datos para crear una cuenta</Card.Description
         >
       </Card.Header>
       <Card.Content>
