@@ -29,6 +29,13 @@
       "when": 1733582181928,
       "tag": "0003_sucursal_nullable",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1733647163207,
+      "tag": "0004_sucursales_settings",
+      "breakpoints": true
     }
   ]
 }

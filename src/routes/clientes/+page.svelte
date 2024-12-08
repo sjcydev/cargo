@@ -20,15 +20,15 @@
 
 <InnerLayout title={"Clientes"} {actions}>
   <Tabs.Root
-    value={data.user.rol === "ADMIN" ? "todos" : data.bySucursal[0].nombre}
+    value={data.user.rol === "ADMIN" ? "todos" : data.bySucursal[0].sucursal}
     class="space-y-5"
   >
     {#if data.bySucursal.length > 1}
       <Tabs.List class="border-b border-gray-200">
         <Tabs.Trigger value="todos">Todos</Tabs.Trigger>
         {#each data.bySucursal as sucursal}
-          <Tabs.Trigger value={`${sucursal.nombre}`}
-            >{sucursal.nombre}</Tabs.Trigger
+          <Tabs.Trigger value={`${sucursal.sucursal}`}
+            >{sucursal.sucursal}</Tabs.Trigger
           >
         {/each}
       </Tabs.List>
@@ -39,7 +39,7 @@
       </Tabs.Content>
     {/if}
     {#each data.bySucursal as bySucursal}
-      <Tabs.Content value={`${bySucursal.nombre}`}>
+      <Tabs.Content value={`${bySucursal.sucursal}`}>
         <DataTable {columns} data={bySucursal.usuarios} />
       </Tabs.Content>
     {/each}

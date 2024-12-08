@@ -1,11 +1,10 @@
 import * as auth from "$lib/server/auth";
 import { redirect } from "@sveltejs/kit";
 import { hash } from "@node-rs/argon2";
-import { SECRET_CODE } from "$env/static/private";
 import { db } from "$lib/server/db";
 
 import type { Actions } from "./$types";
-import { users } from "$lib/server/db/schema";
+import { users, sucursales } from "$lib/server/db/schema";
 import { capitaliseWord, generateUserId } from "$lib/utils";
 
 import type { PageServerLoad } from "./$types.js";
@@ -13,11 +12,15 @@ import { superValidate, fail, setError } from "sveltekit-superforms";
 import { userSignUpSchema } from "./schema";
 import { zod } from "sveltekit-superforms/adapters";
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
   const sucursales = await db.query.sucursales.findMany();
 
-  if (sucursales.length === 0) {
-    throw redirect(302, "/onboarding");
+  if (sucursales.length !== 0) {
+    if (!locals.user) {
+      throw redirect(302, "/login");
+    }
+
+    throw redirect(302, "/registrar");
   }
 
   return {
@@ -35,17 +38,26 @@ export const actions: Actions = {
     }
 
     const {
+      sucursal,
+      direccion,
+      telefono,
+      precio,
       username,
       password,
       correo,
       nombre: currNombre,
       apellido: currApellido,
-      secret,
     } = form.data;
 
-    if (secret !== SECRET_CODE) {
-      return setError(form, "secret", "Codigo secreto invalido");
-    }
+    const newSucursal = await db
+      .insert(sucursales)
+      .values({
+        sucursal: capitaliseWord(sucursal),
+        direccion: capitaliseWord(direccion),
+        telefono,
+        precio,
+      })
+      .$returningId();
 
     const userId = generateUserId();
     const passwordHash = await hash(password, {
@@ -65,14 +77,14 @@ export const actions: Actions = {
       correo,
       nombre,
       apellido,
+      rol: "ADMIN",
+      sucursalId: newSucursal[0].sucursalId,
     });
 
-    if (!event.locals.user) {
-      const sessionToken = auth.generateSessionToken();
-      const session = await auth.createSession(sessionToken, userId);
+    const sessionToken = auth.generateSessionToken();
+    const session = await auth.createSession(sessionToken, userId);
 
-      auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
-    }
+    auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
 
     redirect(302, "/");
   },
