@@ -53,6 +53,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>Onboarding</title>
+</svelte:head>
+
 <div class="grid place-items-center min-h-screen">
   <form class="w-full max-w-sm" method="POST" use:enhance>
     <Card.Root>
@@ -102,6 +106,21 @@
                   {...props}
                   bind:value={$formData.telefono}
                   placeholder="+1234567890"
+                />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
+
+          <Form.Field {form} name="precio">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Precio Predeterminado</Form.Label>
+                <Input
+                  {...props}
+                  type="number"
+                  bind:value={$formData.precio}
+                  placeholder="2.75"
                 />
               {/snippet}
             </Form.Control>

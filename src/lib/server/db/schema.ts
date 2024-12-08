@@ -14,7 +14,11 @@ import type { InferResultType } from "./extras";
 
 export const sucursales = mysqlTable("sucursales", {
   sucursalId: int("sucursalId").autoincrement().primaryKey(),
-  nombre: varchar("nombre", { length: 255 }).notNull(),
+  sucursal: varchar("nombre", { length: 255 }).notNull(),
+  direccion: varchar("direccion", { length: 255 }).notNull(),
+  telefono: varchar("telefono", { length: 255 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
   precio: float("precio").default(2.75),
 });
 

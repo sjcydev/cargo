@@ -6,6 +6,7 @@ export const sucursalesSchema = z.object({
     .number()
     .min(0, { message: "Precio debe ser mayor a 0" })
     .optional(),
+
   direccion: z.string({
     required_error: "Direccion de la Sucursal es requerida",
   }),

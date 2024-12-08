@@ -21,11 +21,15 @@
   const { form: formData, enhance } = form;
 </script>
 
+<svelte:head>
+  <title>Registrar</title>
+</svelte:head>
+
 <div class="grid place-items-center min-h-screen">
   <form class="w-full max-w-sm" method="POST" use:enhance>
     <Card.Root>
       <Card.Header>
-        <Card.Title class="text-xl">Registro</Card.Title>
+        <Card.Title class="text-xl">Registrar</Card.Title>
         <Card.Description
           >Ingrese sus datos para crear una cuenta</Card.Description
         >

@@ -67,10 +67,12 @@ export const actions: Actions = {
       apellido,
     });
 
-    const sessionToken = auth.generateSessionToken();
-    const session = await auth.createSession(sessionToken, userId);
+    if (!event.locals.user) {
+      const sessionToken = auth.generateSessionToken();
+      const session = await auth.createSession(sessionToken, userId);
 
-    auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
+      auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
+    }
 
     redirect(302, "/");
   },
