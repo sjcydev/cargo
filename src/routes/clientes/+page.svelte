@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageData } from "./$types";
   import Button from "$lib/components/ui/button/button.svelte";
-  import DataTable from "./data-table.svelte";
+  import DataTable from "../../lib/components/data-table.svelte";
   import { columns } from "./columns";
   import * as Tabs from "$lib/components/ui/tabs/index";
 

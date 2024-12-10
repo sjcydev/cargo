@@ -3,7 +3,7 @@ import type { UsuariosWithSucursal, Sucursales } from "$lib/server/db/schema";
 import { createRawSnippet } from "svelte";
 import { renderComponent, renderSnippet } from "$lib/components/ui/data-table";
 import DataTableActions from "./data-table-actions.svelte";
-import DataSortableButton from "./data-sortable-button.svelte";
+import DataSortableButton from "../../lib/components/data-sortable-button.svelte";
 
 export const columns: ColumnDef<UsuariosWithSucursal>[] = [
   {
@@ -12,7 +12,7 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
     id: "casillero",
     header: ({ column }) =>
       renderComponent(DataSortableButton, {
-        title: "Casillero",
+        label: "Casillero",
         onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
       }),
     enableHiding: false,
@@ -23,7 +23,7 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
     id: "nombre",
     header: ({ column }) =>
       renderComponent(DataSortableButton, {
-        title: "Nombre",
+        label: "Nombre",
         onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
       }),
   },
@@ -33,7 +33,7 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
     id: "apellido",
     header: ({ column }) =>
       renderComponent(DataSortableButton, {
-        title: "Apellido",
+        label: "Apellido",
         onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
       }),
   },
@@ -43,7 +43,7 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
     id: "correo",
     header: ({ column }) =>
       renderComponent(DataSortableButton, {
-        title: "Correo",
+        label: "Correo",
         onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
       }),
   },
@@ -53,7 +53,7 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
     id: "cedula",
     header: ({ column }) =>
       renderComponent(DataSortableButton, {
-        title: "Cedula",
+        label: "Cedula",
         onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
       }),
   },

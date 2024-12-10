@@ -45,7 +45,7 @@ export const load = (async ({ locals }) => {
 import type { Actions } from "./$types";
 
 export const actions: Actions = {
-  delete: async ({ locals, request }) => {
+  delete: async ({ request }) => {
     const data = await request.formData();
     const casillero = data.get("id") as string;
 
