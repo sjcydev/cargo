@@ -2,7 +2,7 @@ import type { PageServerLoad } from "./$types";
 import { db } from "$lib/server/db";
 import { sucursales, usuarios } from "$lib/server/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
-import { redirect } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 
 export const load = (async ({ locals }) => {
   const { user } = locals;
@@ -41,3 +41,14 @@ export const load = (async ({ locals }) => {
 
   return { todos, bySucursal, user };
 }) satisfies PageServerLoad;
+
+import type { Actions } from "./$types";
+
+export const actions: Actions = {
+  delete: async ({ locals, request }) => {
+    const data = await request.formData();
+    const casillero = data.get("id") as string;
+
+    await db.delete(usuarios).where(eq(usuarios.casillero, Number(casillero)));
+  },
+};

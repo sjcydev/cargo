@@ -111,7 +111,9 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
-      return renderComponent(DataTableActions, { id: String(row.original.id) });
+      return renderComponent(DataTableActions, {
+        id: String(row.original.casillero),
+      });
     },
   },
 ];
