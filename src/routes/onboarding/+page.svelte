@@ -8,6 +8,7 @@
     userSignUpSchema,
     sucursalesSchema,
     type userSignUpType,
+    companiesSchema,
   } from "./schema";
   import {
     type SuperValidated,
@@ -26,6 +27,7 @@
   let currentStep = $state(0);
 
   const steps = [
+    { schema: companiesSchema, title: "Información de la Organización" },
     { schema: sucursalesSchema, title: "Información de la Sucursal" },
     { schema: userSignUpSchema, title: "Información del Usuario" },
   ];
@@ -70,6 +72,20 @@
       </Card.Header>
       <Card.Content>
         {#if currentStep === 0}
+          <Form.Field {form} name="company">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Nombre de la Organización</Form.Label>
+                <Input
+                  {...props}
+                  bind:value={$formData.company}
+                  placeholder="ACME Inc"
+                />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
+        {:else if currentStep === 1}
           <Form.Field {form} name="sucursal">
             <Form.Control>
               {#snippet children({ props })}
@@ -126,7 +142,21 @@
             </Form.Control>
             <Form.FieldErrors />
           </Form.Field>
-        {:else if currentStep === 1}
+
+          <Form.Field {form} name="codificacion">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Codificación</Form.Label>
+                <Input
+                  {...props}
+                  bind:value={$formData.codificacion}
+                  placeholder="XXXX"
+                />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
+        {:else if currentStep === 2}
           <div class="grid grid-cols-2 gap-4">
             <Form.Field {form} name="nombre">
               <Form.Control>
