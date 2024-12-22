@@ -4,7 +4,7 @@ import { hash } from "@node-rs/argon2";
 import { db } from "$lib/server/db";
 
 import type { Actions } from "./$types";
-import { users, sucursales } from "$lib/server/db/schema";
+import { users, sucursales, companies } from "$lib/server/db/schema";
 import { capitaliseWord, generateUserId } from "$lib/utils";
 
 import type { PageServerLoad } from "./$types.js";
@@ -14,9 +14,10 @@ import { zod } from "sveltekit-superforms/adapters";
 
 export const load: PageServerLoad = async ({ locals }) => {
   const sucursales = await db.query.sucursales.findMany();
+  const users = await db.query.users.findMany();
 
   if (sucursales.length !== 0) {
-    if (!locals.user) {
+    if (users.length !== 0 && !locals.user) {
       throw redirect(302, "/login");
     }
 
@@ -38,10 +39,12 @@ export const actions: Actions = {
     }
 
     const {
+      company,
       sucursal,
       direccion,
       telefono,
       precio,
+      codificacion,
       username,
       password,
       correo,
@@ -49,15 +52,21 @@ export const actions: Actions = {
       apellido: currApellido,
     } = form.data;
 
-    const newSucursal = await db
-      .insert(sucursales)
+    const newCompany = await db
+      .insert(companies)
       .values({
-        sucursal: capitaliseWord(sucursal),
-        direccion: capitaliseWord(direccion),
-        telefono,
-        precio,
+        company,
       })
       .$returningId();
+
+    const newSucursal = await db.insert(sucursales).values({
+      sucursal: capitaliseWord(sucursal),
+      direccion: capitaliseWord(direccion),
+      telefono,
+      precio,
+      codificacion,
+      companyId: newCompany[0].companyId,
+    });
 
     const userId = generateUserId();
     const passwordHash = await hash(password, {
@@ -78,7 +87,7 @@ export const actions: Actions = {
       nombre,
       apellido,
       rol: "ADMIN",
-      sucursalId: newSucursal[0].sucursalId,
+      companyId: newCompany[0].companyId,
     });
 
     const sessionToken = auth.generateSessionToken();

@@ -1,19 +1,31 @@
 import { z } from "zod";
 
-export const sucursalesSchema = z.object({
-  sucursal: z.string({ required_error: "Sucursal es requerida" }),
-  precio: z
-    .number()
-    .min(0, { message: "Precio debe ser mayor a 0" })
-    .optional(),
-
-  direccion: z.string({
-    required_error: "Direccion de la Sucursal es requerida",
-  }),
-  telefono: z.string({
-    required_error: "Telefono de la Sucursal es requerida",
+export const companiesSchema = z.object({
+  company: z.string({
+    required_error: "Nombre de la Organización es requerida",
   }),
 });
+
+export const sucursalesSchema = z.intersection(
+  companiesSchema,
+  z.object({
+    sucursal: z.string({ required_error: "Sucursal es requerida" }),
+    precio: z
+      .number()
+      .min(0, { message: "Precio debe ser mayor a 0" })
+      .optional(),
+
+    direccion: z.string({
+      required_error: "Direccion de la Sucursal es requerida",
+    }),
+    telefono: z.string({
+      required_error: "Telefono de la Sucursal es requerida",
+    }),
+    codificacion: z
+      .string({ required_error: "Codificacion de la Sucursal es requerida" })
+      .max(4, { message: "Codificación debe tener 4 o menos caracteres" }),
+  })
+);
 
 export const userSignUpSchema = z.intersection(
   sucursalesSchema,

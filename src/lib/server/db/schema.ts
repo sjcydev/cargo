@@ -12,14 +12,25 @@ import {
 import { relations } from "drizzle-orm";
 import type { InferResultType } from "./extras";
 
+export const companies = mysqlTable("companies", {
+  companyId: int("companyId").autoincrement().primaryKey(),
+  company: varchar("company", {
+    length: 255,
+  }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
+});
+
 export const sucursales = mysqlTable("sucursales", {
   sucursalId: int("sucursalId").autoincrement().primaryKey(),
   sucursal: varchar("nombre", { length: 255 }).notNull(),
   direccion: varchar("direccion", { length: 255 }).notNull(),
   telefono: varchar("telefono", { length: 255 }).notNull(),
+  precio: float("precio").default(2.75),
+  codificacion: varchar("codificacion", { length: 4 }).notNull(),
+  companyId: int("company").references(() => companies.companyId),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
-  precio: float("precio").default(2.75),
 });
 
 export const users = mysqlTable("users", {
@@ -43,7 +54,9 @@ export const users = mysqlTable("users", {
     .default("EMPLEADO")
     .notNull(),
   sucursalId: int("sucursalId").references(() => sucursales.sucursalId),
+  companyId: int("company").references(() => companies.companyId),
   createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
 export const session = mysqlTable("session", {
@@ -90,12 +103,14 @@ export const facturas = mysqlTable("facturas", {
     length: 15,
     enum: ["transferencia", "efectivo", "yappy", "tarjeta", "nulo"],
   }).default("nulo"),
-  createdAt: timestamp("createdAt").defaultNow(),
   pagadoAt: timestamp("pagadoAt"),
   sucursalId: int("sucursalId")
     .references(() => sucursales.sucursalId)
     .notNull(),
+  empleadoId: varchar("empleadoId", { length: 255 }).references(() => users.id),
   retirados: boolean("retirados").default(false),
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
 export const reportes = mysqlTable("reportes", {
@@ -104,10 +119,13 @@ export const reportes = mysqlTable("reportes", {
   fechaFinal: datetime("fechaFinal"),
   facturas: int("facturas"),
   total: float("total"),
+  empleadoId: varchar("empleadoId", { length: 255 }).references(() => users.id),
   sucursalId: int("sucursalId")
     .references(() => sucursales.sucursalId)
     .notNull(),
   metodoDePago: json("metodoDePago"),
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
 export const trackings = mysqlTable("trackings", {
@@ -119,12 +137,18 @@ export const trackings = mysqlTable("trackings", {
   precio: float("precio"),
   retirado: boolean("retirado").default(false),
   createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
-export const usersRelations = relations(users, ({ one }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   sucursal: one(sucursales, {
     fields: [users.sucursalId],
     references: [sucursales.sucursalId],
+  }),
+  facturas: many(facturas),
+  company: one(companies, {
+    fields: [users.companyId],
+    references: [companies.companyId],
   }),
 }));
 
@@ -146,6 +170,10 @@ export const facturasRelations = relations(facturas, ({ one, many }) => ({
     fields: [facturas.sucursalId],
     references: [sucursales.sucursalId],
   }),
+  empleado: one(users, {
+    fields: [facturas.empleadoId],
+    references: [users.id],
+  }),
 }));
 
 export const trackingsRelations = relations(trackings, ({ one }) => ({
@@ -155,12 +183,36 @@ export const trackingsRelations = relations(trackings, ({ one }) => ({
   }),
 }));
 
-export const sucursalesRelations = relations(sucursales, ({ many }) => ({
+export const sucursalesRelations = relations(sucursales, ({ many, one }) => ({
   usuarios: many(usuarios),
   user: many(users),
+  facturas: many(facturas),
+  company: one(companies, {
+    fields: [sucursales.companyId],
+    references: [companies.companyId],
+  }),
 }));
 
+export const reportesRelations = relations(reportes, ({ one }) => ({
+  empleado: one(users, {
+    fields: [reportes.empleadoId],
+    references: [users.id],
+  }),
+  sucursal: one(sucursales, {
+    fields: [reportes.sucursalId],
+    references: [sucursales.sucursalId],
+  }),
+}));
+
+export const companiesRelations = relations(companies, ({ many }) => ({
+  sucursales: many(sucursales),
+  users: many(users),
+}));
+
+export type Companies = typeof companies.$inferSelect;
+export type NewCompanies = typeof companies.$inferInsert;
 export type Sucursales = typeof sucursales.$inferSelect;
+export type NewSucursales = typeof sucursales.$inferInsert;
 export type Usuarios = typeof usuarios.$inferSelect;
 export type NewUsuarios = typeof usuarios.$inferInsert;
 export type Facturas = typeof facturas.$inferSelect;

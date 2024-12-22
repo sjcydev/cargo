@@ -7,7 +7,7 @@ import { db } from "$lib/server/db";
 const onboardingHandle: Handle = async ({ event, resolve }) => {
   const sucursales = await db.query.sucursales.findMany();
 
-  if (sucursales.length === 0) {
+  if (sucursales.length === 0 && event.url.pathname !== "/onboarding") {
     throw redirect(302, "/onboarding");
   }
 

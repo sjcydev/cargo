@@ -36,6 +36,13 @@
       "when": 1733647163207,
       "tag": "0004_sucursales_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1734898348920,
+      "tag": "0005_add_codificacion_and_companies",
+      "breakpoints": true
     }
   ]
 }
