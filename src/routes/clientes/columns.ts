@@ -12,7 +12,7 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
     id: "casillero",
     header: ({ column }) =>
       renderComponent(DataSortableButton, {
-        label: "Casillero",
+        label: "ID",
         onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
       }),
     enableHiding: false,

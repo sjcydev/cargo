@@ -10,7 +10,7 @@
   }: { label: string } & ComponentProps<typeof Button> = $props();
 </script>
 
-<Button class="m-0 p-0 hover:bg-transparent" {variant} {...restProps}>
+<Button class="text-sm m-0 p-0 hover:bg-transparent" {variant} {...restProps}>
   {label}
-  <ArrowUpDown />
+  <ArrowUpDown size={1} />
 </Button>

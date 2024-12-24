@@ -23,6 +23,9 @@ export const clientesRegisterSchema = z.object({
     .trim()
     .min(1, { message: "Cedula debe tener 1 o más caracteres" }),
   sexo: z.enum(["Masculino", "Femenino", "Otros"]).default("Otros").optional(),
+  sucursalId: z
+    .string({ required_error: "Sucursal es requerido" })
+    .min(1, { message: "Sucursal es requerido" }),
 });
 
 export type clientesRegsiterType = typeof clientesRegisterSchema;

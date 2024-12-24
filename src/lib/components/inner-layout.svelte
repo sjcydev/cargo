@@ -5,10 +5,16 @@
     title,
     actions,
     children,
-  }: { title: string; actions?: Snippet; children?: Snippet } = $props();
+    back = false,
+  }: {
+    title: string;
+    actions?: Snippet;
+    children?: Snippet;
+    back?: boolean;
+  } = $props();
 </script>
 
-<SidebarHeader {title} {actions} />
+<SidebarHeader {title} {actions} {back} />
 
 <div class="m-4">
   {@render children?.()}
