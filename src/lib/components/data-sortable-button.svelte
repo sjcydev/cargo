@@ -4,13 +4,13 @@
   import { Button } from "$lib/components/ui/button/index.js";
 
   let {
-    title,
+    label,
     variant = "ghost",
     ...restProps
-  }: { title: string } & ComponentProps<typeof Button> = $props();
+  }: { label: string } & ComponentProps<typeof Button> = $props();
 </script>
 
-<Button class="m-0 p-0 hover:bg-transparent" {variant} {...restProps}>
-  {title}
-  <ArrowUpDown />
+<Button class="text-sm m-0 p-0 hover:bg-transparent" {variant} {...restProps}>
+  {label}
+  <ArrowUpDown size={1} />
 </Button>
