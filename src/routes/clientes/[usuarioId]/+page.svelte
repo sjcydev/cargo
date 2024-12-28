@@ -1,11 +1,234 @@
 <script lang="ts">
   import InnerLayout from "$lib/components/inner-layout.svelte";
+  import Input from "$lib/components/ui/input/input.svelte";
+  import Separator from "$lib/components/ui/separator/separator.svelte";
   import type { PageData } from "./$types";
+  import * as Form from "$lib/components/ui/form";
+  import {
+    type clientesRegsiterType,
+    clientesRegisterSchema,
+  } from "$lib/clientes_registrar/schema";
+  import type { SuperValidated, Infer } from "sveltekit-superforms";
+  import { superForm } from "sveltekit-superforms";
+  import { zodClient } from "sveltekit-superforms/adapters";
+  import * as Select from "$lib/components/ui/select";
+  import { skirt, trousers } from "@lucide/lab";
+  import { Icon, User } from "lucide-svelte";
+  import Button from "$lib/components/ui/button/button.svelte";
+  import { goto, invalidateAll } from "$app/navigation";
 
-  let { data }: { data: PageData } = $props();
-  let { cliente } = data;
+  let {
+    data,
+  }: { data: SuperValidated<Infer<clientesRegsiterType>> & PageData } =
+    $props();
+  let { cliente, sucursales } = data;
+
+  const form = superForm(data, {
+    validators: zodClient(clientesRegisterSchema),
+    dataType: "json",
+    invalidateAll: "force",
+    onResult: async ({ result }) => {
+      if (result.type === "success") {
+        editMode = false;
+        await invalidateAll();
+        await goto(`/clientes/${$formData.casillero}`);
+      }
+    },
+  });
+
+  const { form: formData, enhance, message, submit } = form;
+
+  const sucursalTrigger = $derived(
+    sucursales.find((f) => $formData.sucursalId === String(f.sucursalId))
+      ?.sucursal ?? "Elige la sucursal"
+  );
+  $formData = {
+    sucursalId: String(cliente?.sucursalId),
+    nombre: cliente?.nombre,
+    apellido: cliente?.apellido,
+    correo: cliente?.correo,
+    telefono: cliente?.telefono,
+    cedula: cliente?.cedula,
+    sexo: cliente?.sexo,
+    casillero: String(cliente?.casillero),
+    id: String(cliente?.id),
+  };
+
+  let editMode = $state(false);
 </script>
 
-<InnerLayout title={`${cliente?.nombre} ${cliente?.apellido}`}>
-  <div></div>
+<svelte:head>
+  <title>{cliente?.nombre} {cliente?.apellido}</title>
+</svelte:head>
+
+{#snippet actions()}
+  {#if editMode}
+    <Button
+      variant="success"
+      onclick={() => {
+        submit();
+      }}>Guardar</Button
+    >
+  {:else}
+    <Button variant="outline" onclick={() => (editMode = true)}>Editar</Button>
+  {/if}
+{/snippet}
+
+<InnerLayout title={`${cliente?.nombre} ${cliente?.apellido}`} {actions}>
+  <form class="grid" use:enhance method="POST">
+    <Form.Field {form} name="casillero">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Casillero</Form.Label>
+          <Input
+            {...props}
+            bind:value={$formData.casillero}
+            placeholder="1000"
+            disabled={!editMode}
+          />
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
+
+    <Form.Field {form} name="sucursalId">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Sucursal</Form.Label>
+          <Select.Root
+            type="single"
+            bind:value={$formData.sucursalId}
+            name={props.name}
+            disabled={!editMode}
+          >
+            <Select.Trigger {...props}>
+              {sucursalTrigger}
+            </Select.Trigger>
+            <Select.Content>
+              {#each sucursales as sucursal}
+                <Select.Item value={String(sucursal.sucursalId)}>
+                  {sucursal.sucursal}
+                </Select.Item>
+              {/each}
+            </Select.Content>
+          </Select.Root>
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
+
+    <div class="grid grid-cols-2 gap-4">
+      <Form.Field {form} name="nombre">
+        <Form.Control>
+          {#snippet children({ props })}
+            <Form.Label>Nombre</Form.Label>
+            <Input
+              {...props}
+              bind:value={$formData.nombre}
+              placeholder="Max"
+              disabled={!editMode}
+            />
+          {/snippet}
+        </Form.Control>
+        <Form.FieldErrors />
+      </Form.Field>
+
+      <Form.Field {form} name="apellido">
+        <Form.Control>
+          {#snippet children({ props })}
+            <Form.Label>Apellido</Form.Label>
+            <Input
+              {...props}
+              bind:value={$formData.apellido}
+              placeholder="Robinson"
+              disabled={!editMode}
+            />
+          {/snippet}
+        </Form.Control>
+        <Form.FieldErrors />
+      </Form.Field>
+    </div>
+
+    <Form.Field {form} name="correo">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Correo</Form.Label>
+          <Input
+            {...props}
+            bind:value={$formData.correo}
+            placeholder="correo@ejemplo.com"
+            disabled={!editMode}
+          />
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
+
+    <Form.Field {form} name="telefono">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Telefono</Form.Label>
+          <Input
+            {...props}
+            bind:value={$formData.telefono}
+            placeholder="66606060"
+            disabled={!editMode}
+          />
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
+
+    <Form.Field {form} name="cedula">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Cedula</Form.Label>
+          <Input
+            {...props}
+            bind:value={$formData.cedula}
+            placeholder="8-888-8888"
+            disabled={!editMode}
+          />
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
+
+    <Form.Field {form} name="sexo">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Sexo</Form.Label>
+          <Select.Root
+            type="single"
+            bind:value={$formData.sexo!}
+            name={props.name}
+            disabled={!editMode}
+          >
+            <Select.Trigger {...props}>
+              {$formData.sexo ? $formData.sexo : "Elige el sexo de la persona"}
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Item value="Masculino" class="flex gap-2">
+                <Icon iconNode={trousers} size={20} /> Masculino
+              </Select.Item>
+              <Select.Item value="Femenino" class="flex gap-2">
+                <Icon iconNode={skirt} size={20} /> Femenino
+              </Select.Item>
+              <Select.Item value="Otros" class="flex gap-2">
+                <User size={20} /> Otros
+              </Select.Item>
+            </Select.Content>
+          </Select.Root>
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
+  </form>
+  <Separator />
+  <div class="flex items-center justify-between my-2">
+    <h1 class="text-xl font-bold">Facturas</h1>
+    <Button href="/clientes/facturar/?search={data.cliente?.casillero}"
+      >Facturar</Button
+    >
+  </div>
 </InnerLayout>
