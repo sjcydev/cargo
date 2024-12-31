@@ -2,7 +2,7 @@
   import Ellipsis from "lucide-svelte/icons/ellipsis";
   import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
-  import { Pencil, Trash2, Receipt } from "lucide-svelte";
+  import { UserPen, Trash2, Receipt } from "lucide-svelte";
   import { enhance } from "$app/forms";
 
   let { id }: { id: string } = $props();
@@ -28,7 +28,7 @@
     </DropdownMenu.Item>
     <DropdownMenu.Separator />
     <DropdownMenu.Item
-      ><a href="/clientes/{id}" class="flex gap-2"><Pencil /> Editar</a
+      ><a href="/clientes/{id}" class="flex gap-2"><UserPen /> Perfil</a
       ></DropdownMenu.Item
     >
     <DropdownMenu.Item
