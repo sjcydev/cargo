@@ -21,7 +21,9 @@
     data,
   }: { data: SuperValidated<Infer<clientesRegsiterType>> & PageData } =
     $props();
-  let { cliente, sucursales } = data;
+  let { sucursales } = data;
+
+  let cliente = $state(data.cliente);
 
   const form = superForm(data, {
     validators: zodClient(clientesRegisterSchema),
@@ -30,6 +32,12 @@
     onResult: async ({ result }) => {
       if (result.type === "success") {
         editMode = false;
+        cliente = {
+          ...cliente,
+          nombre: result.data?.nombre,
+          apellido: result.data?.apellido,
+        };
+        previous = { ...$formData };
         await invalidateAll();
         await goto(`/clientes/${$formData.casillero}`);
       }
@@ -38,21 +46,27 @@
 
   const { form: formData, enhance, message, submit } = form;
 
+  // svelte-ignore state_referenced_locally
+  $formData = {
+    sucursalId: String(cliente.sucursalId),
+    casillero: String(cliente.casillero),
+    nombre: cliente.nombre,
+    apellido: cliente.apellido,
+    correo: cliente.correo,
+    telefono: cliente.telefono,
+    cedula: cliente.cedula,
+    sexo: cliente.sexo,
+    id: String(cliente.id),
+  };
+  let previous = $state({ ...$formData });
+  let disableChange = $derived(
+    JSON.stringify($formData) === JSON.stringify(previous)
+  );
+
   const sucursalTrigger = $derived(
     sucursales.find((f) => $formData.sucursalId === String(f.sucursalId))
       ?.sucursal ?? "Elige la sucursal"
   );
-  $formData = {
-    sucursalId: String(cliente?.sucursalId),
-    nombre: cliente?.nombre,
-    apellido: cliente?.apellido,
-    correo: cliente?.correo,
-    telefono: cliente?.telefono,
-    cedula: cliente?.cedula,
-    sexo: cliente?.sexo,
-    casillero: String(cliente?.casillero),
-    id: String(cliente?.id),
-  };
 
   let editMode = $state(false);
 </script>
@@ -64,17 +78,28 @@
 {#snippet actions()}
   {#if editMode}
     <Button
+      variant="outline"
+      onclick={() => {
+        editMode = false;
+      }}>Cancelar</Button
+    >
+    <Button
       variant="success"
       onclick={() => {
         submit();
-      }}>Guardar</Button
+      }}
+      disabled={disableChange}>Guardar</Button
     >
   {:else}
     <Button variant="outline" onclick={() => (editMode = true)}>Editar</Button>
   {/if}
 {/snippet}
 
-<InnerLayout title={`${cliente?.nombre} ${cliente?.apellido}`} {actions}>
+<InnerLayout
+  title={`${cliente?.nombre} ${cliente?.apellido}`}
+  {actions}
+  back={true}
+>
   <form class="grid" use:enhance method="POST">
     <Form.Field {form} name="casillero">
       <Form.Control>

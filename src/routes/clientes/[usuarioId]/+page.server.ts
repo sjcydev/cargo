@@ -2,8 +2,8 @@ import { db } from "$lib/server/db";
 import { eq } from "drizzle-orm";
 import type { PageServerLoad, Actions } from "./$types";
 import { usuarios } from "$lib/server/db/schema";
-import { error, fail } from "@sveltejs/kit";
-import { superValidate } from "sveltekit-superforms/server";
+import { error, fail, redirect } from "@sveltejs/kit";
+import { superValidate, setError } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { clientesRegisterSchema } from "$lib/clientes_registrar/schema";
 import { capitaliseWord } from "$lib/utils";
@@ -14,7 +14,7 @@ export const load = (async ({ params }) => {
   });
 
   if (!cliente) {
-    throw error(404, "Cliente no encontrado");
+    throw redirect(302, "/clientes");
   }
 
   const sucursales = await db.query.sucursales.findMany();
@@ -35,6 +35,14 @@ export const actions: Actions = {
       return fail(400, { form });
     }
 
+    // if (cliente) {
+    //   return setError(
+    //     form,
+    //     "casillero",
+    //     `Casillero debe ser unico, ya existe casillero ${form.data.casillero}`
+    //   );
+    // }
+
     const {
       nombre,
       apellido,
@@ -47,19 +55,23 @@ export const actions: Actions = {
       id,
     } = form.data;
 
+    const nombreCapital = capitaliseWord(nombre);
+    const apellidoCapital = capitaliseWord(apellido);
+
     await db
       .update(usuarios)
       .set({
         casillero: Number(casillero),
-        nombre: capitaliseWord(nombre),
-        apellido: capitaliseWord(apellido),
+        nombre: nombreCapital,
+        apellido: apellidoCapital,
         telefono,
         cedula,
         correo,
         sexo,
         sucursalId: Number(sucursalId),
       })
-
       .where(eq(usuarios.id, Number(id)));
+
+    return { nombre: nombreCapital, apellido: apellidoCapital };
   },
 };
