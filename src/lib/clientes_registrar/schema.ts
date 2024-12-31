@@ -22,10 +22,12 @@ export const clientesRegisterSchema = z.object({
     .string({ required_error: "Cedula es requerido" })
     .trim()
     .min(1, { message: "Cedula debe tener 1 o más caracteres" }),
-  sexo: z.enum(["Masculino", "Femenino", "Otros"]).default("Otros").optional(),
+  sexo: z.enum(["Masculino", "Femenino", "Otros"]).default("Otros").nullable(),
   sucursalId: z
     .string({ required_error: "Sucursal es requerido" })
     .min(1, { message: "Sucursal es requerido" }),
+  casillero: z.string({ required_error: "Casillero es requerido" }).nullable(),
+  id: z.string().optional(),
 });
 
 export type clientesRegsiterType = typeof clientesRegisterSchema;

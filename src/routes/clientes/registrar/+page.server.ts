@@ -1,13 +1,11 @@
 import { clientesRegisterSchema } from "$lib/clientes_registrar/schema";
-import * as auth from "$lib/server/auth";
-import { redirect } from "@sveltejs/kit";
 import { db } from "$lib/server/db";
 import type { Actions, PageServerLoad } from "./$types";
 import { usuarios } from "$lib/server/db/schema";
 import { superValidate, fail, message } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { eq } from "drizzle-orm";
-import { toast } from "svelte-sonner";
+import { capitaliseWord } from "$lib/utils";
 
 export const load: PageServerLoad = async ({ locals }) => {
   const sucursales = await db.query.sucursales.findMany();
@@ -33,8 +31,8 @@ export const actions: Actions = {
     const newUsuario = await db
       .insert(usuarios)
       .values({
-        nombre,
-        apellido,
+        nombre: capitaliseWord(nombre),
+        apellido: capitaliseWord(apellido),
         telefono,
         cedula,
         correo,
