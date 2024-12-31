@@ -13,8 +13,7 @@
     "/onboarding",
   ]);
 
-  let { children } = $props();
-  let { user } = $page.data;
+  let { data, children } = $props();
 </script>
 
 <Toaster position="top-right" richColors />
@@ -22,7 +21,11 @@
 {#if protectedRoutes.has($page.url.pathname)}
   {@render children()}
 {:else}
-  <SidebarPage {user}>
-    {@render children()}
-  </SidebarPage>
+  {#await data.user}
+    <h1>Loading...</h1>
+  {:then user}
+    <SidebarPage {user}>
+      {@render children()}
+    </SidebarPage>
+  {/await}
 {/if}
