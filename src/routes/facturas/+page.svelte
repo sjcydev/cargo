@@ -5,8 +5,7 @@
 </script>
 
 {#snippet actions()}
-  <Button href="/facturas">Facturas</Button>
+  <Button href="/facturas/facturar">Facturar</Button>
 {/snippet}
 
-<InnerLayout title={"Facturas"} {actions}>
-</InnerLayout>
+<InnerLayout title={"Facturas"} {actions}></InnerLayout>

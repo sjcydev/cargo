@@ -23,8 +23,10 @@
     {/snippet}
   </DropdownMenu.Trigger>
   <DropdownMenu.Content>
-    <DropdownMenu.Item onclick={() => navigator.clipboard.writeText(id)}>
-      <Receipt /> Facturar
+    <DropdownMenu.Item>
+      <a href="/facturas/facturar/?search={id}" class="flex gap-2">
+        <Receipt /> Facturar
+      </a>
     </DropdownMenu.Item>
     <DropdownMenu.Separator />
     <DropdownMenu.Item

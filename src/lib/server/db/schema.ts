@@ -26,7 +26,7 @@ export const sucursales = mysqlTable("sucursales", {
   sucursal: varchar("nombre", { length: 255 }).notNull(),
   direccion: varchar("direccion", { length: 255 }).notNull(),
   telefono: varchar("telefono", { length: 255 }).notNull(),
-  precio: float("precio").default(2.75),
+  precio: float("precio").default(2.75).notNull(),
   codificacion: varchar("codificacion", { length: 4 }).notNull(),
   companyId: int("company").references(() => companies.companyId),
   createdAt: timestamp("createdAt").defaultNow(),

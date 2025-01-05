@@ -15,7 +15,7 @@
 </svelte:head>
 
 {#snippet actions()}
-  <Button href="/clientes/registrar" variant="outline">Crear cliente</Button>
+  <Button href="/clientes/registrar">Crear cliente</Button>
 {/snippet}
 
 <InnerLayout title={"Clientes"} {actions}>

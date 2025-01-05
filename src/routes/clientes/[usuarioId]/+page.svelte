@@ -252,7 +252,7 @@
   <Separator />
   <div class="flex items-center justify-between my-2">
     <h1 class="text-xl font-bold">Facturas</h1>
-    <Button href="/clientes/facturar/?search={data.cliente?.casillero}"
+    <Button href="/clientes/facturas/facturar?search={data.cliente?.casillero}"
       >Facturar</Button
     >
   </div>

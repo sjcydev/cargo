@@ -17,6 +17,7 @@
     FileSearch,
     BookText,
   } from "lucide-svelte";
+  import { page } from "$app/stores";
 
   const data = {
     navMain: [
@@ -34,6 +35,7 @@
         title: "Facturación",
         url: "/facturas",
         icon: Package,
+        isActive: true,
         items: [
           {
             icon: Package,
@@ -95,7 +97,7 @@
           {#snippet child({ props })}
             <a href="/" {...props}>
               <div
-                class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
+                class={`bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg`}
               >
                 <Command class="size-4" />
               </div>
@@ -109,7 +111,11 @@
     </Sidebar.Menu>
   </Sidebar.Header>
   <Sidebar.Content>
-    <NavMain items={data.navMain} {protectedRoutes} />
+    <NavMain
+      items={data.navMain}
+      {protectedRoutes}
+      currentRoute={$page.url.pathname}
+    />
   </Sidebar.Content>
   <Sidebar.Footer>
     <NavUser {user} />
