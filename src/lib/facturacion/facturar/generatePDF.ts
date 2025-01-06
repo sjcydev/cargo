@@ -83,6 +83,7 @@ async function addLogo(doc: jsPDF): Promise<void> {
 }
 
 function addHeader(doc: jsPDF): void {
+  // @ts-ignore
   doc.autoTable({
     body: [[{ content: "FACTURA", styles: STYLES.header }]],
     theme: "plain",
@@ -90,6 +91,7 @@ function addHeader(doc: jsPDF): void {
 }
 
 function addInvoiceInfo(doc: jsPDF, facturaId: string, fecha: string): void {
+  // @ts-ignore
   doc.autoTable({
     body: [
       [{ content: `Factura No. ${facturaId}`, styles: STYLES.invoiceNumber }],
@@ -108,6 +110,7 @@ function addClientInfo(
   casillero: string,
   total: string
 ): void {
+  // @ts-ignore
   doc.autoTable({
     head: [
       [
@@ -135,6 +138,7 @@ function addClientInfo(
 }
 
 function addTrackingTable(doc: jsPDF, trackings: string[][]): void {
+  // @ts-ignore
   doc.autoTable({
     head: [["Numero de Tracking", "Peso (lbs)", "Total"]],
     body: trackings,
@@ -149,6 +153,7 @@ function addTrackingTable(doc: jsPDF, trackings: string[][]): void {
 }
 
 function addTotalSection(doc: jsPDF, total: string): void {
+  // @ts-ignore
   doc.autoTable({
     body: [
       [
@@ -177,6 +182,7 @@ function addTermsAndConditions(doc: jsPDF): void {
     "Panabox Logistics no se hace responsable por paquetes, despues de 1 mes de no ser retirado en la oficina.",
   ];
 
+  // @ts-ignore
   doc.autoTable({
     head: [["Terminos y Condiciones"]],
     body: terms.map((term) => [`\u2022 ${term}`]),

@@ -13,26 +13,21 @@ const columnHelper = createColumnHelper<FacturasWithCliente>();
 export const columns: ColumnDef<FacturasWithCliente>[] = [
   {
     id: "select",
-    cell: ({ row, table }) => {
-      const selectedRows = table.getSelectedRowModel().rows;
-      const currentClienteId = row.original.clienteId;
-      const isDisabled =
-        selectedRows.length > 0 &&
-        !selectedRows.every(
-          (selectedRow) => selectedRow.original.clienteId === currentClienteId
-        );
-
-      return renderComponent(Checkbox, {
+    header: ({ table }) =>
+      renderComponent(Checkbox, {
+        checked: table.getIsAllPageRowsSelected(),
+        indeterminate:
+          table.getIsSomePageRowsSelected() &&
+          !table.getIsAllPageRowsSelected(),
+        onCheckedChange: (value) => table.toggleAllPageRowsSelected(!!value),
+        "aria-label": "Select all",
+      }),
+    cell: ({ row }) =>
+      renderComponent(Checkbox, {
         checked: row.getIsSelected(),
-        disabled: isDisabled,
-        onCheckedChange: (value) => {
-          if (!isDisabled) {
-            row.toggleSelected(!!value);
-          }
-        },
+        onCheckedChange: (value) => row.toggleSelected(!!value),
         "aria-label": "Select row",
-      });
-    },
+      }),
     enableSorting: false,
     enableHiding: false,
   },
@@ -111,20 +106,11 @@ export const columns: ColumnDef<FacturasWithCliente>[] = [
     cell: ({ row }) => row.original.total!.toFixed(2),
   },
   columnHelper.display({
-    id: "pagado",
-    header: "Pagado",
+    id: "estado",
+    header: "Estado",
     cell: ({ row }) => {
       return renderComponent(Estado, {
-        variant: row.original.pagado ? "success" : "destructive",
-      });
-    },
-  }),
-  columnHelper.display({
-    id: "retirados",
-    header: "Retirados",
-    cell: ({ row }) => {
-      return renderComponent(Estado, {
-        variant: row.original.retirados ? "success" : "destructive",
+        variant: row.original.enviado ? "success" : "destructive",
       });
     },
   }),

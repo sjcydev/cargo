@@ -45,7 +45,11 @@
           {
             icon: ReceiptText,
             url: "/facturas/facturar",
-            title: "Facturar cliente",
+            title: "Facturar Cliente",
+          },
+          {
+            url: "/facturas/no_enviadas",
+            title: "No Enviadas",
           },
         ],
       },

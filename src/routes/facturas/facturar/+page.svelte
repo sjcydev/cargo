@@ -22,6 +22,7 @@
   import { fetchClienteData } from "$lib/facturacion/facturar/utils";
   import type { Tracking } from "$lib/facturacion/facturar/types";
   import { enhance } from "$app/forms";
+  import { page } from "$app/state";
 
   let { data }: { data: PageData } = $props();
 
@@ -170,13 +171,19 @@
       searching = false;
     }
   }, 1500);
+
+  $effect(() => {
+    if (page.url.searchParams.get("search")) {
+      searching = true;
+      facturaInfo.casillero =
+        Number(page.url.searchParams.get("search")) || null;
+      handleCasilleroChange();
+    }
+  });
 </script>
 
 <InnerLayout title={"Facturar"}>
   <div class="space-y-2">
-    <form method="POST" action="?/descargar" use:enhance>
-      <Button type="submit" variant="outline">Descargar</Button>
-    </form>
     <Card.Root>
       <Card.Content class="px-6 py-5">
         <Label for="casillero" class="flex gap-1 items-center">

@@ -7,7 +7,6 @@ import {
   usuarios,
 } from "$lib/server/db/schema";
 import { eq } from "drizzle-orm";
-import { generateInvoice } from "$lib/facturacion/facturar/generatePDF";
 import type {
   FacturasWithTrackings,
   User,
@@ -24,7 +23,7 @@ export const load = (async ({ locals }) => {
 }) satisfies PageServerLoad;
 
 export const actions = {
-  crear: async ({ request }) => {
+  default: async ({ request }) => {
     const formData = await request.formData();
     const facturaInfo = JSON.parse(
       formData.get("facturaInfo") as string
@@ -52,17 +51,5 @@ export const actions = {
     });
 
     await db.insert(trackings).values(facturaInfo.trackings);
-  },
-  descargar: async ({ request }) => {
-    const factura = await db.query.facturas.findFirst({
-      where: eq(facturas.facturaId, 1),
-      with: { trackings: true },
-    });
-
-    const cliente = await db.query.usuarios.findFirst({
-      where: eq(usuarios.id, Number(factura?.clienteId)),
-    });
-
-    await generateInvoice(factura!, cliente!, true);
   },
 } satisfies Actions;

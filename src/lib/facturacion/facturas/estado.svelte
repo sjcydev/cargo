@@ -7,7 +7,7 @@
   const destructive = "#dc2626";
 </script>
 
-<div class="flex justify-center">
+<div class="flex items-center">
   {#if variant === "success"}
     <CircleCheckBig size={18} strokeWidth={3} color={success} />
   {:else}

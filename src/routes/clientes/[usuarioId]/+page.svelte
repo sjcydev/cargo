@@ -16,6 +16,8 @@
   import { Icon, User } from "lucide-svelte";
   import Button from "$lib/components/ui/button/button.svelte";
   import { goto, invalidateAll } from "$app/navigation";
+  import VerFacturas from "$lib/facturacion/facturas/ver-facturas.svelte";
+  import { columns } from "./columns";
 
   let {
     data,
@@ -250,10 +252,12 @@
     </Form.Field>
   </form>
   <Separator />
-  <div class="flex items-center justify-between my-2">
+  <div class="flex items-center justify-between my-3">
     <h1 class="text-xl font-bold">Facturas</h1>
-    <Button href="/clientes/facturas/facturar?search={data.cliente?.casillero}"
+    <Button href="/facturas/facturar?search={data.cliente?.casillero}"
       >Facturar</Button
     >
   </div>
+  <Separator class="mb-3" />
+  <VerFacturas data={cliente.facturas} {columns} />
 </InnerLayout>

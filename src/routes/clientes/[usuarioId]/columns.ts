@@ -13,26 +13,21 @@ const columnHelper = createColumnHelper<FacturasWithCliente>();
 export const columns: ColumnDef<FacturasWithCliente>[] = [
   {
     id: "select",
-    cell: ({ row, table }) => {
-      const selectedRows = table.getSelectedRowModel().rows;
-      const currentClienteId = row.original.clienteId;
-      const isDisabled =
-        selectedRows.length > 0 &&
-        !selectedRows.every(
-          (selectedRow) => selectedRow.original.clienteId === currentClienteId
-        );
-
-      return renderComponent(Checkbox, {
+    header: ({ table }) =>
+      renderComponent(Checkbox, {
+        checked: table.getIsAllPageRowsSelected(),
+        indeterminate:
+          table.getIsSomePageRowsSelected() &&
+          !table.getIsAllPageRowsSelected(),
+        onCheckedChange: (value) => table.toggleAllPageRowsSelected(!!value),
+        "aria-label": "Select all",
+      }),
+    cell: ({ row }) =>
+      renderComponent(Checkbox, {
         checked: row.getIsSelected(),
-        disabled: isDisabled,
-        onCheckedChange: (value) => {
-          if (!isDisabled) {
-            row.toggleSelected(!!value);
-          }
-        },
+        onCheckedChange: (value) => row.toggleSelected(!!value),
         "aria-label": "Select row",
-      });
-    },
+      }),
     enableSorting: false,
     enableHiding: false,
   },
@@ -52,56 +47,10 @@ export const columns: ColumnDef<FacturasWithCliente>[] = [
     id: "facturaId",
     header: ({ column }) =>
       renderComponent(DataSortableButton, {
-        label: "ID",
+        label: "Factura",
         onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
       }),
     enableHiding: false,
-  },
-  {
-    accessorFn: (row) => row.casillero,
-    accessorKey: "casillero",
-    id: "casillero",
-    header: ({ column }) =>
-      renderComponent(DataSortableButton, {
-        label: "Casillero",
-        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-      }),
-    enableHiding: false,
-  },
-  columnHelper.display({
-    id: "cliente",
-    header: "Cliente",
-    cell: ({ row }) => {
-      const nombre = row.original.cliente!.nombre;
-      const apellido = row.original.cliente!.apellido;
-      return `${nombre} ${apellido}`;
-    },
-  }),
-  {
-    accessorFn: (row) => row.cliente!.correo,
-    accessorKey: "correo",
-    id: "correo",
-    header: ({ column }) =>
-      renderComponent(DataSortableButton, {
-        label: "Correo",
-        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-      }),
-  },
-  {
-    accessorFn: (row) => row.cliente!.cedula,
-    accessorKey: "cedula",
-    id: "cedula",
-    header: ({ column }) =>
-      renderComponent(DataSortableButton, {
-        label: "Identificación",
-        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-      }),
-  },
-  {
-    accessorFn: (row) => row.cliente!.telefono,
-    accessorKey: "telefono",
-    id: "telefono",
-    header: "Telefono",
   },
   {
     accessorFn: (row) => row.total,
@@ -110,6 +59,15 @@ export const columns: ColumnDef<FacturasWithCliente>[] = [
     header: "Total",
     cell: ({ row }) => row.original.total!.toFixed(2),
   },
+  columnHelper.display({
+    id: "enviado",
+    header: "Enviado",
+    cell: ({ row }) => {
+      return renderComponent(Estado, {
+        variant: row.original.enviado ? "success" : "destructive",
+      });
+    },
+  }),
   columnHelper.display({
     id: "pagado",
     header: "Pagado",
