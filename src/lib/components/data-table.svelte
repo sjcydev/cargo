@@ -5,6 +5,7 @@
     ColumnFiltersState,
     ColumnDef,
     VisibilityState,
+    RowSelectionState,
   } from "@tanstack/table-core";
   import {
     getCoreRowModel,
@@ -22,7 +23,6 @@
   import { Input } from "$lib/components/ui/input/index.js";
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
-  import { onMount } from "svelte";
 
   type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
@@ -35,6 +35,7 @@
   let columnFilters = $state<ColumnFiltersState>([]);
   let globalFilter = $state<any>($page.url.searchParams.get("search") ?? "");
   let columnVisibility = $state<VisibilityState>({});
+  let rowSelection = $state<RowSelectionState>({});
 
   const table = createSvelteTable({
     get data() {
@@ -56,6 +57,9 @@
       },
       get columnVisibility() {
         return columnVisibility;
+      },
+      get rowSelection() {
+        return rowSelection;
       },
     },
     getCoreRowModel: getCoreRowModel(),
@@ -97,6 +101,13 @@
         columnVisibility = updater(columnVisibility);
       } else {
         columnVisibility = updater;
+      }
+    },
+    onRowSelectionChange: (updater) => {
+      if (typeof updater === "function") {
+        rowSelection = updater(rowSelection);
+      } else {
+        rowSelection = updater;
       }
     },
   });

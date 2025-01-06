@@ -19,8 +19,9 @@
   import debounce from "debounce";
   import { toast } from "$lib/utils";
   import * as Table from "$lib/components/ui/table";
-  import { fetchClienteData } from "$lib/facturar/utils";
-  import type { Tracking } from "$lib/facturar/types";
+  import { fetchClienteData } from "$lib/facturacion/facturar/utils";
+  import type { Tracking } from "$lib/facturacion/facturar/types";
+  import { enhance } from "$app/forms";
 
   let { data }: { data: PageData } = $props();
 
@@ -173,6 +174,9 @@
 
 <InnerLayout title={"Facturar"}>
   <div class="space-y-2">
+    <form method="POST" action="?/descargar" use:enhance>
+      <Button type="submit" variant="outline">Descargar</Button>
+    </form>
     <Card.Root>
       <Card.Content class="px-6 py-5">
         <Label for="casillero" class="flex gap-1 items-center">
@@ -207,7 +211,7 @@
     <Card.Root>
       <Card.Content class="pt-6">
         <Card.Title><h2 class="text-xl mb-2">Detalles</h2></Card.Title>
-        <form class="grid gap-4">
+        <div class="grid gap-4">
           <div>
             <Label for="customer-name">Nombre del Cliente</Label>
             <div class="flex gap-4">
@@ -298,7 +302,6 @@
                           id="item-quantity"
                           type="number"
                           bind:value={infoTracking.peso}
-                          oninput={() => console.log(infoTracking.peso)}
                           required
                         />
                       </div>
@@ -308,8 +311,6 @@
                           id="tracking-number"
                           placeholder="1Z999AA1"
                           bind:value={infoTracking.numeroTracking}
-                          oninput={() =>
-                            console.log(infoTracking.numeroTracking)}
                           required
                         />
                       </div>
@@ -428,16 +429,28 @@
                 </div>
               </div>
               <div class="flex justify-end gap-2">
-                <Button variant="outline">Cancel</Button>
-                <Button
-                  onclick={() => {
-                    console.log(facturaInfo);
-                  }}>Save Invoice</Button
-                >
+                <form method="POST" action="?/crear" use:enhance>
+                  <input
+                    type="hidden"
+                    name="facturaInfo"
+                    value={JSON.stringify(facturaInfo)}
+                  />
+                  <input
+                    type="hidden"
+                    name="cliente"
+                    value={JSON.stringify(cliente)}
+                  />
+                  <input
+                    type="hidden"
+                    name="user"
+                    value={JSON.stringify(user)}
+                  />
+                  <Button type="submit">Crear Factura</Button>
+                </form>
               </div>
             </div>
           {/if}
-        </form>
+        </div>
       </Card.Content>
     </Card.Root>
   </div>

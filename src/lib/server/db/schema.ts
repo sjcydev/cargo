@@ -109,6 +109,7 @@ export const facturas = mysqlTable("facturas", {
     .notNull(),
   empleadoId: varchar("empleadoId", { length: 255 }).references(() => users.id),
   retirados: boolean("retirados").default(false),
+  enviado: boolean("enviado").default(false),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -225,6 +226,16 @@ export type NewReportes = typeof reportes.$inferInsert;
 export type UsuariosWithSucursal = InferResultType<
   "usuarios",
   { sucursal: true }
+>;
+
+export type FacturasWithTrackings = InferResultType<
+  "facturas",
+  { trackings: true }
+>;
+
+export type FacturasWithCliente = InferResultType<
+  "facturas",
+  { cliente: { with: { sucursal: true } } }
 >;
 
 export type Session = typeof session.$inferSelect;

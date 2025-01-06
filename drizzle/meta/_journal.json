@@ -43,6 +43,13 @@
       "when": 1734898348920,
       "tag": "0005_add_codificacion_and_companies",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1736043303750,
+      "tag": "0006_add_enviado_flag_to_facturas",
+      "breakpoints": true
     }
   ]
 }

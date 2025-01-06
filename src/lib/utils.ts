@@ -2,6 +2,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { encodeBase32LowerCase } from "@oslojs/encoding";
 import { toast as mainToast } from "svelte-sonner";
+import { DateTime, Settings } from "luxon";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -57,4 +58,62 @@ export function toast({
       return mainToast(message);
     }
   }
+}
+
+export function generateBase64(file: Blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+  });
+}
+
+Settings.defaultZone = "America/Panama";
+
+export function getToday() {
+  return DateTime.now().setZone("America/Panama");
+}
+
+export function dateToLocaleString(date: DateTime) {
+  return date.setLocale("en-GB").toLocaleString();
+}
+
+export function getDateFromISO(iso: string) {
+  return DateTime.fromISO(iso, { zone: "America/Panama" });
+}
+
+type DimensionsType = {
+  imgWidth: number;
+  imgHeight: number;
+  maxWidth: number;
+  maxHeight: number;
+};
+
+export function calculateDimensions({
+  imgWidth,
+  imgHeight,
+  maxWidth,
+  maxHeight,
+}: DimensionsType) {
+  const aspectRatio = imgWidth / imgHeight;
+  let width = maxWidth;
+  let height = maxHeight;
+
+  if (imgWidth > imgHeight) {
+    // Landscape image
+    if (imgWidth > maxWidth) {
+      width = maxWidth;
+      height = maxWidth / aspectRatio;
+    }
+  } else {
+    // Portrait image
+    if (imgHeight > maxHeight) {
+      height = maxHeight;
+      width = maxHeight * aspectRatio;
+    }
+  }
+
+  return { width, height };
 }
