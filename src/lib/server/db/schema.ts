@@ -88,6 +88,12 @@ export const usuarios = mysqlTable("usuarios", {
     length: 9,
   }).default("Otros"),
   precio: float("precio").default(2.75),
+  tipo: varchar("tipo", {
+    enum: ["REGULAR", "ESPECIAL", "CORPORATIVO"],
+    length: 11,
+  })
+    .default("REGULAR")
+    .notNull(),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -95,21 +101,27 @@ export const usuarios = mysqlTable("usuarios", {
 export const facturas = mysqlTable("facturas", {
   facturaId: int("facturaId").autoincrement().primaryKey(),
   casillero: int("casillero"),
-  fecha: varchar("fecha", { length: 50 }),
-  pagado: boolean("pagado").default(false),
-  clienteId: int("clienteId").references(() => usuarios.id),
+  fecha: varchar("fecha", { length: 50 }).notNull(),
+  pagado: boolean("pagado").default(false).notNull(),
+  clienteId: int("clienteId")
+    .references(() => usuarios.id)
+    .notNull(),
   total: float("total").default(0),
   metodoDePago: varchar("metodoDePago", {
     length: 15,
     enum: ["transferencia", "efectivo", "yappy", "tarjeta", "nulo"],
-  }).default("nulo"),
+  })
+    .default("nulo")
+    .notNull(),
   pagadoAt: timestamp("pagadoAt"),
   sucursalId: int("sucursalId")
     .references(() => sucursales.sucursalId)
     .notNull(),
-  empleadoId: varchar("empleadoId", { length: 255 }).references(() => users.id),
-  retirados: boolean("retirados").default(false),
-  enviado: boolean("enviado").default(false),
+  empleadoId: varchar("empleadoId", { length: 255 })
+    .references(() => users.id)
+    .notNull(),
+  retirados: boolean("retirados").default(false).notNull(),
+  enviado: boolean("enviado").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });

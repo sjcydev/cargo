@@ -15,6 +15,8 @@
     NewFacturas,
     NewTrackings,
     User,
+    UsuariosWithSucursal,
+    Sucursales,
   } from "$lib/server/db/schema";
   import debounce from "debounce";
   import { toast } from "$lib/utils";
@@ -49,9 +51,13 @@
     sexo: null,
     createdAt: null,
     updatedAt: null,
+    sucursal: {} as Sucursales,
+    tipo: "REGULAR",
   } as const;
 
-  let cliente = $state<NewUsuarios>(structuredClone(defaultClienteState));
+  let cliente = $state<UsuariosWithSucursal>(
+    structuredClone(defaultClienteState)
+  );
 
   function resetCliente() {
     cliente = structuredClone(defaultClienteState);
@@ -78,10 +84,12 @@
 
   let facturaInfo = $state<NewFacturas & { trackings: NewTrackings[] }>({
     casillero: null,
-    trackings: [],
+    trackings: [] as NewTrackings[],
     total: 0,
     empleadoId: user!.id,
     sucursalId: sucursales!.sucursalId,
+    clienteId: 0,
+    fecha: "",
   });
 
   $effect(() => {
@@ -98,6 +106,8 @@
       total: 0,
       empleadoId: user!.id,
       sucursalId: sucursales!.sucursalId,
+      clienteId: 0,
+      fecha: "",
     };
   }
 
@@ -135,7 +145,7 @@
   }
 
   function processClienteData(
-    data: { cliente?: NewUsuarios },
+    data: { cliente?: UsuariosWithSucursal },
     casillero: string
   ) {
     if (data.cliente) {
@@ -181,6 +191,10 @@
     }
   });
 </script>
+
+<svelte:head>
+  <title>Facturar Cliente</title>
+</svelte:head>
 
 <InnerLayout title={"Facturar"}>
   <div class="space-y-2">
@@ -247,9 +261,32 @@
               placeholder="CORREO"
             />
           </div>
-
+          {#if cliente.casillero}
+            <div class="flex gap-4">
+              <div class="w-full">
+                <Label for="sucursal">Sucursal</Label>
+                <Input
+                  id="sucursal"
+                  readonly
+                  class="focus-visible:ring-0"
+                  bind:value={cliente.sucursal.sucursal}
+                  placeholder="SUCURSAL"
+                />
+              </div>
+              <div class="w-full">
+                <Label for="tipo">Tipo de Cliente</Label>
+                <Input
+                  id="tipo"
+                  readonly
+                  class="focus-visible:ring-0"
+                  bind:value={cliente.tipo}
+                  placeholder="TIPO"
+                />
+              </div>
+            </div>
+          {/if}
           {#if cliente.id}
-            <Card.Title>Tipo de Casillero</Card.Title>
+            <Card.Title class="text-lg">Tipo de Casillero</Card.Title>
             <RadioGroup.Root
               value={especial ? "especial" : "regular"}
               onValueChange={(val) => {

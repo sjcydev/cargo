@@ -50,6 +50,27 @@
       "when": 1736043303750,
       "tag": "0006_add_enviado_flag_to_facturas",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1736311401362,
+      "tag": "0007_add_not_null_to_facturas",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1736312301819,
+      "tag": "0008_remove_not_null_to_casillero",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1736314508659,
+      "tag": "0009_add_tipo_to_clientes",
+      "breakpoints": true
     }
   ]
 }

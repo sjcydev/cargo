@@ -7,19 +7,12 @@ export const POST = async ({ params, request }: RequestEvent) => {
   const casillero = params.id;
 
   const data = await request.json();
-  const { user } = data;
 
   let cliente;
   if (casillero.length > 0) {
     cliente = await db.query.usuarios.findFirst({
       where: eq(usuarios.casillero, Number(casillero)),
-    });
-  }
-
-  if (user.rol !== "ADMIN" && user.sucursalId !== cliente?.sucursalId) {
-    return new Response(JSON.stringify({ cliente: null }), {
-      headers: { "Content-Type": "application/json" },
-      status: 404,
+      with: { sucursal: true },
     });
   }
 
