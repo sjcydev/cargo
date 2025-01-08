@@ -4,7 +4,6 @@
   import ChevronRight from "lucide-svelte/icons/chevron-right";
   import { cn } from "$lib/utils";
   import { type ClassValue } from "clsx";
-  import { writeMalformedNumericLiteralMessage } from "@ark/util";
 
   let {
     items,
@@ -75,7 +74,7 @@
                           href={subItem.url}
                           class={cn(
                             "hover:text-primary",
-                            `${currentRoute === subItem.url ? "bg-muted text-primary" : ""}`
+                            `${(currentRoute.startsWith(subItem.url) && subItem.url !== "/facturas") || currentRoute === subItem.url || (subItem.url === "/facturas" && /^\/facturas\/\d+/.test(currentRoute)) ? "bg-muted text-primary" : ""}`
                           )}
                         >
                           <span>{subItem.title}</span>
