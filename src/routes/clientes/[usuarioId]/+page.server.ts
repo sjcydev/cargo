@@ -40,14 +40,6 @@ export const actions: Actions = {
       return fail(400, { form });
     }
 
-    // if (cliente) {
-    //   return setError(
-    //     form,
-    //     "casillero",
-    //     `Casillero debe ser unico, ya existe casillero ${form.data.casillero}`
-    //   );
-    // }
-
     const {
       nombre,
       apellido,
@@ -59,6 +51,18 @@ export const actions: Actions = {
       casillero,
       id,
     } = form.data;
+
+    const cliente = await db.query.usuarios.findFirst({
+      where: eq(usuarios.casillero, Number(casillero)),
+    });
+
+    if (cliente) {
+      return setError(
+        form,
+        "casillero",
+        `Casillero debe ser unico, ya existe casillero ${form.data.casillero}`
+      );
+    }
 
     const nombreCapital = capitaliseWord(nombre);
     const apellidoCapital = capitaliseWord(apellido);

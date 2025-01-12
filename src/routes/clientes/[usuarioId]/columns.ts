@@ -57,7 +57,7 @@ export const columns: ColumnDef<FacturasWithCliente>[] = [
     accessorKey: "total",
     id: "total",
     header: "Total",
-    cell: ({ row }) => row.original.total!.toFixed(2),
+    cell: ({ row }) => `$${row.original.total!.toFixed(2)}`,
   },
   columnHelper.display({
     id: "enviado",

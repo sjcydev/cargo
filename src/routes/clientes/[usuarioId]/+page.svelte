@@ -71,6 +71,18 @@
   );
 
   let editMode = $state(false);
+
+  let selectedFacturas = $state<number[]>([]);
+
+  function handleSelectionChange(selected: number[]) {
+    selectedFacturas = selected;
+  }
+
+  function procesarMultiples() {
+    if (selectedFacturas.length > 0) {
+      goto(`/facturas/multiples?facturas=${selectedFacturas.join(",")}`);
+    }
+  }
 </script>
 
 <svelte:head>
@@ -254,10 +266,25 @@
   <Separator />
   <div class="flex items-center justify-between my-3">
     <h1 class="text-xl font-bold">Facturas</h1>
-    <Button href="/facturas/facturar?search={data.cliente?.casillero}"
-      >Facturar</Button
-    >
+    <div>
+      <Button
+        variant="outline"
+        onclick={procesarMultiples}
+        disabled={selectedFacturas.length === 0}
+      >
+        Procesar {selectedFacturas.length} Factura{selectedFacturas.length !== 1
+          ? "s"
+          : ""}
+      </Button>
+      <Button href="/facturas/facturar?search={data.cliente?.casillero}"
+        >Facturar</Button
+      >
+    </div>
   </div>
   <Separator class="mb-3" />
-  <VerFacturas data={cliente.facturas} {columns} />
+  <VerFacturas
+    data={cliente.facturas}
+    {columns}
+    selectionChange={handleSelectionChange}
+  />
 </InnerLayout>

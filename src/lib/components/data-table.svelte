@@ -1,4 +1,4 @@
-<script lang="ts" generics="TData, TValue">
+<script lang="ts" generics="TData extends { facturaId: number }, TValue">
   import type {
     PaginationState,
     SortingState,
@@ -21,21 +21,53 @@
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
   import { Button } from "$lib/components/ui/button/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import { goto } from "$app/navigation";
+  import type { Snippet } from "svelte";
 
   type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
+    actions?: Snippet;
+    enableSelection?: boolean;
+    selectionChange?: (selected: number[]) => void;
+    showTotal?: boolean;
   };
 
-  let { data, columns }: DataTableProps<TData, TValue> = $props();
+  let {
+    data,
+    columns,
+    actions,
+    enableSelection = false,
+    selectionChange,
+    showTotal = false,
+  }: DataTableProps<TData, TValue> = $props();
   let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
   let sorting = $state<SortingState>([]);
   let columnFilters = $state<ColumnFiltersState>([]);
-  let globalFilter = $state<any>($page.url.searchParams.get("search") ?? "");
+  let globalFilter = $state<any>(page.url.searchParams.get("search") ?? "");
   let columnVisibility = $state<VisibilityState>({});
   let rowSelection = $state<RowSelectionState>({});
+  let currentTotal = $state(0);
+
+  $effect(() => {
+    if (enableSelection && selectionChange) {
+      const selectedIds = Object.entries(rowSelection)
+        .filter(([_, selected]) => selected)
+        .map(([index]) => data[parseInt(index)].facturaId);
+      selectionChange(selectedIds);
+    }
+  });
+
+  $effect(() => {
+    if (showTotal) {
+      const currentPageRows = table.getRowModel().rows;
+      currentTotal = currentPageRows.reduce((sum, row) => {
+        const total = (row.original as any).total;
+        return sum + (typeof total === "number" ? total : 0);
+      }, 0);
+    }
+  });
 
   const table = createSvelteTable({
     get data() {
@@ -110,14 +142,19 @@
         rowSelection = updater;
       }
     },
+    enableRowSelection: enableSelection,
   });
   $effect(() => {
-    const search = $page.url.searchParams.get("search");
+    const search = page.url.searchParams.get("search");
+    table.setGlobalFilter(search);
+  });
+  $effect(() => {
+    const search = page.url.searchParams.get("search");
     table.setGlobalFilter(search);
   });
 </script>
 
-<div class="flex items-center pb-4">
+<div class="flex items-center justify-between pb-4">
   <Input
     placeholder="Buscador"
     value={globalFilter}
@@ -130,27 +167,29 @@
     }}
     class="max-w-sm"
   />
-  <DropdownMenu.Root>
-    <DropdownMenu.Trigger>
-      {#snippet child({ props })}
-        <Button {...props} variant="outline" class="ml-auto">Columnas</Button>
-      {/snippet}
-    </DropdownMenu.Trigger>
-    <DropdownMenu.Content align="end">
-      {#each table
-        .getAllColumns()
-        .filter((col) => col.getCanHide()) as column (column.id)}
-        <DropdownMenu.CheckboxItem
-          class="capitalize"
-          controlledChecked
-          checked={column.getIsVisible()}
-          onCheckedChange={(value) => column.toggleVisibility(!!value)}
-        >
-          {column.id}
-        </DropdownMenu.CheckboxItem>
-      {/each}
-    </DropdownMenu.Content>
-  </DropdownMenu.Root>
+  <div>
+    {@render actions?.()}
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger>
+        {#snippet child({ props })}
+          <Button {...props} variant="outline" class="ml-auto">Columnas</Button>
+        {/snippet}
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Content align="end">
+        {#each table
+          .getAllColumns()
+          .filter((col) => col.getCanHide()) as column (column.id)}
+          <DropdownMenu.CheckboxItem
+            class="capitalize"
+            checked={column.getIsVisible()}
+            onCheckedChange={(value) => column.toggleVisibility(!!value)}
+          >
+            {column.id}
+          </DropdownMenu.CheckboxItem>
+        {/each}
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
+  </div>
 </div>
 <div class="rounded-md border">
   <Table.Root>
@@ -192,6 +231,11 @@
     </Table.Body>
   </Table.Root>
 </div>
+{#if showTotal && currentTotal > 0}
+  <div class="flex justify-end mt-2 text-md font-medium">
+    Total: ${currentTotal.toFixed(2)}
+  </div>
+{/if}
 <div class="flex items-center justify-end space-x-2 py-4">
   <Button
     variant="outline"

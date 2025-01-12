@@ -1,23 +1,13 @@
 <script lang="ts" module>
-  import BookOpen from "lucide-svelte/icons/book-open";
-  import Bot from "lucide-svelte/icons/bot";
-  import ChartPie from "lucide-svelte/icons/chart-pie";
-  import Frame from "lucide-svelte/icons/frame";
-  import LifeBuoy from "lucide-svelte/icons/life-buoy";
-  import Map from "lucide-svelte/icons/map";
-  import Send from "lucide-svelte/icons/send";
-  import Settings2 from "lucide-svelte/icons/settings-2";
-  import SquareTerminal from "lucide-svelte/icons/square-terminal";
   import {
     Home,
-    User,
     Users,
     Package,
     ReceiptText,
     FileSearch,
     BookText,
   } from "lucide-svelte";
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
 
   const data = {
     navMain: [
@@ -118,7 +108,7 @@
     <NavMain
       items={data.navMain}
       {protectedRoutes}
-      currentRoute={$page.url.pathname}
+      currentRoute={page.url.pathname}
     />
   </Sidebar.Content>
   <Sidebar.Footer>
