@@ -1,22 +1,13 @@
 <script lang="ts" module>
-  import BookOpen from "lucide-svelte/icons/book-open";
-  import Bot from "lucide-svelte/icons/bot";
-  import ChartPie from "lucide-svelte/icons/chart-pie";
-  import Frame from "lucide-svelte/icons/frame";
-  import LifeBuoy from "lucide-svelte/icons/life-buoy";
-  import Map from "lucide-svelte/icons/map";
-  import Send from "lucide-svelte/icons/send";
-  import Settings2 from "lucide-svelte/icons/settings-2";
-  import SquareTerminal from "lucide-svelte/icons/square-terminal";
   import {
     Home,
-    User,
     Users,
     Package,
     ReceiptText,
     FileSearch,
     BookText,
   } from "lucide-svelte";
+  import { page } from "$app/state";
 
   const data = {
     navMain: [
@@ -34,6 +25,7 @@
         title: "Facturación",
         url: "/facturas",
         icon: Package,
+        isActive: true,
         items: [
           {
             icon: Package,
@@ -43,7 +35,11 @@
           {
             icon: ReceiptText,
             url: "/facturas/facturar",
-            title: "Facturar cliente",
+            title: "Facturar Cliente",
+          },
+          {
+            url: "/facturas/no_enviadas",
+            title: "No Enviadas",
           },
         ],
       },
@@ -95,7 +91,7 @@
           {#snippet child({ props })}
             <a href="/" {...props}>
               <div
-                class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
+                class={`bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg`}
               >
                 <Command class="size-4" />
               </div>
@@ -109,7 +105,11 @@
     </Sidebar.Menu>
   </Sidebar.Header>
   <Sidebar.Content>
-    <NavMain items={data.navMain} {protectedRoutes} />
+    <NavMain
+      items={data.navMain}
+      {protectedRoutes}
+      currentRoute={page.url.pathname}
+    />
   </Sidebar.Content>
   <Sidebar.Footer>
     <NavUser {user} />

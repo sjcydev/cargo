@@ -115,5 +115,6 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
         id: String(row.original.casillero),
       });
     },
+    enableHiding: false,
   },
 ];

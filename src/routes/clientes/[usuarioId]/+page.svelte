@@ -16,6 +16,8 @@
   import { Icon, User } from "lucide-svelte";
   import Button from "$lib/components/ui/button/button.svelte";
   import { goto, invalidateAll } from "$app/navigation";
+  import VerFacturas from "$lib/facturacion/facturas/ver-facturas.svelte";
+  import { columns } from "./columns";
 
   let {
     data,
@@ -69,6 +71,18 @@
   );
 
   let editMode = $state(false);
+
+  let selectedFacturas = $state<number[]>([]);
+
+  function handleSelectionChange(selected: number[]) {
+    selectedFacturas = selected;
+  }
+
+  function procesarMultiples() {
+    if (selectedFacturas.length > 0) {
+      goto(`/facturas/multiples?facturas=${selectedFacturas.join(",")}`);
+    }
+  }
 </script>
 
 <svelte:head>
@@ -250,10 +264,27 @@
     </Form.Field>
   </form>
   <Separator />
-  <div class="flex items-center justify-between my-2">
+  <div class="flex items-center justify-between my-3">
     <h1 class="text-xl font-bold">Facturas</h1>
-    <Button href="/clientes/facturar/?search={data.cliente?.casillero}"
-      >Facturar</Button
-    >
+    <div>
+      <Button
+        variant="outline"
+        onclick={procesarMultiples}
+        disabled={selectedFacturas.length === 0}
+      >
+        Procesar {selectedFacturas.length} Factura{selectedFacturas.length !== 1
+          ? "s"
+          : ""}
+      </Button>
+      <Button href="/facturas/facturar?search={data.cliente?.casillero}"
+        >Facturar</Button
+      >
+    </div>
   </div>
+  <Separator class="mb-3" />
+  <VerFacturas
+    data={cliente.facturas}
+    {columns}
+    selectionChange={handleSelectionChange}
+  />
 </InnerLayout>

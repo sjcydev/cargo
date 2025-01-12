@@ -17,7 +17,6 @@ const onboardingHandle: Handle = async ({ event, resolve }) => {
 const authHandle: Handle = async ({ event, resolve }) => {
   const protected_urls =
     event.route.id === "/" ||
-    event.url.pathname.startsWith("/facturar") ||
     event.url.pathname.startsWith("/facturas") ||
     event.url.pathname.startsWith("/tracking") ||
     event.url.pathname.startsWith("/registrar_cliente") ||

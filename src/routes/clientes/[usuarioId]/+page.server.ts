@@ -1,7 +1,7 @@
 import { db } from "$lib/server/db";
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import type { PageServerLoad, Actions } from "./$types";
-import { usuarios } from "$lib/server/db/schema";
+import { usuarios, facturas } from "$lib/server/db/schema";
 import { error, fail, redirect } from "@sveltejs/kit";
 import { superValidate, setError } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
@@ -11,6 +11,11 @@ import { capitaliseWord } from "$lib/utils";
 export const load = (async ({ params }) => {
   const cliente = await db.query.usuarios.findFirst({
     where: eq(usuarios.casillero, Number(params.usuarioId)),
+    with: {
+      facturas: {
+        orderBy: [desc(facturas.facturaId)],
+      },
+    },
   });
 
   if (!cliente) {
@@ -35,14 +40,6 @@ export const actions: Actions = {
       return fail(400, { form });
     }
 
-    // if (cliente) {
-    //   return setError(
-    //     form,
-    //     "casillero",
-    //     `Casillero debe ser unico, ya existe casillero ${form.data.casillero}`
-    //   );
-    // }
-
     const {
       nombre,
       apellido,
@@ -54,6 +51,18 @@ export const actions: Actions = {
       casillero,
       id,
     } = form.data;
+
+    const cliente = await db.query.usuarios.findFirst({
+      where: eq(usuarios.casillero, Number(casillero)),
+    });
+
+    if (cliente) {
+      return setError(
+        form,
+        "casillero",
+        `Casillero debe ser unico, ya existe casillero ${form.data.casillero}`
+      );
+    }
 
     const nombreCapital = capitaliseWord(nombre);
     const apellidoCapital = capitaliseWord(apellido);
