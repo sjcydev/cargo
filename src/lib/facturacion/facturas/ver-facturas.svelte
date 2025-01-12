@@ -1,7 +1,7 @@
 <script lang="ts">
   import DataTable from "$lib/components/data-table.svelte";
   import type { Snippet } from "svelte";
-  import type { FacturasWithCliente } from "$lib/server/db/schema";
+  import type { FacturasWithCliente, Facturas } from "$lib/server/db/schema";
 
   let {
     columns,
@@ -10,7 +10,7 @@
     selectionChange,
   }: {
     columns: any;
-    data: FacturasWithCliente[];
+    data: FacturasWithCliente[] | Facturas[];
     actions?: Snippet;
     selectionChange?: (selected: number[]) => void;
   } = $props();
