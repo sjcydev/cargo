@@ -11,6 +11,8 @@ import type { PageServerLoad } from "./$types.js";
 import { superValidate, fail, setError } from "sveltekit-superforms";
 import { userSignUpSchema } from "./schema";
 import { zod } from "sveltekit-superforms/adapters";
+import { uploadFile } from "$lib/server/s3";
+import { B2_BUCKET_NAME } from "$env/static/private";
 
 export const load: PageServerLoad = async ({ locals }) => {
   const sucursales = await db.query.sucursales.findMany();
@@ -50,14 +52,35 @@ export const actions: Actions = {
       correo,
       nombre: currNombre,
       apellido: currApellido,
+      logo: logoArchivo,
     } = form.data;
 
-    const newCompany = await db
-      .insert(companies)
-      .values({
-        company,
-      })
-      .$returningId();
+    let newCompany;
+
+    if (logoArchivo) {
+      const fileExt = logoArchivo.type.split("/")[1] || "png";
+      const keyName = `${company}/logo.${fileExt}`;
+
+      const friendlyUrl = await uploadFile({
+        file: logoArchivo,
+        keyName,
+      });
+
+      newCompany = await db
+        .insert(companies)
+        .values({
+          company,
+          logo: friendlyUrl,
+        })
+        .$returningId();
+    } else {
+      newCompany = await db
+        .insert(companies)
+        .values({
+          company,
+        })
+        .$returningId();
+    }
 
     const newSucursal = await db.insert(sucursales).values({
       sucursal: capitaliseWord(sucursal),

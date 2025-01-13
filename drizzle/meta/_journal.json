@@ -71,6 +71,20 @@
       "when": 1736314508659,
       "tag": "0009_add_tipo_to_clientes",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1736738045581,
+      "tag": "0010_add_logo_column_to_company",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1736739766978,
+      "tag": "0011_edit_logo_properties",
+      "breakpoints": true
     }
   ]
 }

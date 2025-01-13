@@ -17,6 +17,9 @@ export const companies = mysqlTable("companies", {
   company: varchar("company", {
     length: 255,
   }).notNull(),
+  logo: varchar("logo", {
+    length: 255,
+  }),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });

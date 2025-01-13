@@ -3,6 +3,7 @@
   import { Input } from "$lib/components/ui/input";
   import * as Form from "$lib/components/ui/form";
   import { Button } from "$lib/components/ui/button";
+  import { Upload } from "lucide-svelte";
 
   import {
     userSignUpSchema,
@@ -14,9 +15,12 @@
     type SuperValidated,
     type Infer,
     superForm,
+    fileProxy,
   } from "sveltekit-superforms";
 
   import { zod } from "sveltekit-superforms/adapters";
+
+  import { FileDrop as Dropzone } from "svelte-droplet";
 
   let {
     data,
@@ -53,6 +57,13 @@
   $effect(() => {
     options.validators = zod(steps[currentStep].schema);
   });
+
+  const file = fileProxy(formData, "logo");
+  function handleFiles(files: File[]) {
+    if (files.length === 0) return;
+
+    file.set(files[0]);
+  }
 </script>
 
 <svelte:head>
@@ -60,7 +71,12 @@
 </svelte:head>
 
 <div class="grid place-items-center min-h-screen">
-  <form class="w-full max-w-sm" method="POST" use:enhance>
+  <form
+    class="w-full max-w-sm"
+    method="POST"
+    enctype="multipart/form-data"
+    use:enhance
+  >
     <Card.Root>
       <Card.Header>
         <Card.Title class="text-xl"
@@ -83,6 +99,45 @@
                 />
               {/snippet}
             </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
+
+          <Form.Field {form} name="logo">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Upload Image</Form.Label>
+                <Dropzone
+                  {...props}
+                  {handleFiles}
+                  let:droppable
+                  acceptedMimes={["image/*"]}
+                  max={1}
+                  name="logo"
+                >
+                  <div
+                    class="border-2 border-dashed rounded-lg p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer"
+                    class:border-blue-500={droppable}
+                  >
+                    <div
+                      class="flex flex-col items-center justify-center gap-2"
+                    >
+                      <Upload size={24} class="text-gray-500" />
+                      <p class="text-sm text-gray-600">
+                        Suelta tu imagen aquí o haz clic para subir
+                      </p>
+                    </div>
+                  </div>
+                </Dropzone>
+                {#if $formData.logo}
+                  <p class="mt-2 text-sm text-gray-600">
+                    Archivo seleccionado: {$formData.logo.name}
+                  </p>
+                {/if}
+              {/snippet}
+            </Form.Control>
+            <Form.Description
+              >Sube un archivo de imagen (PNG, JPG, GIF)</Form.Description
+            >
             <Form.FieldErrors />
           </Form.Field>
         {:else if currentStep === 1}

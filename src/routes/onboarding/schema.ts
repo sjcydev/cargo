@@ -4,6 +4,11 @@ export const companiesSchema = z.object({
   company: z.string({
     required_error: "Nombre de la Organización es requerida",
   }),
+  logo: z
+    .instanceof(File, { message: "Please upload a file." })
+    .refine((f) => f.size < 20_000_000, "Logo debe ser menor a 20MB.")
+    .optional()
+    .nullable(),
 });
 
 export const sucursalesSchema = z.intersection(
