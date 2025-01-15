@@ -15,7 +15,11 @@
   }
 
   function procesarMultiples() {
-    if (selectedFacturas.length > 0) {
+    if (selectedFacturas.length === 1) {
+      // If only one factura is selected, go to its individual page
+      goto(`/facturas/${selectedFacturas[0]}`);
+    } else if (selectedFacturas.length > 1) {
+      // If multiple facturas are selected, go to the multiples route
       goto(`/facturas/multiples?facturas=${selectedFacturas.join(",")}`);
     }
   }

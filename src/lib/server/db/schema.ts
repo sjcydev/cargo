@@ -20,6 +20,9 @@ export const companies = mysqlTable("companies", {
   logo: varchar("logo", {
     length: 255,
   }),
+  dominio: varchar("dominio", {
+    length: 255,
+  }).notNull(),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -31,6 +34,7 @@ export const sucursales = mysqlTable("sucursales", {
   telefono: varchar("telefono", { length: 255 }).notNull(),
   precio: float("precio").default(2.75).notNull(),
   codificacion: varchar("codificacion", { length: 4 }).notNull(),
+  correo: varchar("correo", { length: 255 }).notNull(),
   companyId: int("company").references(() => companies.companyId),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
@@ -84,7 +88,7 @@ export const usuarios = mysqlTable("usuarios", {
   sucursalId: int("sucursalId")
     .references(() => sucursales.sucursalId)
     .notNull(),
-  nacimiento: timestamp("nacimiento").defaultNow(),
+  nacimiento: datetime("nacimiento").notNull(),
   correo: varchar("correo", { length: 255 }).notNull(),
   sexo: varchar("sexo", {
     enum: ["Masculino", "Femenino", "Otros"],
@@ -105,7 +109,7 @@ export const facturas = mysqlTable("facturas", {
   facturaId: int("facturaId").autoincrement().primaryKey(),
   casillero: int("casillero"),
   fecha: varchar("fecha", { length: 50 }).notNull(),
-  pagado: boolean("pagado").default(false).notNull(),
+  pagado: boolean("pagado").default(false),
   clienteId: int("clienteId")
     .references(() => usuarios.id)
     .notNull(),
@@ -123,8 +127,8 @@ export const facturas = mysqlTable("facturas", {
   empleadoId: varchar("empleadoId", { length: 255 })
     .references(() => users.id)
     .notNull(),
-  retirados: boolean("retirados").default(false).notNull(),
-  enviado: boolean("enviado").default(false).notNull(),
+  retirados: boolean("retirados").default(false),
+  enviado: boolean("enviado").default(false),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });

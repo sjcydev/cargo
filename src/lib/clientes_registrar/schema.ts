@@ -26,7 +26,16 @@ export const clientesRegisterSchema = z.object({
   sucursalId: z
     .string({ required_error: "Sucursal es requerido" })
     .min(1, { message: "Sucursal es requerido" }),
-  casillero: z.string({ required_error: "Casillero es requerido" }).nullable(),
+  casillero: z
+    .string({ required_error: "Casillero es requerido" })
+    .optional()
+    .nullable(),
+  precio: z
+    .number()
+    .min(0, { message: "Precio debe ser mayor a 0" })
+    .default(2.75)
+    .optional()
+    .nullable(),
   id: z.string().optional(),
 });
 

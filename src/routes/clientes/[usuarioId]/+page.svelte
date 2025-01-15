@@ -13,7 +13,7 @@
   import { zodClient } from "sveltekit-superforms/adapters";
   import * as Select from "$lib/components/ui/select";
   import { skirt, trousers } from "@lucide/lab";
-  import { Icon, User } from "lucide-svelte";
+  import { Edit, Icon, Receipt, Save, Send, User } from "lucide-svelte";
   import Button from "$lib/components/ui/button/button.svelte";
   import { goto, invalidateAll } from "$app/navigation";
   import VerFacturas from "$lib/facturacion/facturas/ver-facturas.svelte";
@@ -58,6 +58,7 @@
     telefono: cliente.telefono,
     cedula: cliente.cedula,
     sexo: cliente.sexo,
+    precio: cliente.precio,
     id: String(cliente.id),
   };
   let previous = $state({ ...$formData });
@@ -83,6 +84,30 @@
       goto(`/facturas/multiples?facturas=${selectedFacturas.join(",")}`);
     }
   }
+
+  async function sendEmail(
+    e: SubmitEvent & { currentTarget: HTMLFormElement & EventTarget }
+  ) {
+    e.preventDefault();
+
+    const response = await fetch(`/api/emails/bienvenida`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        nombre: $formData.nombre,
+        apellido: $formData.apellido,
+        casillero: $formData.casillero,
+        sucursalId: $formData.sucursalId,
+        correo: $formData.correo,
+      }),
+    });
+
+    const data = await response.json();
+
+    console.log(data);
+  }
 </script>
 
 <svelte:head>
@@ -90,23 +115,30 @@
 </svelte:head>
 
 {#snippet actions()}
-  {#if editMode}
-    <Button
-      variant="outline"
-      onclick={() => {
-        editMode = false;
-      }}>Cancelar</Button
-    >
-    <Button
-      variant="success"
-      onclick={() => {
-        submit();
-      }}
-      disabled={disableChange}>Guardar</Button
-    >
-  {:else}
-    <Button variant="outline" onclick={() => (editMode = true)}>Editar</Button>
-  {/if}
+  <div class="flex gap-1">
+    <form method="POST" onsubmit={sendEmail}>
+      <Button variant="outline" type="submit">Reenviar Correo <Send /></Button>
+    </form>
+    {#if editMode}
+      <Button
+        variant="outline"
+        onclick={() => {
+          editMode = false;
+        }}>Cancelar</Button
+      >
+      <Button
+        variant="success"
+        onclick={() => {
+          submit();
+        }}
+        disabled={disableChange}>Guardar <Save /></Button
+      >
+    {:else}
+      <Button variant="outline" onclick={() => (editMode = true)}
+        >Editar <Edit /></Button
+      >
+    {/if}
+  </div>
 {/snippet}
 
 <InnerLayout
@@ -233,6 +265,21 @@
       <Form.FieldErrors />
     </Form.Field>
 
+    <Form.Field {form} name="precio">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Precio</Form.Label>
+          <Input
+            {...props}
+            bind:value={$formData.precio}
+            placeholder="2.75"
+            disabled={!editMode}
+          />
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
+
     <Form.Field {form} name="sexo">
       <Form.Control>
         {#snippet children({ props })}
@@ -277,7 +324,7 @@
           : ""}
       </Button>
       <Button href="/facturas/facturar?search={data.cliente?.casillero}"
-        >Facturar</Button
+        >Facturar <Receipt /></Button
       >
     </div>
   </div>

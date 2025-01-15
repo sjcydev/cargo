@@ -1,0 +1,1 @@
+ALTER TABLE `companies` ADD `dominio` varchar(255) NOT NULL;

@@ -85,6 +85,48 @@
       "when": 1736739766978,
       "tag": "0011_edit_logo_properties",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1736744223406,
+      "tag": "0012_update_nacimiento",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1736744261504,
+      "tag": "0013_update_nacimiento",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1736744606624,
+      "tag": "0014_update_nacimiento",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "5",
+      "when": 1736795210104,
+      "tag": "0015_update_not_null",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "5",
+      "when": 1736899189595,
+      "tag": "0016_add_dominio",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1736976599720,
+      "tag": "0017_add_correo_sucursal",
+      "breakpoints": true
     }
   ]
 }

@@ -102,6 +102,20 @@
             <Form.FieldErrors />
           </Form.Field>
 
+          <Form.Field {form} name="dominio">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Dominio</Form.Label>
+                <Input
+                  {...props}
+                  bind:value={$formData.dominio}
+                  placeholder="compania.com"
+                />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
+
           <Form.Field {form} name="logo">
             <Form.Control>
               {#snippet children({ props })}
@@ -177,6 +191,20 @@
                   {...props}
                   bind:value={$formData.telefono}
                   placeholder="+1234567890"
+                />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
+
+          <Form.Field {form} name="correo">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Correo</Form.Label>
+                <Input
+                  {...props}
+                  bind:value={$formData.correo}
+                  placeholder="correo@ejemplo.com"
                 />
               {/snippet}
             </Form.Control>

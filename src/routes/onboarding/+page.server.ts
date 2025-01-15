@@ -12,7 +12,6 @@ import { superValidate, fail, setError } from "sveltekit-superforms";
 import { userSignUpSchema } from "./schema";
 import { zod } from "sveltekit-superforms/adapters";
 import { uploadFile } from "$lib/server/s3";
-import { B2_BUCKET_NAME } from "$env/static/private";
 
 export const load: PageServerLoad = async ({ locals }) => {
   const sucursales = await db.query.sucursales.findMany();
@@ -41,7 +40,7 @@ export const actions: Actions = {
     }
 
     const {
-      company,
+      company: currCompany,
       sucursal,
       direccion,
       telefono,
@@ -50,10 +49,14 @@ export const actions: Actions = {
       username,
       password,
       correo,
+      correoSucursal,
       nombre: currNombre,
       apellido: currApellido,
       logo: logoArchivo,
+      dominio,
     } = form.data;
+
+    const company = capitaliseWord(currCompany);
 
     let newCompany;
 
@@ -70,7 +73,8 @@ export const actions: Actions = {
         .insert(companies)
         .values({
           company,
-          logo: friendlyUrl,
+          logo: keyName,
+          dominio,
         })
         .$returningId();
     } else {
@@ -78,18 +82,23 @@ export const actions: Actions = {
         .insert(companies)
         .values({
           company,
+          dominio,
         })
         .$returningId();
     }
 
-    const newSucursal = await db.insert(sucursales).values({
-      sucursal: capitaliseWord(sucursal),
-      direccion: capitaliseWord(direccion),
-      telefono,
-      precio,
-      codificacion,
-      companyId: newCompany[0].companyId,
-    });
+    const newSucursal = await db
+      .insert(sucursales)
+      .values({
+        sucursal: capitaliseWord(sucursal),
+        direccion: capitaliseWord(direccion),
+        telefono,
+        precio,
+        codificacion,
+        correo: correoSucursal,
+        companyId: newCompany[0].companyId,
+      })
+      .$returningId();
 
     const userId = generateUserId();
     const passwordHash = await hash(password, {
@@ -110,6 +119,7 @@ export const actions: Actions = {
       nombre,
       apellido,
       rol: "ADMIN",
+      sucursalId: newSucursal[0].sucursalId,
       companyId: newCompany[0].companyId,
     });
 
