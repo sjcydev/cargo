@@ -80,6 +80,8 @@ export const actions: Actions = {
         casillero: newUsuario[0].id,
         sucursalId: Number(sucursalId),
         correo,
+        cedula,
+        telefono,
       }),
     });
 

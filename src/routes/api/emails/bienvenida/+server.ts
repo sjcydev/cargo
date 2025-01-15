@@ -8,14 +8,23 @@ import { json } from "@sveltejs/kit";
 import { getFriendlyUrl } from "$lib/server/s3";
 import { randomUUID as uuid } from "crypto";
 import { renderAsPlainText } from "svelte-email-tailwind";
-
+import NuevoCasillero from "$lib/components/emails/new-customer-admin.svelte";
 import { render } from "svelte/server";
 
 export const POST: RequestHandler = async ({ request }) => {
   console.log("hit");
   const body = await request.json();
 
-  let { nombre, apellido, casillero, sucursalId, correo } = body;
+  let {
+    nombre,
+    apellido,
+    casillero,
+    sucursalId,
+    correo,
+    cedula,
+    telefono,
+    reenviar = false,
+  } = body;
 
   try {
     const company = await db.query.companies.findFirst()!;
@@ -51,6 +60,32 @@ export const POST: RequestHandler = async ({ request }) => {
           "X-Entity-Ref-ID": uuid(),
         },
       });
+
+      if (!reenviar) {
+        const { body: adminEmailHtml } = render(NuevoCasillero, {
+          props: {
+            nombre,
+            apellido,
+            casillero,
+            sucursal: sucursal?.sucursal,
+            codigo_de_compania: sucursal?.codificacion,
+            logo,
+            correo,
+            cedula,
+            telefono,
+          },
+        });
+
+        const adminEmailText = await renderAsPlainText(adminEmailHtml);
+
+        await resend.emails.send({
+          from: `${company.company} <no-reply-info@resend.dev>`,
+          to: [sucursal!.correo],
+          subject: `¡Nuevo Casillero Registrado!`,
+          html: adminEmailHtml,
+          text: adminEmailText,
+        });
+      }
 
       return json({ data, message: "Email sent successfully" });
     }
