@@ -7,6 +7,7 @@
     Html,
     Preview,
     Section,
+    Body,
     Text,
     Img,
   } from "svelte-email-tailwind";
@@ -91,56 +92,58 @@
 <Html>
   <Head />
   <Preview {preview} />
-  <Section style={main}>
-    <Container style={container}>
-      <Container style={logoContainer}>
-        <Img
-          src={logo}
-          width="30"
-          height="30"
-          style={logoIcon}
-          alt="Panabox Logistics Logo"
-        />
+  <Body>
+    <Section style={main}>
+      <Container style={container}>
+        <Container style={logoContainer}>
+          <Img
+            src={logo}
+            width="30"
+            height="30"
+            style={logoIcon}
+            alt="Panabox Logistics Logo"
+          />
+        </Container>
+        <Heading style={heading}>Nuevo Casillero Registrado</Heading>
+        <Text style={paragraph}>
+          Un nuevo cliente se ha registrado en la sucursal {sucursal}. Debajo
+          tendrás la información del casillero del cliente.
+        </Text>
+        <Hr style={hr} />
+        <Heading style={heading2}>Información del Cliente</Heading>
+        <Text style={paragraph}>
+          Nombre: {nombre}
+          {apellido}
+          <br />
+          Cedula: {cedula}
+          <br />
+          Correo: {correo}
+          <br />
+          Telefono: {telefono}
+        </Text>
+        <Hr style={hr} />
+        <Heading style={heading2}>Información del Casillero</Heading>
+        <Text style={paragraph}>
+          Nombre: {codigo_de_compania}
+          {nombre}
+          {apellido}
+          <br />
+          Address Line 1: {direccion.direccion1}
+          {codigo_de_compania}
+          <br />
+          Address Line 2: {codigo_de_compania}{casillero}
+          <br />
+          City: {direccion.ciudad}
+          <br />
+          State: {direccion.estado}
+          <br />
+          Zip Code: {direccion.zip}
+          <br />
+          Country: {direccion.pais}
+          <br />
+          Tel: {direccion.tel}
+        </Text>
       </Container>
-      <Heading style={heading}>Nuevo Casillero Registrado</Heading>
-      <Text style={paragraph}>
-        Un nuevo cliente se ha registrado en la sucursal {sucursal}. Debajo
-        tendrás la información del casillero del cliente.
-      </Text>
-      <Hr style={hr} />
-      <Heading style={heading2}>Información del Cliente</Heading>
-      <Text style={paragraph}>
-        Nombre: {nombre}
-        {apellido}
-        <br />
-        Cedula: {cedula}
-        <br />
-        Correo: {correo}
-        <br />
-        Telefono: {telefono}
-      </Text>
-      <Hr style={hr} />
-      <Heading style={heading2}>Información del Casillero</Heading>
-      <Text style={paragraph}>
-        Nombre: {codigo_de_compania}
-        {nombre}
-        {apellido}
-        <br />
-        Address Line 1: {direccion.direccion1}
-        {codigo_de_compania}
-        <br />
-        Address Line 2: {codigo_de_compania}{casillero}
-        <br />
-        City: {direccion.ciudad}
-        <br />
-        State: {direccion.estado}
-        <br />
-        Zip Code: {direccion.zip}
-        <br />
-        Country: {direccion.pais}
-        <br />
-        Tel: {direccion.tel}
-      </Text>
-    </Container>
-  </Section>
+    </Section>
+  </Body>
 </Html>

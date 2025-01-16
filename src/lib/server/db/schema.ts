@@ -31,6 +31,7 @@ export const sucursales = mysqlTable("sucursales", {
   sucursalId: int("sucursalId").autoincrement().primaryKey(),
   sucursal: varchar("nombre", { length: 255 }).notNull(),
   direccion: varchar("direccion", { length: 255 }).notNull(),
+  maps: varchar("maps", { length: 255 }),
   telefono: varchar("telefono", { length: 255 }).notNull(),
   precio: float("precio").default(2.75).notNull(),
   codificacion: varchar("codificacion", { length: 4 }).notNull(),

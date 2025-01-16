@@ -62,14 +62,34 @@ export function toast({
   }
 }
 
-export function generateBase64(file: Blob) {
+export function generateBase64(file: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
     reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
+    reader.onload = () => resolve(reader.result as string);
     reader.onerror = reject;
   });
+}
+
+export async function getBase64FromUrl(url: string): Promise<string> {
+  const response = await fetch(url);
+
+  // Browser environment
+  if (typeof window !== "undefined") {
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  // Server environment
+  const arrayBuffer = await response.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  return `data:image/png;base64,${buffer.toString("base64")}`;
 }
 
 Settings.defaultZone = "America/Panama";

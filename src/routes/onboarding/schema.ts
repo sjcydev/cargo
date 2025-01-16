@@ -34,6 +34,7 @@ export const sucursalesSchema = z.intersection(
       .string({ required_error: "Correo es requerido" })
       .email({ message: "Correo invalido" })
       .trim(),
+    maps: z.string().optional().nullish(),
   })
 );
 

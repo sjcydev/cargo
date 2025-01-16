@@ -1,18 +1,13 @@
 import { jsPDF } from "jspdf";
-import Logo from "$lib/assets/logocompleto.png";
 import { type FontStyle, type RowInput } from "jspdf-autotable";
 import { applyPlugin } from "jspdf-autotable";
-import {
-  getToday,
-  dateToLocaleString,
-  generateBase64,
-  calculateDimensions,
-} from "$lib/utils";
+import { calculateDimensions, getBase64FromUrl } from "$lib/utils";
 import type {
   FacturasWithTrackings,
-  Usuarios,
-  Facturas,
   Trackings,
+  Companies,
+  Sucursales,
+  UsuariosWithSucursal,
 } from "$lib/server/db/schema";
 
 applyPlugin(jsPDF);
@@ -65,12 +60,13 @@ function createTrackingRows(trackings: Trackings[]): string[][] {
 }
 
 // PDF Section Generators
-async function addLogo(doc: jsPDF): Promise<void> {
+async function addLogo(doc: jsPDF, logo: string): Promise<void> {
+  const base64Image = await getBase64FromUrl(logo);
   const {
     fileType,
     height: imgHeight,
     width: imgWidth,
-  } = doc.getImageProperties(Logo);
+  } = doc.getImageProperties(base64Image);
 
   const { width, height } = calculateDimensions({
     imgHeight,
@@ -79,7 +75,7 @@ async function addLogo(doc: jsPDF): Promise<void> {
     maxHeight: 85,
   });
 
-  doc.addImage(Logo, fileType, 38, 50, width, height, "", "FAST");
+  doc.addImage(base64Image, fileType, 38, 50, width, height, "", "FAST");
 }
 
 function addHeader(doc: jsPDF): void {
@@ -106,7 +102,7 @@ function addInvoiceInfo(doc: jsPDF, facturaId: string, fecha: string): void {
 
 function addClientInfo(
   doc: jsPDF,
-  cliente: Usuarios,
+  cliente: UsuariosWithSucursal,
   casillero: string,
   total: string
 ): void {
@@ -140,7 +136,16 @@ function addClientInfo(
 function addTrackingTable(doc: jsPDF, trackings: string[][]): void {
   // @ts-ignore
   doc.autoTable({
-    head: [["Numero de Tracking", "Peso (lbs)", "Total"]],
+    head: [
+      [
+        {
+          content: "Numero de Tracking",
+          styles: { halign: "left" },
+        },
+        "Peso (lbs)",
+        "Total",
+      ],
+    ],
     body: trackings,
     theme: "striped",
     headStyles: STYLES.tableHeader,
@@ -174,12 +179,12 @@ function addTotalSection(doc: jsPDF, total: string): void {
   });
 }
 
-function addTermsAndConditions(doc: jsPDF): void {
+function addTermsAndConditions(doc: jsPDF, company: string): void {
   const terms = [
-    "Panabox Logistics aplica cargos por peso o volumen para cargas extra dimensionada.",
-    "Panabox Logistics no se hará responsable por daño en mercancia mal empacada por exportación.",
-    "Panabox Logistics no se hace responsable por mercancia extraviada entregada por USPS.",
-    "Panabox Logistics no se hace responsable por paquetes, despues de 1 mes de no ser retirado en la oficina.",
+    `${company} aplica cargos por peso o volumen para cargas extra dimensionada.`,
+    `${company} no se hará responsable por daño en mercancia mal empacada por exportación.`,
+    `${company} no se hace responsable por mercancia extraviada entregada por USPS.`,
+    `${company} no se hace responsable por paquetes, despues de 1 mes de no ser retirado en la oficina.`,
   ];
 
   // @ts-ignore
@@ -192,9 +197,8 @@ function addTermsAndConditions(doc: jsPDF): void {
   });
 }
 
-function addFooter(doc: jsPDF): void {
-  const str =
-    "Panabox Logistics | Teléfono +507 6858-1291\nRicardo J. Alfaro, Plaza Dorado City Center, Piso 1, Local 113A";
+function addFooter(doc: jsPDF, company: string, sucursal: Sucursales): void {
+  const str = `${company} | Teléfono ${sucursal.telefono}\n${sucursal.direccion}`;
   doc.setFontSize(11);
 
   var pageSize = doc.internal.pageSize;
@@ -202,36 +206,41 @@ function addFooter(doc: jsPDF): void {
   doc.text(str, 40, pageHeight - 40);
 }
 
-export async function generateInvoice(
-  info: FacturasWithTrackings,
-  cliente: Usuarios,
+export async function generateInvoice({
+  info,
+  cliente,
+  company,
+  logo,
   descargar = false,
-  reenviar = false
-): Promise<string> {
+  reenviar = false,
+}: {
+  info: FacturasWithTrackings;
+  cliente: UsuariosWithSucursal;
+  company: Companies;
+  logo: string;
+  descargar?: boolean;
+  reenviar?: boolean;
+}): Promise<Buffer | void> {
   const doc = new jsPDF(PDF_CONFIG);
   const trackingRows = createTrackingRows(info.trackings);
 
   const total = formatCurrency(info.total!);
-  const fecha =
-    descargar || reenviar ? info.fecha! : dateToLocaleString(getToday());
+  const fecha = info.fecha!;
 
-  await addLogo(doc);
+  await addLogo(doc, logo);
   addHeader(doc);
   addInvoiceInfo(doc, String(info.facturaId), fecha);
   addClientInfo(doc, cliente, String(info.casillero), total);
   addTrackingTable(doc, trackingRows);
   addTotalSection(doc, total);
-  addTermsAndConditions(doc);
-  addFooter(doc);
+  addTermsAndConditions(doc, company.company);
+  addFooter(doc, company.company, cliente.sucursal);
 
-  let base = "";
   if (descargar) {
     doc.save(`Factura-${info.facturaId}.pdf`);
   } else {
-    base = (await generateBase64(doc.output("blob"))) as string;
+    return Buffer.from(doc.output("arraybuffer"));
   }
-
-  return base;
 }
 
 // export async function createReport(

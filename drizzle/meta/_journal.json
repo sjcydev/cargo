@@ -127,6 +127,13 @@
       "when": 1736976599720,
       "tag": "0017_add_correo_sucursal",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1736984071138,
+      "tag": "0018_add_maps_to_sucursales",
+      "breakpoints": true
     }
   ]
 }

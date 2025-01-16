@@ -7,20 +7,40 @@
   import { Download, Send } from "lucide-svelte";
   import * as Dialog from "$lib/components/ui/dialog";
   import { generateInvoice } from "$lib/facturacion/facturar/generatePDF";
-  import type { Usuarios } from "$lib/server/db/schema";
+  import type { UsuariosWithSucursal } from "$lib/server/db/schema";
   import ClienteInfo from "$lib/facturacion/facturas/components/cliente-info.svelte";
   import MetodoPago from "$lib/facturacion/facturas/components/metodo-pago.svelte";
   import TrackingList from "$lib/facturacion/facturas/components/tracking-list.svelte";
   import FacturaHeader from "$lib/facturacion/facturas/components/factura-header.svelte";
   import { enhance } from "$app/forms";
   import { invalidateAll } from "$app/navigation";
-  import Estado from "$lib/facturacion/facturas/estado.svelte";
+  import { toast } from "svelte-sonner";
 
   let { data }: { data: PageData } = $props();
   let showCancelDialog = $state<boolean>(false);
 
   async function descargarFactura() {
-    await generateInvoice(data.factura, data.factura.cliente as Usuarios, true);
+    const base = await generateInvoice({
+      info: data.factura,
+      cliente: data.factura.cliente as UsuariosWithSucursal,
+      company: data.company!,
+      logo: data.logo!,
+      descargar: true,
+    });
+    console.log(base);
+  }
+
+  async function enviarFactura() {
+    try {
+      await fetch("/api/emails/facturas", {
+        method: "POST",
+        body: JSON.stringify({ facturaId: data.factura.facturaId }),
+      });
+    } catch (error) {
+      console.error("Error sending emails:", error);
+    }
+
+    toast.success("Factura enviada correctamente");
   }
 </script>
 
@@ -29,7 +49,7 @@
 </svelte:head>
 
 {#snippet actions()}
-  <Button variant="outline" class="font-semibold"
+  <Button variant="outline" class="font-semibold" onclick={enviarFactura}
     >{data.factura.enviado ? "Reenviar" : "Enviar"} <Send /></Button
   >
   {#if data.user!.rol === "ADMIN"}

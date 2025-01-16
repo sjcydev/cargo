@@ -80,7 +80,9 @@
   }
 
   function procesarMultiples() {
-    if (selectedFacturas.length > 0) {
+    if (selectedFacturas.length === 1) {
+      goto(`/facturas/${selectedFacturas[0]}`);
+    } else if (selectedFacturas.length > 1) {
       goto(`/facturas/multiples?facturas=${selectedFacturas.join(",")}`);
     }
   }
