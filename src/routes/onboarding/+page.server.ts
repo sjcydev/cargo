@@ -11,6 +11,7 @@ import type { PageServerLoad } from "./$types.js";
 import { superValidate, fail, setError } from "sveltekit-superforms";
 import { userSignUpSchema } from "./schema";
 import { zod } from "sveltekit-superforms/adapters";
+import { uploadFile } from "$lib/server/s3";
 
 export const load: PageServerLoad = async ({ locals }) => {
   const sucursales = await db.query.sucursales.findMany();
@@ -39,7 +40,7 @@ export const actions: Actions = {
     }
 
     const {
-      company,
+      company: currCompany,
       sucursal,
       direccion,
       telefono,
@@ -48,25 +49,56 @@ export const actions: Actions = {
       username,
       password,
       correo,
+      correoSucursal,
       nombre: currNombre,
       apellido: currApellido,
+      logo: logoArchivo,
+      dominio,
     } = form.data;
 
-    const newCompany = await db
-      .insert(companies)
+    const company = capitaliseWord(currCompany);
+
+    let newCompany;
+
+    if (logoArchivo) {
+      const fileExt = logoArchivo.type.split("/")[1] || "png";
+      const keyName = `${company}/logo.${fileExt}`;
+
+      const friendlyUrl = await uploadFile({
+        file: logoArchivo,
+        keyName,
+      });
+
+      newCompany = await db
+        .insert(companies)
+        .values({
+          company,
+          logo: keyName,
+          dominio,
+        })
+        .$returningId();
+    } else {
+      newCompany = await db
+        .insert(companies)
+        .values({
+          company,
+          dominio,
+        })
+        .$returningId();
+    }
+
+    const newSucursal = await db
+      .insert(sucursales)
       .values({
-        company,
+        sucursal: capitaliseWord(sucursal),
+        direccion: capitaliseWord(direccion),
+        telefono,
+        precio,
+        codificacion,
+        correo: correoSucursal,
+        companyId: newCompany[0].companyId,
       })
       .$returningId();
-
-    const newSucursal = await db.insert(sucursales).values({
-      sucursal: capitaliseWord(sucursal),
-      direccion: capitaliseWord(direccion),
-      telefono,
-      precio,
-      codificacion,
-      companyId: newCompany[0].companyId,
-    });
 
     const userId = generateUserId();
     const passwordHash = await hash(password, {
@@ -87,6 +119,7 @@ export const actions: Actions = {
       nombre,
       apellido,
       rol: "ADMIN",
+      sucursalId: newSucursal[0].sucursalId,
       companyId: newCompany[0].companyId,
     });
 

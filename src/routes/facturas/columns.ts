@@ -78,16 +78,6 @@ export const columns: ColumnDef<FacturasWithCliente>[] = [
     },
   }),
   {
-    accessorFn: (row) => row.cliente!.correo,
-    accessorKey: "correo",
-    id: "correo",
-    header: ({ column }) =>
-      renderComponent(DataSortableButton, {
-        label: "Correo",
-        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-      }),
-  },
-  {
     accessorFn: (row) => row.cliente!.cedula,
     accessorKey: "cedula",
     id: "cedula",

@@ -43,6 +43,8 @@
     "zod": "^3.23.8"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.726.1",
+    "@aws-sdk/s3-request-presigner": "^3.726.1",
     "@node-rs/argon2": "^1.1.0",
     "@oslojs/crypto": "^1.0.1",
     "@oslojs/encoding": "^1.1.0",
@@ -55,6 +57,8 @@
     "jspdf-autotable": "^3.8.4",
     "lucide-svelte": "^0.469.0",
     "luxon": "^3.5.0",
-    "mysql2": "^3.11.0"
+    "mysql2": "^3.11.0",
+    "svelte-droplet": "^1.1.0",
+    "svelte-email-tailwind": "^2.0.1"
   }
 }

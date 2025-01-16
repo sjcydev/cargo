@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { PageData } from "./$types";
-  import InnerLayout from "$lib/components/inner-layout.svelte";
+  import Preview from "svelte-email-tailwind/preview/preview.svelte";
 
   let { data }: { data: PageData } = $props();
 </script>
 
-<InnerLayout title={"Dashboard"}>dashboard</InnerLayout>
+<Preview {data} email="test@email.com" />

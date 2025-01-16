@@ -1,7 +1,7 @@
 import { db } from "$lib/server/db";
 import { eq, desc } from "drizzle-orm";
 import type { PageServerLoad, Actions } from "./$types";
-import { usuarios, facturas } from "$lib/server/db/schema";
+import { usuarios, facturas, sucursales } from "$lib/server/db/schema";
 import { error, fail, redirect } from "@sveltejs/kit";
 import { superValidate, setError } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
@@ -49,6 +49,7 @@ export const actions: Actions = {
       sexo,
       sucursalId,
       casillero,
+      precio: currPrecio,
       id,
     } = form.data;
 
@@ -67,6 +68,15 @@ export const actions: Actions = {
     const nombreCapital = capitaliseWord(nombre);
     const apellidoCapital = capitaliseWord(apellido);
 
+    const sucursal = await db.query.sucursales.findFirst({
+      where: eq(sucursales.sucursalId, Number(sucursalId)),
+    });
+
+    let precio = sucursal?.precio;
+    if (currPrecio) {
+      precio = Number(currPrecio.toFixed(2));
+    }
+
     await db
       .update(usuarios)
       .set({
@@ -78,6 +88,8 @@ export const actions: Actions = {
         correo,
         sexo,
         sucursalId: Number(sucursalId),
+        precio,
+        tipo: sucursal!.precio === precio ? "REGULAR" : "ESPECIAL",
       })
       .where(eq(usuarios.id, Number(id)));
 

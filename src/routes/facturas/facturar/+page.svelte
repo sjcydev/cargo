@@ -47,7 +47,7 @@
     casillero: null,
     cedula: "",
     sucursalId: sucursales!.sucursalId,
-    nacimiento: null,
+    nacimiento: new Date(),
     sexo: null,
     createdAt: null,
     updatedAt: null,
@@ -66,8 +66,10 @@
   const defaultTrackingsState = {
     numeroTracking: "",
     peso: 1,
-    precio: precioBase,
-    base: precioBase,
+    // svelte-ignore state_referenced_locally
+    precio: cliente.precio,
+    // svelte-ignore state_referenced_locally
+    base: cliente.precio,
   } as const;
 
   let infoTracking = $state<Tracking | NewTrackings>(
@@ -76,6 +78,8 @@
 
   function resetTrackingInfo() {
     infoTracking = structuredClone(defaultTrackingsState);
+    infoTracking.base = cliente.precio;
+    infoTracking.precio = infoTracking.base;
   }
 
   let currPrecio = $derived(
@@ -112,8 +116,17 @@
   }
 
   function resetAll() {
-    resetCliente();
-    resetInfo();
+    cliente = structuredClone(defaultClienteState);
+    facturaInfo = structuredClone({
+      casillero: null,
+      trackings: [],
+      total: 0,
+      empleadoId: user!.id,
+      sucursalId: sucursales!.sucursalId,
+      clienteId: 0,
+      fecha: "",
+    });
+    resetTrackingInfo();
   }
 
   function resetEditMode() {
@@ -473,7 +486,20 @@
                 </div>
               </div>
               <div class="flex justify-end gap-2">
-                <form method="POST" action="?/crear" use:enhance>
+                <form
+                  method="POST"
+                  use:enhance={() => {
+                    return async ({ result }) => {
+                      if (result.type === "success") {
+                        toast({
+                          message: "Factura creada exitosamente",
+                          type: "success",
+                        });
+                        resetAll();
+                      }
+                    };
+                  }}
+                >
                   <input
                     type="hidden"
                     name="facturaInfo"
@@ -483,11 +509,6 @@
                     type="hidden"
                     name="cliente"
                     value={JSON.stringify(cliente)}
-                  />
-                  <input
-                    type="hidden"
-                    name="user"
-                    value={JSON.stringify(user)}
                   />
                   <Button type="submit">Crear Factura</Button>
                 </form>

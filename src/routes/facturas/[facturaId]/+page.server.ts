@@ -3,6 +3,7 @@ import { db } from "$lib/server/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { facturas, trackings } from "$lib/server/db/schema";
 import { fail } from "@sveltejs/kit";
+import { getFriendlyUrl } from "$lib/server/s3";
 
 export const load = (async ({ params }) => {
   const facturaId = params.facturaId;
@@ -16,7 +17,10 @@ export const load = (async ({ params }) => {
     throw new Error("Factura not found");
   }
 
-  return { factura };
+  const company = await db.query.companies.findFirst()!;
+  const logo = getFriendlyUrl(company!.logo!);
+
+  return { factura, company, logo };
 }) satisfies PageServerLoad;
 
 export const actions = {

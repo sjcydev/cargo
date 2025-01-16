@@ -1,0 +1,1 @@
+ALTER TABLE `companies` MODIFY COLUMN `logo` varchar(255);

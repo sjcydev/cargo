@@ -4,6 +4,12 @@ export const companiesSchema = z.object({
   company: z.string({
     required_error: "Nombre de la Organización es requerida",
   }),
+  logo: z
+    .instanceof(File, { message: "Please upload a file." })
+    .refine((f) => f.size < 20_000_000, "Logo debe ser menor a 20MB.")
+    .optional()
+    .nullable(),
+  dominio: z.string({ required_error: "Dominio es requerido" }),
 });
 
 export const sucursalesSchema = z.intersection(
@@ -24,6 +30,11 @@ export const sucursalesSchema = z.intersection(
     codificacion: z
       .string({ required_error: "Codificacion de la Sucursal es requerida" })
       .max(4, { message: "Codificación debe tener 4 o menos caracteres" }),
+    correoSucursal: z
+      .string({ required_error: "Correo es requerido" })
+      .email({ message: "Correo invalido" })
+      .trim(),
+    maps: z.string().optional().nullish(),
   })
 );
 

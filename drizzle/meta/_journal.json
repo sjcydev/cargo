@@ -71,6 +71,69 @@
       "when": 1736314508659,
       "tag": "0009_add_tipo_to_clientes",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1736738045581,
+      "tag": "0010_add_logo_column_to_company",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1736739766978,
+      "tag": "0011_edit_logo_properties",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1736744223406,
+      "tag": "0012_update_nacimiento",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1736744261504,
+      "tag": "0013_update_nacimiento",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1736744606624,
+      "tag": "0014_update_nacimiento",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "5",
+      "when": 1736795210104,
+      "tag": "0015_update_not_null",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "5",
+      "when": 1736899189595,
+      "tag": "0016_add_dominio",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1736976599720,
+      "tag": "0017_add_correo_sucursal",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1736984071138,
+      "tag": "0018_add_maps_to_sucursales",
+      "breakpoints": true
     }
   ]
 }

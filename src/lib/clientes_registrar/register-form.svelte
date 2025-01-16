@@ -47,7 +47,7 @@
 </script>
 
 <div class="grid place-items-center h-full">
-  <form class="w-full max-w-sm" method="POST" use:enhance>
+  <form class="w-full max-w-sm" method="POST" action="?/registrar" use:enhance>
     <Card.Root>
       <Card.Header>
         <Card.Title class="text-xl">Registrar Cliente</Card.Title>
@@ -147,6 +147,21 @@
                 {...props}
                 bind:value={$formData.cedula}
                 placeholder="8-888-8888"
+              />
+            {/snippet}
+          </Form.Control>
+          <Form.FieldErrors />
+        </Form.Field>
+
+        <Form.Field {form} name="precio">
+          <Form.Control>
+            {#snippet children({ props })}
+              <Form.Label>Precio</Form.Label>
+              <Input
+                {...props}
+                type="number"
+                bind:value={$formData.precio}
+                placeholder="2.75"
               />
             {/snippet}
           </Form.Control>

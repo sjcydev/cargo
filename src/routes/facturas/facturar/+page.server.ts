@@ -16,7 +16,7 @@ import { getToday, dateToLocaleString } from "$lib/utils";
 
 export const load = (async ({ locals }) => {
   const sucursalesData = await db.query.sucursales.findFirst({
-    where: eq(sucursales.sucursalId, Number(locals.user!.sucursalId)),
+    where: eq(sucursales.sucursalId, Number(locals.user!.sucursalId ?? 1)),
   });
 
   return { sucursales: sucursalesData };
@@ -29,17 +29,21 @@ export const actions = {
       formData.get("facturaInfo") as string
     ) as FacturasWithTrackings;
     const cliente = JSON.parse(formData.get("cliente") as string) as Usuarios;
-    const user = JSON.parse(formData.get("user") as string) as User;
 
     const newFactura = await db
       .insert(facturas)
       .values({
         casillero: Number(facturaInfo.casillero),
-        sucursalId: Number(user.sucursalId),
+        sucursalId: Number(cliente.sucursalId),
         total: facturaInfo.total,
         empleadoId: facturaInfo.empleadoId,
         clienteId: Number(cliente.id),
         fecha: dateToLocaleString(getToday()),
+        pagado: false,
+        metodoDePago: "nulo",
+        retirados: false,
+        enviado: false,
+        pagadoAt: null,
       })
       .$returningId();
 
@@ -51,5 +55,10 @@ export const actions = {
     });
 
     await db.insert(trackings).values(facturaInfo.trackings);
+
+    return {
+      status: 200,
+      message: "Factura creada exitosamente",
+    };
   },
 } satisfies Actions;
