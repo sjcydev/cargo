@@ -117,9 +117,16 @@ export const facturas = mysqlTable("facturas", {
   total: float("total").default(0),
   metodoDePago: varchar("metodoDePago", {
     length: 15,
-    enum: ["transferencia", "efectivo", "yappy", "tarjeta", "nulo"],
+    enum: [
+      "transferencia",
+      "efectivo",
+      "yappy",
+      "tarjeta",
+      "otros",
+      "no_pagado",
+    ],
   })
-    .default("nulo")
+    .default("no_pagado")
     .notNull(),
   pagadoAt: timestamp("pagadoAt"),
   sucursalId: int("sucursalId")
@@ -156,7 +163,9 @@ export const trackings = mysqlTable("trackings", {
   peso: int("peso"),
   base: float("base"),
   precio: float("precio"),
+  sucursalId: int("sucursalId").references(() => sucursales.sucursalId),
   retirado: boolean("retirado").default(false),
+  retiradoAt: timestamp("retiradoAt"),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -202,6 +211,10 @@ export const trackingsRelations = relations(trackings, ({ one }) => ({
     fields: [trackings.facturaId],
     references: [facturas.facturaId],
   }),
+  sucursal: one(sucursales, {
+    fields: [trackings.sucursalId],
+    references: [sucursales.sucursalId],
+  }),
 }));
 
 export const sucursalesRelations = relations(sucursales, ({ many, one }) => ({
@@ -212,6 +225,7 @@ export const sucursalesRelations = relations(sucursales, ({ many, one }) => ({
     fields: [sucursales.companyId],
     references: [companies.companyId],
   }),
+  trackings: many(trackings),
 }));
 
 export const reportesRelations = relations(reportes, ({ one }) => ({
@@ -256,6 +270,11 @@ export type FacturasWithTrackings = InferResultType<
 export type FacturasWithCliente = InferResultType<
   "facturas",
   { cliente: { with: { sucursal: true } } }
+>;
+
+export type TrackingsWithSucursal = InferResultType<
+  "trackings",
+  { sucursal: true }
 >;
 
 export type Session = typeof session.$inferSelect;

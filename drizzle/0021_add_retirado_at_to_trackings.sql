@@ -1,0 +1,1 @@
+ALTER TABLE `trackings` ADD `retiradoAt` timestamp;

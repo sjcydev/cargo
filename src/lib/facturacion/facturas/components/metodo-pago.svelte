@@ -5,9 +5,18 @@
   import { enhance } from "$app/forms";
   import { invalidateAll } from "$app/navigation";
 
-  let { facturaIds, metodoDePago }: { 
+  let {
+    facturaIds,
+    metodoDePago,
+  }: {
     facturaIds: number | number[];
-    metodoDePago: "transferencia" | "efectivo" | "tarjeta" | "yappy" | "nulo"
+    metodoDePago:
+      | "transferencia"
+      | "efectivo"
+      | "tarjeta"
+      | "yappy"
+      | "otros"
+      | "no_pagado";
   } = $props();
 
   let isUpdatingPago = $state<boolean>(false);
@@ -18,7 +27,8 @@
     { value: "tarjeta", label: "Tarjeta" },
     { value: "yappy", label: "Yappy" },
     { value: "transferencia", label: "Transferencia" },
-    { value: "nulo", label: "Nulo" },
+    { value: "otros", label: "Otros" },
+    { value: "no_pagado", label: "No Pagado" },
   ] as const;
 </script>
 
@@ -38,7 +48,13 @@
       };
     }}
   >
-    <input type="hidden" name="facturaIds" value={JSON.stringify(Array.isArray(facturaIds) ? facturaIds : [facturaIds])} />
+    <input
+      type="hidden"
+      name="facturaIds"
+      value={JSON.stringify(
+        Array.isArray(facturaIds) ? facturaIds : [facturaIds]
+      )}
+    />
     <Select.Root
       type="single"
       name="metodoPago"

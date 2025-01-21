@@ -46,7 +46,8 @@ export const actions = {
       | "efectivo"
       | "tarjeta"
       | "yappy"
-      | "nulo";
+      | "otros"
+      | "no_pagado";
 
     await db.transaction(async (tx) => {
       for (const facturaId of facturaIds) {
@@ -54,8 +55,8 @@ export const actions = {
           .update(facturas)
           .set({
             metodoDePago: metodoPago,
-            pagado: metodoPago !== "nulo",
-            pagadoAt: metodoPago !== "nulo" ? new Date() : null,
+            pagado: metodoPago !== "no_pagado",
+            pagadoAt: metodoPago !== "no_pagado" ? new Date() : null,
           })
           .where(eq(facturas.facturaId, facturaId));
       }
@@ -76,6 +77,7 @@ export const actions = {
         .update(trackings)
         .set({
           retirado: setRetirado,
+          retiradoAt: setRetirado ? new Date() : null,
         })
         .where(inArray(trackings.trackingId, trackingIds));
 
