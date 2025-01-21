@@ -29,18 +29,19 @@ export const actions = {
     const facturaId = Number(formData.get("facturaId"));
     const metodoPago = formData.get("metodoPago") as
       | "efectivo"
-      | "nulo"
+      | "otros"
       | "tarjeta"
       | "transferencia"
-      | "yappy";
+      | "yappy"
+      | "no_pagado";
 
     await db.transaction(async (tx) => {
       await tx
         .update(facturas)
         .set({
           metodoDePago: metodoPago,
-          pagado: metodoPago !== "nulo",
-          pagadoAt: metodoPago !== "nulo" ? new Date() : null,
+          pagado: metodoPago !== "no_pagado",
+          pagadoAt: metodoPago !== "no_pagado" ? new Date() : null,
         })
         .where(eq(facturas.facturaId, facturaId));
     });
@@ -78,7 +79,10 @@ export const actions = {
       // Update tracking status
       await tx
         .update(trackings)
-        .set({ retirado: setRetirado })
+        .set({
+          retirado: setRetirado,
+          retiradoAt: setRetirado ? new Date() : null,
+        })
         .where(inArray(trackings.trackingId, trackingIds));
 
       // Get all trackings for this factura

@@ -134,6 +134,27 @@
       "when": 1736984071138,
       "tag": "0018_add_maps_to_sucursales",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1737232105867,
+      "tag": "0019_change_payment_methods",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1737352098181,
+      "tag": "0020_add_sucursalid_to_trackings",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1737403949516,
+      "tag": "0021_add_retirado_at_to_trackings",
+      "breakpoints": true
     }
   ]
 }

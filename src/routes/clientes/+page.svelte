@@ -4,10 +4,17 @@
   import DataTable from "../../lib/components/data-table.svelte";
   import { columns } from "./columns";
   import * as Tabs from "$lib/components/ui/tabs/index";
+  import { goto } from "$app/navigation";
 
   import InnerLayout from "$lib/components/inner-layout.svelte";
 
   let { data }: { data: PageData } = $props();
+
+  function handleRowClick(row: any) {
+    if (row.id) {
+      goto(`/clientes/${row.id}`);
+    }
+  }
 </script>
 
 <svelte:head>
@@ -35,12 +42,16 @@
     {/if}
     {#if data.user.rol === "ADMIN"}
       <Tabs.Content value="todos">
-        <DataTable {columns} data={data.todos} />
+        <DataTable {columns} data={data.todos} onRowClick={handleRowClick} />
       </Tabs.Content>
     {/if}
     {#each data.bySucursal as bySucursal}
       <Tabs.Content value={`${bySucursal.sucursal}`}>
-        <DataTable {columns} data={bySucursal.usuarios} />
+        <DataTable
+          {columns}
+          data={bySucursal.usuarios}
+          onRowClick={handleRowClick}
+        />
       </Tabs.Content>
     {/each}
   </Tabs.Root>

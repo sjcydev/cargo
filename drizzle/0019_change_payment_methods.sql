@@ -1,0 +1,1 @@
+ALTER TABLE `facturas` MODIFY COLUMN `metodoDePago` varchar(15) NOT NULL DEFAULT 'no_pagado';

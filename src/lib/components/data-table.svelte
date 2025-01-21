@@ -1,4 +1,4 @@
-<script lang="ts" generics="TData extends { facturaId: number }, TValue">
+<script lang="ts" generics="TData , TValue">
   import type {
     PaginationState,
     SortingState,
@@ -25,6 +25,10 @@
   import { goto } from "$app/navigation";
   import type { Snippet } from "svelte";
 
+  type TDataFactura = Partial<TData> & {
+    facturaId: number;
+  };
+
   type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
@@ -32,6 +36,7 @@
     enableSelection?: boolean;
     selectionChange?: (selected: number[]) => void;
     showTotal?: boolean;
+    onRowClick?: (row: TData) => void;
   };
 
   let {
@@ -41,6 +46,7 @@
     enableSelection = false,
     selectionChange,
     showTotal = false,
+    onRowClick,
   }: DataTableProps<TData, TValue> = $props();
   let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
   let sorting = $state<SortingState>([]);
@@ -54,7 +60,7 @@
     if (enableSelection && selectionChange) {
       const selectedIds = Object.entries(rowSelection)
         .filter(([_, selected]) => selected)
-        .map(([index]) => data[parseInt(index)].facturaId);
+        .map(([index]) => (data as TDataFactura[])[parseInt(index)].facturaId!);
       selectionChange(selectedIds);
     }
   });
@@ -148,10 +154,18 @@
     const search = page.url.searchParams.get("search");
     table.setGlobalFilter(search);
   });
-  $effect(() => {
-    const search = page.url.searchParams.get("search");
-    table.setGlobalFilter(search);
-  });
+
+  const handleRowClick = (row: any, event: MouseEvent) => {
+    // Check if the click was on a checkbox or action button
+    const target = event.target as HTMLElement;
+    const isCheckbox = target.closest('[role="checkbox"]');
+    const isActionButton = target.closest('button') || target.closest('a');
+
+    // Only trigger row click if not clicking checkbox or action button
+    if (!isCheckbox && !isActionButton && onRowClick) {
+      onRowClick(row.original);
+    }
+  };
 </script>
 
 <div class="flex items-center justify-between pb-4">
@@ -211,7 +225,12 @@
     </Table.Header>
     <Table.Body>
       {#each table.getRowModel().rows as row (row.id)}
-        <Table.Row data-state={row.getIsSelected() && "selected"}>
+        <Table.Row
+          data-state={row.getIsSelected() && "selected"}
+          onclick={(e) => handleRowClick(row, e)}
+          role="button"
+          class="cursor-pointer"
+        >
           {#each row.getVisibleCells() as cell (cell.id)}
             <Table.Cell>
               <FlexRender

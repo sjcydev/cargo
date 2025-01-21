@@ -40,7 +40,7 @@ export const actions = {
         clienteId: Number(cliente.id),
         fecha: dateToLocaleString(getToday()),
         pagado: false,
-        metodoDePago: "nulo",
+        metodoDePago: "no_pagado",
         retirados: false,
         enviado: false,
         pagadoAt: null,
@@ -51,6 +51,7 @@ export const actions = {
       return {
         ...tracking,
         facturaId: Number(newFactura[0].facturaId),
+        sucursalId: Number(cliente.sucursalId),
       };
     });
 

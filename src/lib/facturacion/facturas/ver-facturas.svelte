@@ -2,6 +2,7 @@
   import DataTable from "$lib/components/data-table.svelte";
   import type { Snippet } from "svelte";
   import type { FacturasWithCliente, Facturas } from "$lib/server/db/schema";
+  import { goto } from "$app/navigation";
 
   let {
     columns,
@@ -14,6 +15,12 @@
     actions?: Snippet;
     selectionChange?: (selected: number[]) => void;
   } = $props();
+
+  function handleRowClick(row: any) {
+    if (row.facturaId) {
+      goto(`/facturas/${row.facturaId}`);
+    }
+  }
 </script>
 
 <DataTable
@@ -23,4 +30,5 @@
   enableSelection={true}
   {selectionChange}
   showTotal={true}
+  onRowClick={handleRowClick}
 />
