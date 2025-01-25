@@ -1,37 +1,43 @@
 <script lang="ts">
-  import { Label } from "$lib/components/ui/label";
-  import { Input } from "$lib/components/ui/input";
   import type { UsuariosWithSucursal } from "$lib/server/db/schema";
 
   let { cliente }: { cliente: UsuariosWithSucursal } = $props();
 </script>
 
-<div>
-  <h3 class="text-lg font-medium mb-4">Información del Cliente</h3>
+<div class="grid gap-4 p-4 bg-muted rounded-lg">
+  <!-- Basic Info -->
   <div class="grid grid-cols-2 gap-4">
     <div>
-      <Label>Cliente</Label>
-      <Input value={`${cliente.nombre} ${cliente.apellido}`} readonly />
+      <p class="text-sm font-medium text-muted-foreground">Cliente</p>
+      <p class="text-base font-semibold">{cliente.nombre} {cliente.apellido}</p>
     </div>
     <div>
-      <Label>Casillero</Label>
-      <Input value={cliente.casillero} readonly />
+      <p class="text-sm font-medium text-muted-foreground">Casillero</p>
+      <p class="text-base font-semibold">{cliente.casillero}</p>
+    </div>
+  </div>
+
+  <!-- Contact Info -->
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <p class="text-sm font-medium text-muted-foreground">Cédula</p>
+      <p class="text-base font-semibold">{cliente.cedula}</p>
     </div>
     <div>
-      <Label>Cédula</Label>
-      <Input value={cliente.cedula} readonly />
+      <p class="text-sm font-medium text-muted-foreground">Correo</p>
+      <p class="text-base font-semibold">{cliente.correo}</p>
+    </div>
+  </div>
+
+  <!-- Additional Info -->
+  <div class="grid grid-cols-2 gap-4">
+    <div>
+      <p class="text-sm font-medium text-muted-foreground">Sucursal</p>
+      <p class="text-base font-semibold">{cliente.sucursal.sucursal}</p>
     </div>
     <div>
-      <Label>Correo</Label>
-      <Input value={cliente.correo} readonly />
-    </div>
-    <div>
-      <Label>Sucursal</Label>
-      <Input value={cliente.sucursal.sucursal} readonly />
-    </div>
-    <div>
-      <Label>Tipo de Cliente</Label>
-      <Input value={cliente.tipo} readonly />
+      <p class="text-sm font-medium text-muted-foreground">Tipo de Cliente</p>
+      <p class="text-base font-semibold">{cliente.tipo}</p>
     </div>
   </div>
 </div>

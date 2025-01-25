@@ -99,14 +99,11 @@
 <InnerLayout title="Detalles de Factura" back={true} {actions}>
   <div class="space-y-4">
     <Card.Root>
-      <Card.Header>
+      <!-- <Card.Header>
         <Card.Title>
           Detalles de la Factura N° {data.factura.facturaId}
-          <div class="text-lg font-medium mt-1">
-            Total: ${data.factura.total!.toFixed(2)}
-          </div>
         </Card.Title>
-      </Card.Header>
+      </Card.Header> -->
       <Card.Content class="space-y-6">
         <FacturaHeader factura={data.factura} />
         <Separator />
