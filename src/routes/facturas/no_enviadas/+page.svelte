@@ -65,7 +65,7 @@
 </script>
 
 {#snippet actions()}
-  <div class="flex gap-2">
+  <div class="flex gap-3">
     <Button
       variant="outline"
       onclick={enviarFacturas}
