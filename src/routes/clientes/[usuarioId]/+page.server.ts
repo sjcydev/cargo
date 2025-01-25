@@ -57,7 +57,7 @@ export const actions: Actions = {
       where: eq(usuarios.casillero, Number(casillero)),
     });
 
-    if (cliente) {
+    if (cliente && cliente.id !== Number(id)) {
       return setError(
         form,
         "casillero",
