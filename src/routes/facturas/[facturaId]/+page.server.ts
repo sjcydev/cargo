@@ -2,8 +2,8 @@ import type { PageServerLoad, Actions } from "./$types";
 import { db } from "$lib/server/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { facturas, trackings } from "$lib/server/db/schema";
-import { fail } from "@sveltejs/kit";
 import { getFriendlyUrl } from "$lib/server/s3";
+import { getLocalTimeZone, today } from "@internationalized/date";
 
 export const load = (async ({ params }) => {
   const facturaId = params.facturaId;
@@ -26,7 +26,7 @@ export const load = (async ({ params }) => {
 export const actions = {
   updateMetodoPago: async ({ request }) => {
     const formData = await request.formData();
-    const facturaId = Number(formData.get("facturaId"));
+    const facturaIds = JSON.parse(formData.get("facturaIds") as string);
     const metodoPago = formData.get("metodoPago") as
       | "efectivo"
       | "otros"
@@ -35,16 +35,21 @@ export const actions = {
       | "yappy"
       | "no_pagado";
 
-    await db.transaction(async (tx) => {
-      await tx
+    try {
+      await db
         .update(facturas)
         .set({
           metodoDePago: metodoPago,
           pagado: metodoPago !== "no_pagado",
-          pagadoAt: metodoPago !== "no_pagado" ? new Date() : null,
+          pagadoAt:
+            metodoPago !== "no_pagado"
+              ? today(getLocalTimeZone()).toDate(getLocalTimeZone())
+              : null,
         })
-        .where(eq(facturas.facturaId, facturaId));
-    });
+        .where(inArray(facturas.facturaId, facturaIds));
+    } catch (e) {
+      console.log(e);
+    }
 
     return { type: "success" };
   },
@@ -69,7 +74,7 @@ export const actions = {
 
   updateTrackings: async ({ request }) => {
     const formData = await request.formData();
-    const facturaId = Number(formData.get("facturaId"));
+    const facturaIds = JSON.parse(formData.get("facturaIds") as string);
     const trackingIds = JSON.parse(
       formData.get("trackingIds") as string
     ) as number[];
@@ -89,7 +94,7 @@ export const actions = {
       const facturaTrackings = await tx
         .select({ retirado: trackings.retirado })
         .from(trackings)
-        .where(eq(trackings.facturaId, facturaId));
+        .where(inArray(trackings.facturaId, facturaIds));
 
       // Check if all trackings are retirado
       const allRetirado = facturaTrackings.every((t) => t.retirado);
@@ -98,7 +103,7 @@ export const actions = {
       await tx
         .update(facturas)
         .set({ retirados: allRetirado })
-        .where(eq(facturas.facturaId, facturaId));
+        .where(inArray(facturas.facturaId, facturaIds));
     });
 
     return { type: "success" };

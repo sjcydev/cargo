@@ -8,6 +8,8 @@ import type {
   Companies,
   Sucursales,
   UsuariosWithSucursal,
+  Reportes,
+  Facturas,
 } from "$lib/server/db/schema";
 
 applyPlugin(jsPDF);
@@ -78,19 +80,24 @@ async function addLogo(doc: jsPDF, logo: string): Promise<void> {
   doc.addImage(base64Image, fileType, 38, 50, width, height, "", "FAST");
 }
 
-function addHeader(doc: jsPDF): void {
+function addHeader(doc: jsPDF, title: string): void {
   // @ts-ignore
   doc.autoTable({
-    body: [[{ content: "FACTURA", styles: STYLES.header }]],
+    body: [[{ content: title, styles: STYLES.header }]],
     theme: "plain",
   });
 }
 
-function addInvoiceInfo(doc: jsPDF, facturaId: string, fecha: string): void {
+function addInvoiceInfo(
+  doc: jsPDF,
+  title: string,
+  id: string,
+  fecha: string
+): void {
   // @ts-ignore
   doc.autoTable({
     body: [
-      [{ content: `Factura No. ${facturaId}`, styles: STYLES.invoiceNumber }],
+      [{ content: `${title} No. ${id}`, styles: STYLES.invoiceNumber }],
       [{ content: `Fecha: ${fecha}`, styles: STYLES.subHeader }],
     ],
     styles: {
@@ -133,6 +140,47 @@ function addClientInfo(
   });
 }
 
+function addTotalHeader(doc: jsPDF, total: string): void {
+  // @ts-ignore
+  doc.autoTable({
+    head: [
+      [
+        {
+          content: "",
+          styles: {
+            halign: "left",
+            fontSize: 13,
+          },
+        },
+        "",
+      ],
+    ],
+    body: [
+      [
+        {
+          content: "",
+          styles: {
+            halign: "left",
+            fontSize: 13,
+          },
+        },
+        {
+          content: `Total: ${total}`,
+          styles: {
+            fontSize: 16,
+            halign: "right",
+            fontStyle: "bold",
+          },
+        },
+      ],
+    ],
+    theme: "plain",
+    styles: {
+      cellPadding: { left: 5, right: 5, top: 0, bottom: 0 },
+    },
+  });
+}
+
 function addTrackingTable(doc: jsPDF, trackings: string[][]): void {
   // @ts-ignore
   doc.autoTable({
@@ -153,6 +201,51 @@ function addTrackingTable(doc: jsPDF, trackings: string[][]): void {
       0: { overflow: "linebreak" },
       1: { halign: "right", cellWidth: 60 },
       2: { halign: "right", cellWidth: 60 },
+    },
+  });
+}
+
+function addFacturasTable(doc: jsPDF, facturas: Facturas[]): void {
+  const listaDeFacturas = facturas.map((factura) => {
+    let estado = factura.pagado ? "Pagado" : "Pendiente";
+    let fechaDePago = factura.pagadoAt
+      ? factura.pagadoAt.toLocaleDateString("en-GB")
+      : "";
+
+    return [
+      factura.fecha!,
+      `${factura.facturaId}`,
+      `$${factura.total}`,
+      `${factura.metodoDePago}`,
+      estado,
+      fechaDePago,
+    ];
+  });
+
+  // @ts-ignore
+  doc.autoTable({
+    head: [
+      [
+        { content: "Fecha", styles: { halign: "left" } },
+        "Factura Nº",
+        "Total",
+        "Metodo de Pago",
+        "Estado de Pago",
+        "Fecha de Pago",
+      ],
+    ],
+    body: listaDeFacturas,
+    theme: "striped",
+    headStyles: {
+      fillColor: "#343a40",
+      halign: "right",
+    },
+    columnStyles: {
+      1: { halign: "right" },
+      2: { halign: "right" },
+      3: { halign: "right" },
+      4: { halign: "right" },
+      5: { halign: "right" },
     },
   });
 }
@@ -212,14 +305,12 @@ export async function generateInvoice({
   company,
   logo,
   descargar = false,
-  reenviar = false,
 }: {
   info: FacturasWithTrackings;
   cliente: UsuariosWithSucursal;
   company: Companies;
   logo: string;
   descargar?: boolean;
-  reenviar?: boolean;
 }): Promise<Buffer | void> {
   const doc = new jsPDF(PDF_CONFIG);
   const trackingRows = createTrackingRows(info.trackings);
@@ -228,8 +319,8 @@ export async function generateInvoice({
   const fecha = info.fecha!;
 
   await addLogo(doc, logo);
-  addHeader(doc);
-  addInvoiceInfo(doc, String(info.facturaId), fecha);
+  addHeader(doc, "FACTURA");
+  addInvoiceInfo(doc, "Factura", String(info.facturaId), fecha);
   addClientInfo(doc, cliente, String(info.casillero), total);
   addTrackingTable(doc, trackingRows);
   addTotalSection(doc, total);
@@ -243,15 +334,40 @@ export async function generateInvoice({
   }
 }
 
-// export async function createReport(
-//   reporte: any,
-//   facturas: Facturas[],
-//   descargar = false
-// ): Promise<string> {
-//   const doc = new jsPDF(PDF_CONFIG);
+export async function generateReport({
+  reporte,
+  facturas,
+  logo,
+  descargar = false,
+}: {
+  reporte: Reportes;
+  facturas: Facturas[];
+  logo: string;
+  descargar?: boolean;
+}) {
+  const doc = new jsPDF(PDF_CONFIG);
+  const total = formatCurrency(reporte.total!);
 
-//   // Report generation logic...
-//   // TODO: Refactor this function similarly to generateInvoice
+  const fechaInicial = reporte.fechaInicial!.toLocaleDateString("en-GB");
+  const fechaFinal = reporte.fechaFinal!.toLocaleDateString("en-GB");
 
-//   return doc.output("dataurlstring");
-// }
+  const fechas =
+    fechaInicial !== fechaFinal
+      ? `${fechaInicial} - ${fechaFinal}`
+      : `${fechaInicial}`;
+
+  await addLogo(doc, logo);
+  addHeader(doc, "REPORTE DE VENTAS");
+  addInvoiceInfo(doc, "Reporte", String(reporte.reporteId), fechas);
+  addTotalHeader(doc, total);
+  addFacturasTable(doc, facturas);
+  addTotalSection(doc, total);
+
+  if (descargar) {
+    doc.save(`Reporte-${reporte.reporteId}.pdf`);
+  }
+
+  return doc.output("dataurl", {
+    filename: `Reporte-${reporte.reporteId}.pdf`,
+  });
+}

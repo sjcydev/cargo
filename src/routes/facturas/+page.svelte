@@ -25,6 +25,10 @@
   }
 </script>
 
+<svelte:head>
+  <title>Facturas</title>
+</svelte:head>
+
 {#snippet actions()}
   <Button
     variant="outline"

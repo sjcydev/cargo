@@ -4,8 +4,6 @@
   import { Button } from "$lib/components/ui/button";
   import { goto } from "$app/navigation";
   import { Separator } from "$lib/components/ui/separator";
-  import { enhance } from "$app/forms";
-  import { Rainbow as Loader } from "svelte-loading-spinners";
   import ClienteInfo from "$lib/facturacion/facturas/components/cliente-info.svelte";
   import MetodoPago from "$lib/facturacion/facturas/components/metodo-pago.svelte";
   import TrackingList from "$lib/facturacion/facturas/components/tracking-list.svelte";
@@ -13,8 +11,6 @@
   import InnerLayout from "$lib/components/inner-layout.svelte";
 
   let { data }: { data: PageData } = $props();
-
-  let isProcessing = $state<boolean>(false);
 
   function getFacturaIds(): number[] {
     return data.facturas.map((f) => f.facturaId);
@@ -30,7 +26,9 @@
 
   function getMetodoDePago() {
     const uniqueMethods = new Set(data.facturas.map((f) => f.metodoDePago));
-    return uniqueMethods.size === 1 ? data.facturas[0].metodoDePago : "nulo";
+    return uniqueMethods.size === 1
+      ? data.facturas[0].metodoDePago
+      : "no_pagado";
   }
 
   $effect(() => {

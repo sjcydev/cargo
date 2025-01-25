@@ -6,8 +6,6 @@
   import Separator from "$lib/components/ui/separator/separator.svelte";
   import { Download, Send } from "lucide-svelte";
   import * as Dialog from "$lib/components/ui/dialog";
-  import { generateInvoice } from "$lib/facturacion/facturar/generatePDF";
-  import type { UsuariosWithSucursal } from "$lib/server/db/schema";
   import ClienteInfo from "$lib/facturacion/facturas/components/cliente-info.svelte";
   import MetodoPago from "$lib/facturacion/facturas/components/metodo-pago.svelte";
   import TrackingList from "$lib/facturacion/facturas/components/tracking-list.svelte";
@@ -15,20 +13,10 @@
   import { enhance } from "$app/forms";
   import { invalidateAll } from "$app/navigation";
   import { toast } from "svelte-sonner";
+  import { generateInvoice } from "$lib/facturacion/facturar/generatePDF";
 
   let { data }: { data: PageData } = $props();
   let showCancelDialog = $state<boolean>(false);
-
-  async function descargarFactura() {
-    const base = await generateInvoice({
-      info: data.factura,
-      cliente: data.factura.cliente as UsuariosWithSucursal,
-      company: data.company!,
-      logo: data.logo!,
-      descargar: true,
-    });
-    console.log(base);
-  }
 
   async function enviarFactura() {
     try {
@@ -41,6 +29,16 @@
     }
 
     toast.success("Factura enviada correctamente");
+  }
+
+  async function downloadFactura() {
+    await generateInvoice({
+      info: data.factura,
+      cliente: data.factura.cliente!,
+      company: data.company!,
+      logo: data.logo!,
+      descargar: true,
+    });
   }
 </script>
 
@@ -61,7 +59,7 @@
       Cancelar Factura
     </Button>
   {/if}
-  <Button variant="success" class="font-semibold" onclick={descargarFactura}
+  <Button class="font-semibold" onclick={downloadFactura}
     >Descargar <Download /></Button
   >
 {/snippet}

@@ -3,6 +3,7 @@ import { facturas, trackings } from "$lib/server/db/schema";
 import { eq, inArray, and } from "drizzle-orm";
 import type { PageServerLoad } from "./$types";
 import type { Actions } from "@sveltejs/kit";
+import { getLocalTimeZone, today } from "@internationalized/date";
 
 export const load = (async ({ url }) => {
   const facturaIds =
@@ -56,7 +57,10 @@ export const actions = {
           .set({
             metodoDePago: metodoPago,
             pagado: metodoPago !== "no_pagado",
-            pagadoAt: metodoPago !== "no_pagado" ? new Date() : null,
+            pagadoAt:
+              metodoPago !== "no_pagado"
+                ? today(getLocalTimeZone()).toDate(getLocalTimeZone())
+                : null,
           })
           .where(eq(facturas.facturaId, facturaId));
       }

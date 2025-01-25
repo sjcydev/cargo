@@ -56,7 +56,7 @@
     ],
   };
 
-  let protectedRoutes = new Set(["/reportes", "/registrar"]);
+  let protectedRoutes = new Set(["/registrar"]);
 </script>
 
 <script lang="ts">

@@ -110,11 +110,11 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      return renderComponent(DataTableActions, {
+    cell: ({ row }) =>
+      renderComponent(DataTableActions, {
         id: String(row.original.casillero),
-      });
-    },
+        nombre: `${row.original.nombre} ${row.original.apellido}`,
+      }),
     enableHiding: false,
   },
 ];
