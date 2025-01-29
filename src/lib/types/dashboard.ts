@@ -3,7 +3,7 @@ import type { DateRange } from "bits-ui";
 export type GrowthStats = {
   current: number;
   previous: number;
-  growthPercentage: number;
+  growthPercentage: string;
 };
 
 export type DailyRevenue = {

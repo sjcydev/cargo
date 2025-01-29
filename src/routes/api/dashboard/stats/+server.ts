@@ -3,8 +3,16 @@ import { facturas, trackings, usuarios } from "$lib/server/db/schema";
 import { and, between, eq, sql } from "drizzle-orm";
 import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
-import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
+import {
+  CalendarDate,
+  getLocalTimeZone,
+  startOfMonth,
+  today,
+  endOfMonth,
+  toCalendarDate,
+} from "@internationalized/date";
 import type { DateRange } from "bits-ui";
+import { formatCompactPercentage } from "$lib/utils";
 
 // Types
 interface DailyRevenue {
@@ -15,7 +23,7 @@ interface DailyRevenue {
 interface GrowthStats {
   current: number;
   previous: number;
-  growthPercentage: number;
+  growthPercentage: string;
 }
 
 interface MonthlyStats {
@@ -47,41 +55,72 @@ interface CustomerStats {
 }
 
 // Utility functions
-const calculateGrowthPercentage = (current: number, previous: number): number => {
-  if (previous === 0) return current > 0 ? 100 : 0;
-  return ((current - previous) / previous) * 100;
+const calculateGrowthPercentage = (
+  current: number,
+  previous: number
+): string => {
+  // If both current and previous are 0, there's no growth
+  if (current === 0 && previous === 0) return "0%";
+
+  // If there was no previous revenue but there is current revenue,
+  // that's a 100% increase
+  if (previous === 0) return "100%";
+
+  // If there was previous revenue but no current revenue,
+  // that's a 100% decrease
+  if (current === 0) return "-100%";
+
+  // Normal case: calculate percentage change
+  return formatCompactPercentage(
+    ((current - previous) / Math.abs(previous)) * 100
+  );
 };
 
 const createDateRange = (dateRange?: DateRange) => {
   const now = today(getLocalTimeZone());
-  const defaultStart = new CalendarDate(now.year, now.month, 1);
-  const defaultEnd = new CalendarDate(now.year, now.month + 1, 0);
+  const defaultStart = startOfMonth(now);
+  const defaultEnd = endOfMonth(now);
 
   const start = dateRange?.start || defaultStart;
   const end = dateRange?.end || defaultEnd;
 
-  const currentStart = new CalendarDate(
-    start.year,
-    start.month,
-    start.day
-  ).toDate(getLocalTimeZone());
-  const currentEnd = new CalendarDate(end.year, end.month, end.day).toDate(
-    getLocalTimeZone()
-  );
+  // Convert to JavaScript Date objects
+  const currentStart = new CalendarDate(start.year, start.month, start.day);
+  const currentStartDate = currentStart.toDate(getLocalTimeZone());
+
+  const currentEnd = new CalendarDate(end.year, end.month, end.day);
+  const currentEndDate = currentEnd.toDate(getLocalTimeZone());
 
   // Set time boundaries
-  currentStart.setHours(0, 0, 0, 0);
-  currentEnd.setHours(23, 59, 59, 999);
+  currentStartDate.setHours(0, 0, 0, 0);
+  currentEndDate.setHours(23, 59, 59, 999);
 
-  // Calculate previous period
-  const durationMs = currentEnd.getTime() - currentStart.getTime();
-  const previousEnd = new Date(currentStart);
+  const timeDifference = currentEndDate.getTime() - currentStartDate.getTime();
+  const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+
+  const currPreviousEnd = currentEnd.subtract({ days: daysDifference + 1 });
+  const currPreviousStart = currentStart.subtract({ days: daysDifference + 1 });
+
+  const previousEnd = new CalendarDate(
+    currPreviousEnd.year,
+    currPreviousEnd.month,
+    currPreviousEnd.day
+  ).toDate(getLocalTimeZone());
+  const previousStart = new CalendarDate(
+    currPreviousStart.year,
+    currPreviousStart.month,
+    currPreviousStart.day
+  ).toDate(getLocalTimeZone());
+
   previousEnd.setHours(23, 59, 59, 999);
-  previousEnd.setMilliseconds(previousEnd.getMilliseconds() - 1);
-  const previousStart = new Date(previousEnd.getTime() - durationMs);
   previousStart.setHours(0, 0, 0, 0);
 
-  return { currentStart, currentEnd, previousStart, previousEnd };
+  return {
+    currentStart: currentStartDate,
+    currentEnd: currentEndDate,
+    previousStart,
+    previousEnd,
+  };
 };
 
 const createWhereClause = (
@@ -101,54 +140,76 @@ const createWhereClause = (
 // Stats calculation functions
 const getMonthlyStats = async (
   sucursalId: string,
-  { currentStart, currentEnd, previousStart, previousEnd }: ReturnType<typeof createDateRange>
+  {
+    currentStart,
+    currentEnd,
+    previousStart,
+    previousEnd,
+  }: ReturnType<typeof createDateRange>
 ): Promise<MonthlyStats> => {
-  const whereClause = createWhereClause(facturas, currentStart, currentEnd, sucursalId);
-  const previousWhereClause = createWhereClause(facturas, previousStart, previousEnd, sucursalId);
+  const whereClause = createWhereClause(
+    facturas,
+    currentStart,
+    currentEnd,
+    sucursalId
+  );
+  const previousWhereClause = createWhereClause(
+    facturas,
+    previousStart,
+    previousEnd,
+    sucursalId
+  );
 
   const baseStatsQuery = {
-    total: sql<number>`SUM(${facturas.total})`,
+    total: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = true THEN ${facturas.total} ELSE 0 END), 0)`,
     count: sql<number>`COUNT(*)`,
-    pagados: sql<number>`SUM(CASE WHEN ${facturas.pagado} = true THEN 1 ELSE 0 END)`,
-    pendientes: sql<number>`SUM(CASE WHEN ${facturas.pagado} = false THEN 1 ELSE 0 END)`,
+    pagados: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = true THEN 1 ELSE 0 END), 0)`,
+    pendientes: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = false THEN 1 ELSE 0 END), 0)`,
   };
 
-  const [currentStats, previousStats, dailyRevenue, paymentStats] = await Promise.all([
-    db.select(baseStatsQuery).from(facturas).where(whereClause),
-    db.select({ total: sql<number>`SUM(${facturas.total})` })
-      .from(facturas)
-      .where(previousWhereClause),
-    db.select({
-      date: sql<string>`DATE(${facturas.createdAt})`,
-      total: sql<number>`SUM(${facturas.total})`,
-    })
-      .from(facturas)
-      .where(whereClause)
-      .groupBy(sql`DATE(${facturas.createdAt})`)
-      .orderBy(sql`DATE(${facturas.createdAt})`),
-    db.select({
-      metodoPago: sql<string>`${facturas.metodoDePago}`,
-      count: sql<number>`COUNT(*)`,
-    })
-      .from(facturas)
-      .where(whereClause)
-      .groupBy(facturas.metodoDePago),
-  ]);
+  const [currentStats, previousStats, dailyRevenue, paymentStats] =
+    await Promise.all([
+      db.select(baseStatsQuery).from(facturas).where(whereClause),
+      db
+        .select({
+          total: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = true THEN ${facturas.total} ELSE 0 END), 0)`,
+        })
+        .from(facturas)
+        .where(previousWhereClause),
+      db
+        .select({
+          date: sql<string>`DATE(${facturas.createdAt})`,
+          total: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = true THEN ${facturas.total} ELSE 0 END), 0)`,
+        })
+        .from(facturas)
+        .where(whereClause)
+        .groupBy(sql`DATE(${facturas.createdAt})`)
+        .orderBy(sql`DATE(${facturas.createdAt})`),
+      db
+        .select({
+          metodoPago: sql<string>`${facturas.metodoDePago}`,
+          count: sql<number>`COUNT(*)`,
+        })
+        .from(facturas)
+        .where(whereClause)
+        .groupBy(facturas.metodoDePago),
+    ]);
 
   const metodoPago = paymentStats.reduce((acc, { metodoPago, count }) => {
     acc[metodoPago || "no_pagado"] = count;
     return acc;
   }, {} as Record<string, number>);
 
-  const currentTotal = currentStats[0].total || 0;
-  const previousTotal = previousStats[0].total || 0;
+  // Ensure we have numbers, not null
+  const currentTotal = currentStats[0].total ?? 0;
+  const previousTotal = previousStats[0].total ?? 0;
 
   return {
     ...currentStats[0],
     metodoPago,
-    dailyRevenue: dailyRevenue.map(day => ({
+    dailyRevenue: dailyRevenue.map((day) => ({
       date: day.date,
-      total: day.total || 0,
+      total: day.total ?? 0,
     })),
     growth: {
       current: currentTotal,
@@ -160,25 +221,49 @@ const getMonthlyStats = async (
 
 const getShipmentStats = async (
   sucursalId: string,
-  { currentStart, currentEnd, previousStart, previousEnd }: ReturnType<typeof createDateRange>
+  {
+    currentStart,
+    currentEnd,
+    previousStart,
+    previousEnd,
+  }: ReturnType<typeof createDateRange>
 ): Promise<ShipmentStats> => {
-  const trackingWhereClause = createWhereClause(trackings, currentStart, currentEnd, sucursalId);
-  const previousTrackingWhereClause = createWhereClause(trackings, previousStart, previousEnd, sucursalId);
-  const invoiceWhereClause = createWhereClause(facturas, currentStart, currentEnd, sucursalId);
+  const trackingWhereClause = createWhereClause(
+    trackings,
+    currentStart,
+    currentEnd,
+    sucursalId
+  );
+  const previousTrackingWhereClause = createWhereClause(
+    trackings,
+    previousStart,
+    previousEnd,
+    sucursalId
+  );
+  const invoiceWhereClause = createWhereClause(
+    facturas,
+    currentStart,
+    currentEnd,
+    sucursalId
+  );
 
-  const [currentTrackings, previousTrackings, invoiceStats] = await Promise.all([
-    db.select({ count: sql<number>`COUNT(*)` })
-      .from(trackings)
-      .where(trackingWhereClause),
-    db.select({ count: sql<number>`COUNT(*)` })
-      .from(trackings)
-      .where(previousTrackingWhereClause),
-    db.select({
-      not_enviado: sql<number>`SUM(CASE 
+  const [currentTrackings, previousTrackings, invoiceStats] = await Promise.all(
+    [
+      db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(trackings)
+        .where(trackingWhereClause),
+      db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(trackings)
+        .where(previousTrackingWhereClause),
+      db
+        .select({
+          not_enviado: sql<number>`SUM(CASE 
         WHEN ${facturas.enviado} = false OR ${facturas.enviado} IS NULL THEN 1 
         ELSE 0 
       END)`,
-      pending_payment_or_pickup: sql<number>`SUM(CASE 
+          pending_payment_or_pickup: sql<number>`SUM(CASE 
         WHEN ${facturas.enviado} = true 
         AND (${facturas.pagado} = false OR ${facturas.pagado} IS NULL OR NOT EXISTS (
           SELECT 1 FROM ${trackings} 
@@ -187,7 +272,7 @@ const getShipmentStats = async (
         )) THEN 1 
         ELSE 0 
       END)`,
-      completed: sql<number>`SUM(CASE 
+          completed: sql<number>`SUM(CASE 
         WHEN ${facturas.enviado} = true 
         AND ${facturas.pagado} = true 
         AND EXISTS (
@@ -196,11 +281,12 @@ const getShipmentStats = async (
           AND ${trackings.retirado} = true
         ) THEN 1 
         ELSE 0 
-      END)`
-    })
-      .from(facturas)
-      .where(invoiceWhereClause),
-  ]);
+      END)`,
+        })
+        .from(facturas)
+        .where(invoiceWhereClause),
+    ]
+  );
 
   const currentCount = currentTrackings[0].count || 0;
   const previousCount = previousTrackings[0].count || 0;
@@ -220,30 +306,48 @@ const getShipmentStats = async (
 
 const getCustomerStats = async (
   sucursalId: string,
-  { currentStart, currentEnd, previousStart, previousEnd }: ReturnType<typeof createDateRange>
+  {
+    currentStart,
+    currentEnd,
+    previousStart,
+    previousEnd,
+  }: ReturnType<typeof createDateRange>
 ): Promise<CustomerStats> => {
-  const whereClause = createWhereClause(usuarios, currentStart, currentEnd, sucursalId);
-  const previousWhereClause = createWhereClause(usuarios, previousStart, previousEnd, sucursalId);
+  const whereClause = createWhereClause(
+    usuarios,
+    currentStart,
+    currentEnd,
+    sucursalId
+  );
+  const previousWhereClause = createWhereClause(
+    usuarios,
+    previousStart,
+    previousEnd,
+    sucursalId
+  );
 
   const [dailyCustomers, currentStats, previousStats] = await Promise.all([
-    db.select({
-      date: sql<string>`DATE(${usuarios.createdAt})`,
-      new_customers: sql<number>`COUNT(*)`,
-    })
+    db
+      .select({
+        date: sql<string>`DATE(${usuarios.createdAt})`,
+        new_customers: sql<number>`COUNT(*)`,
+      })
       .from(usuarios)
       .where(whereClause)
       .groupBy(sql`DATE(${usuarios.createdAt})`)
       .orderBy(sql`DATE(${usuarios.createdAt})`),
-    db.select({ total: sql<number>`COUNT(*)` })
+    db
+      .select({ total: sql<number>`COUNT(*)` })
       .from(usuarios)
       .where(whereClause),
-    db.select({ total: sql<number>`COUNT(*)` })
+    db
+      .select({ total: sql<number>`COUNT(*)` })
       .from(usuarios)
       .where(previousWhereClause),
   ]);
 
   let runningTotal = 0;
-  const dailyGrowth = dailyCustomers.map(day => {
+  const dailyGrowth = dailyCustomers.map((day) => {
     runningTotal += day.new_customers;
     return {
       date: day.date,

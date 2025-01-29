@@ -54,7 +54,7 @@
       growth: {
         current: 0,
         previous: 0,
-        growthPercentage: 0,
+        growthPercentage: "0",
       },
     },
     shipmentStats: {
@@ -65,7 +65,7 @@
       growth: {
         current: 0,
         previous: 0,
-        growthPercentage: 0,
+        growthPercentage: "0",
       },
     },
     customerStats: {
@@ -74,7 +74,7 @@
       growth: {
         current: 0,
         previous: 0,
-        growthPercentage: 0,
+        growthPercentage: "0",
       },
     },
   });
@@ -315,17 +315,20 @@
         <CardHeader>
           <CardTitle>Ingresos Totales</CardTitle>
           <CardDescription
-            class={stats.monthlyStats.growth.growthPercentage >= 0
+            class={parseInt(stats.monthlyStats.growth.growthPercentage) >= 0
               ? "text-green-600"
               : "text-red-600"}
           >
             <span class="inline-block">
-              {stats.monthlyStats.growth.growthPercentage >= 0 ? "+" : ""}
-              {stats.monthlyStats.growth.growthPercentage.toFixed(1)}% del
-              periodo anterior
+              {parseInt(stats.monthlyStats.growth.growthPercentage) >= 0
+                ? "+"
+                : ""}
+              {stats.monthlyStats.growth.growthPercentage} del periodo anterior
             </span>
             <span class="ml-1">
-              {stats.monthlyStats.growth.growthPercentage >= 0 ? "↑" : "↓"}
+              {parseInt(stats.monthlyStats.growth.growthPercentage) >= 0
+                ? "↑"
+                : "↓"}
             </span>
           </CardDescription>
         </CardHeader>
@@ -359,17 +362,20 @@
         <CardHeader>
           <CardTitle>Paquetes Registrados</CardTitle>
           <CardDescription
-            class={stats.shipmentStats.growth.growthPercentage >= 0
+            class={parseInt(stats.shipmentStats.growth.growthPercentage) >= 0
               ? "text-green-600"
               : "text-red-600"}
           >
             <span class="inline-block">
-              {stats.shipmentStats.growth.growthPercentage >= 0 ? "+" : ""}
-              {stats.shipmentStats.growth.growthPercentage.toFixed(1)}% del
-              periodo anterior
+              {parseInt(stats.shipmentStats.growth.growthPercentage) >= 0
+                ? "+"
+                : ""}
+              {stats.shipmentStats.growth.growthPercentage} del periodo anterior
             </span>
             <span class="ml-1">
-              {stats.shipmentStats.growth.growthPercentage >= 0 ? "↑" : "↓"}
+              {parseInt(stats.shipmentStats.growth.growthPercentage) >= 0
+                ? "↑"
+                : "↓"}
             </span>
           </CardDescription>
         </CardHeader>
@@ -383,17 +389,20 @@
         <CardHeader>
           <CardTitle>Clientes Registrados</CardTitle>
           <CardDescription
-            class={stats.customerStats.growth.growthPercentage >= 0
+            class={parseInt(stats.customerStats.growth.growthPercentage) >= 0
               ? "text-green-600"
               : "text-red-600"}
           >
             <span class="inline-block">
-              {stats.customerStats.growth.growthPercentage >= 0 ? "+" : ""}
-              {stats.customerStats.growth.growthPercentage.toFixed(1)}% del
-              periodo anterior
+              {parseInt(stats.customerStats.growth.growthPercentage) >= 0
+                ? "+"
+                : ""}
+              {stats.customerStats.growth.growthPercentage} del periodo anterior
             </span>
             <span class="ml-1">
-              {stats.customerStats.growth.growthPercentage >= 0 ? "↑" : "↓"}
+              {parseInt(stats.customerStats.growth.growthPercentage) >= 0
+                ? "↑"
+                : "↓"}
             </span>
           </CardDescription>
         </CardHeader>

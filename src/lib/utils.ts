@@ -3,8 +3,6 @@ import { twMerge } from "tailwind-merge";
 import { encodeBase32LowerCase } from "@oslojs/encoding";
 import { toast as mainToast } from "svelte-sonner";
 import { DateTime, Settings } from "luxon";
-import { render } from "svelte/server";
-import type { SvelteComponent, ComponentProps } from "svelte";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -94,16 +92,41 @@ export async function getBase64FromUrl(url: string): Promise<string> {
 
 Settings.defaultZone = "America/Panama";
 
-export function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('es-PA', {
-    style: 'currency',
-    currency: 'USD',
-    currencyDisplay: 'narrowSymbol',
-    currencySign: 'standard',
+export function formatCurrency(value: number): string {
+  if (value === 0) return "$0";
+
+  // For values under 1000, show full number
+  if (Math.abs(value) < 1000) {
+    return new Intl.NumberFormat("es-PA", {
+      style: "currency",
+      currency: "USD",
+      currencyDisplay: "narrowSymbol",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  }
+
+  // For larger values, use compact notation with 2 decimal places
+  const formatter = new Intl.NumberFormat("en", {
+    notation: "compact",
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(amount);
-};
+    maximumFractionDigits: 2,
+  });
+
+  return `$${formatter.format(value)}`;
+}
+
+export function formatFullCurrency(value: number): string {
+  if (value === 0) return "$0";
+
+  return new Intl.NumberFormat("es-PA", {
+    style: "currency",
+    currency: "USD",
+    currencyDisplay: "narrowSymbol",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
 
 export function getToday() {
   return DateTime.now().setZone("America/Panama");
@@ -149,4 +172,40 @@ export function calculateDimensions({
   }
 
   return { width, height };
+}
+
+export function formatCompactNumber(value: number): string {
+  const formatter = Intl.NumberFormat("en", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  });
+  return formatter.format(value);
+}
+
+export function formatCompactCurrency(value: number): string {
+  if (value === 0) return "$0";
+
+  const formatter = Intl.NumberFormat("en", {
+    notation: "compact",
+    maximumFractionDigits: 1,
+  });
+
+  return `$${formatter.format(value)}`;
+}
+
+export function formatCompactPercentage(value: number): string {
+  if (value === 0) return "0%";
+  
+  // For values under 1000, show with 1 decimal place
+  if (Math.abs(value) < 1000) {
+    return `${value.toFixed(1)}%`;
+  }
+  
+  // For larger values, use compact notation
+  const formatter = new Intl.NumberFormat("en", {
+    notation: "compact",
+    maximumFractionDigits: 1
+  });
+  
+  return `${formatter.format(value)}%`;
 }
