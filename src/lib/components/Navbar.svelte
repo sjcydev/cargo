@@ -77,9 +77,13 @@
   let {
     ref = $bindable(null),
     user,
+    logo,
+    companyName,
     ...restProps
   }: ComponentProps<typeof Sidebar.Root> & {
     user: User;
+    logo?: string;
+    companyName: string;
   } = $props();
 </script>
 
@@ -90,13 +94,19 @@
         <Sidebar.MenuButton size="lg">
           {#snippet child({ props })}
             <a href="/" {...props}>
-              <div
-                class={`bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg`}
-              >
-                <Command class="size-4" />
-              </div>
+              {#if !logo}
+                <div
+                  class={`bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg`}
+                >
+                  <Command class="size-4" />
+                </div>
+              {/if}
               <div class="grid flex-1 text-left text-sm leading-tight">
-                <span class="truncate font-semibold">Acme Inc</span>
+                {#if logo}
+                  <img src={logo} alt="logo" class="max-h-10 mb-2" />
+                {:else}
+                  <span class="truncate font-semibold">{companyName}</span>
+                {/if}
               </div>
             </a>
           {/snippet}

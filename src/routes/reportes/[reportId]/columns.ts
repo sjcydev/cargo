@@ -30,9 +30,13 @@ export const columns: ColumnDef<Facturas>[] = [
       }),
     cell: ({ row }) => {
       const total = row.original.total!;
-      return new Intl.NumberFormat("en-US", {
+      return new Intl.NumberFormat("es-PA", {
         style: "currency",
         currency: "USD",
+        currencyDisplay: "narrowSymbol",
+        currencySign: "standard",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
       }).format(total);
     },
   },
@@ -72,11 +76,13 @@ export const columns: ColumnDef<Facturas>[] = [
       }),
     cell: ({ row }) => {
       const date = row.original.pagadoAt;
-      return date ? new Date(date).toLocaleDateString("es-ES", {
-        day: "numeric",
-        month: "long",
-        year: "numeric"
-      }) : "";
+      return date
+        ? new Date(date).toLocaleDateString("es-ES", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })
+        : "";
     },
   },
 ];

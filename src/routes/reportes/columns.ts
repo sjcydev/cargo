@@ -64,9 +64,13 @@ export const columns = (user: { rol: string }): ColumnDef<Reportes>[] => [
       }),
     cell: ({ row }) => {
       const total = row.original.total!;
-      return new Intl.NumberFormat("en-US", {
+      return new Intl.NumberFormat("es-PA", {
         style: "currency",
         currency: "USD",
+        currencyDisplay: "narrowSymbol",
+        currencySign: "standard",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
       }).format(total);
     },
   },

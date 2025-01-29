@@ -117,8 +117,8 @@
 
 <Html>
   <Head />
-  <Preview {preview} />
   <Body>
+    <Preview {preview} />
     <Container style={main}>
       <Container style={container}>
         <Container style={logoContainer}>

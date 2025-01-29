@@ -91,8 +91,8 @@
 
 <Html>
   <Head />
-  <Preview {preview} />
   <Body>
+    <Preview {preview} />
     <Section style={main}>
       <Container style={container}>
         <Container style={logoContainer}>

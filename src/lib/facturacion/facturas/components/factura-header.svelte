@@ -6,9 +6,13 @@
 
   let { factura }: { factura: Facturas } = $props();
 
-  const formatter = new Intl.NumberFormat("en-US", {
+  const formatter = new Intl.NumberFormat("es-PA", {
     style: "currency",
     currency: "USD",
+    currencyDisplay: "narrowSymbol",
+    currencySign: "standard",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
 
   function getProgressValue(): number {
