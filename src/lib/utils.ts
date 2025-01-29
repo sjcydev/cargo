@@ -94,6 +94,17 @@ export async function getBase64FromUrl(url: string): Promise<string> {
 
 Settings.defaultZone = "America/Panama";
 
+export function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('es-PA', {
+    style: 'currency',
+    currency: 'USD',
+    currencyDisplay: 'narrowSymbol',
+    currencySign: 'standard',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(amount);
+};
+
 export function getToday() {
   return DateTime.now().setZone("America/Panama");
 }

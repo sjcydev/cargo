@@ -81,7 +81,9 @@ export const actions = {
         .update(trackings)
         .set({
           retirado: setRetirado,
-          retiradoAt: setRetirado ? new Date() : null,
+          retiradoAt: setRetirado
+            ? today(getLocalTimeZone()).toDate(getLocalTimeZone())
+            : null,
         })
         .where(inArray(trackings.trackingId, trackingIds));
 

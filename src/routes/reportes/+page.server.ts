@@ -3,6 +3,7 @@ import { db } from "$lib/server/db";
 import { reportes, sucursales, facturas } from "$lib/server/db/schema";
 import { desc, eq, and, between, sql } from "drizzle-orm";
 import { redirect, error, json, fail } from "@sveltejs/kit";
+import { getLocalTimeZone, parseDate } from "@internationalized/date";
 
 export const load = (async ({ locals }) => {
   const { user } = locals;
@@ -47,8 +48,8 @@ export const actions = {
     if (!user) throw redirect(302, "/login");
 
     const data = await request.formData();
-    const fechaInicial = new Date(data.get("fechaInicial") as string);
-    const fechaFinal = new Date(data.get("fechaFinal") as string);
+    const fechaInicial = parseDate(data.get("fechaInicial") as string).toDate(getLocalTimeZone());
+    const fechaFinal = parseDate(data.get("fechaFinal") as string).toDate(getLocalTimeZone());
     const sucursalId = parseInt(data.get("sucursalId") as string);
 
     // Get facturas for the date range and sucursal

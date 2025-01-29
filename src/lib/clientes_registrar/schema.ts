@@ -37,6 +37,7 @@ export const clientesRegisterSchema = z.object({
     .optional()
     .nullable(),
   id: z.string().optional(),
+  nacimiento: z.string().optional(),
 });
 
 export type clientesRegsiterType = typeof clientesRegisterSchema;

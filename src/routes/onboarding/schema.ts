@@ -5,10 +5,8 @@ export const companiesSchema = z.object({
     required_error: "Nombre de la Organización es requerida",
   }),
   logo: z
-    .instanceof(File, { message: "Please upload a file." })
-    .refine((f) => f.size < 20_000_000, "Logo debe ser menor a 20MB.")
-    .optional()
-    .nullable(),
+    .instanceof(File, { message: "Debes subir un logo." })
+    .refine((f) => f.size < 20_000_000, "Logo debe ser menor a 20MB."),
   dominio: z.string({ required_error: "Dominio es requerido" }),
 });
 

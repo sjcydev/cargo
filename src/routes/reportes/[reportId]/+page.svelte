@@ -14,9 +14,13 @@
   let { data }: { data: PageData } = $props();
   let deleteDialogOpen = $state(false);
 
-  const formatter = new Intl.NumberFormat("en-US", {
+  const formatter = new Intl.NumberFormat("es-PA", {
     style: "currency",
     currency: "USD",
+    currencyDisplay: "narrowSymbol",
+    currencySign: "standard",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
 
   function formatDate(date: Date) {

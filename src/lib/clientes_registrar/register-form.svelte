@@ -16,6 +16,8 @@
   import type { Sucursales } from "$lib/server/db/schema";
   import { toast } from "svelte-sonner";
   import { goto } from "$app/navigation";
+  import { today, getLocalTimeZone } from "@internationalized/date";
+  import DatePicker from "$lib/components/ui/date-picker.svelte";
 
   let {
     data,
@@ -38,12 +40,18 @@
     },
   });
 
+  let nacimientoDate = $state(today(getLocalTimeZone()));
+
   const { form: formData, enhance, message } = form;
 
   const sucursalTrigger = $derived(
     sucursales.find((f) => $formData.sucursalId === String(f.sucursalId))
       ?.sucursal ?? "Elige la sucursal"
   );
+
+  $effect(() => {
+    $formData.nacimiento = nacimientoDate.toString();
+  });
 </script>
 
 <div class="grid place-items-center h-full">
@@ -125,6 +133,16 @@
           <Form.FieldErrors />
         </Form.Field>
 
+        <Form.Field {form} name="nacimiento">
+          <Form.Control>
+            {#snippet children({ props })}
+              <Form.Label>Nacimiento</Form.Label>
+              <DatePicker {...props} bind:value={nacimientoDate} />
+            {/snippet}
+          </Form.Control>
+          <Form.FieldErrors />
+        </Form.Field>
+
         <Form.Field {form} name="telefono">
           <Form.Control>
             {#snippet children({ props })}
@@ -174,7 +192,7 @@
               <Form.Label>Sexo</Form.Label>
               <Select.Root
                 type="single"
-                bind:value={$formData.sexo}
+                bind:value={$formData.sexo as string}
                 name={props.name}
               >
                 <Select.Trigger {...props}>

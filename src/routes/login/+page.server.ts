@@ -8,14 +8,19 @@ import { userLoginSchema } from "./schema";
 import { zod } from "sveltekit-superforms/adapters";
 import { eq } from "drizzle-orm";
 import { verify } from "@node-rs/argon2";
+import { getFriendlyUrl } from "$lib/server/s3";
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (locals.user) {
     throw redirect(302, "/");
   }
 
+  const company = await db.query.companies.findFirst()!;
+  const logo = getFriendlyUrl(company!.logo!);
+
   return {
     form: await superValidate(zod(userLoginSchema)),
+    logo,
   };
 };
 

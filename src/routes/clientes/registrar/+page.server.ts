@@ -6,6 +6,12 @@ import { superValidate, fail, message } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { eq } from "drizzle-orm";
 import { capitaliseWord } from "$lib/utils";
+import {
+  CalendarDate,
+  getLocalTimeZone,
+  parseDate,
+  today,
+} from "@internationalized/date";
 
 export const load: PageServerLoad = async ({ locals }) => {
   const sucursales = await db.query.sucursales.findMany();
@@ -34,6 +40,7 @@ export const actions: Actions = {
       sexo,
       sucursalId,
       precio: currPrecio,
+      nacimiento,
     } = form.data;
 
     const nombre = capitaliseWord(currNombre);
@@ -58,7 +65,9 @@ export const actions: Actions = {
         correo,
         sexo,
         sucursalId: Number(sucursalId),
-        nacimiento: new Date(),
+        nacimiento: nacimiento
+          ? parseDate(nacimiento).toDate(getLocalTimeZone())
+          : today(getLocalTimeZone()).toDate(getLocalTimeZone()),
         precio,
         tipo: sucursal!.precio === precio ? "REGULAR" : "ESPECIAL",
       })

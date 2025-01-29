@@ -25,6 +25,7 @@
   import type { Tracking } from "$lib/facturacion/facturar/types";
   import { enhance } from "$app/forms";
   import { page } from "$app/state";
+  import { today, getLocalTimeZone } from "@internationalized/date";
 
   let { data }: { data: PageData } = $props();
 
@@ -47,7 +48,7 @@
     casillero: null,
     cedula: "",
     sucursalId: sucursales!.sucursalId,
-    nacimiento: new Date(),
+    nacimiento: today(getLocalTimeZone()).toDate(getLocalTimeZone()),
     sexo: null,
     createdAt: null,
     updatedAt: null,

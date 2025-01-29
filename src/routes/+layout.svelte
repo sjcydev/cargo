@@ -24,7 +24,7 @@
   {#await data.user}
     <h1>Loading...</h1>
   {:then user}
-    <SidebarPage {user}>
+    <SidebarPage {user} logo={data.logo} companyName={data.company}>
       {@render children()}
     </SidebarPage>
   {/await}

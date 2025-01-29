@@ -25,7 +25,7 @@
           class="cursor-pointer"
         />
       {/if}
-      <h1>{title}</h1>
+      <h1 class="text-2xl font-semibold">{title}</h1>
     </div>
 
     <div>

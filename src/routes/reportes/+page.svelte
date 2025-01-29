@@ -135,13 +135,12 @@
           <input
             type="hidden"
             name="fechaInicial"
-            value={value?.start?.toDate(getLocalTimeZone())?.toISOString() ??
-              ""}
+            value={value?.start?.toString() ?? ""}
           />
           <input
             type="hidden"
             name="fechaFinal"
-            value={value?.end?.toDate(getLocalTimeZone())?.toISOString() ?? ""}
+            value={value?.end?.toString() ?? ""}
           />
         </div>
         {#if data.user.rol === "ADMIN"}
