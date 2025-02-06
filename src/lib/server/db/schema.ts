@@ -63,6 +63,8 @@ export const users = mysqlTable("users", {
     .notNull(),
   sucursalId: int("sucursalId").references(() => sucursales.sucursalId),
   companyId: int("company").references(() => companies.companyId),
+  archivado: boolean("archivado").default(false),
+  archivadoAt: timestamp("archivadoAt"),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -276,4 +278,4 @@ export type TrackingsWithSucursal = InferResultType<
 >;
 
 export type Session = typeof session.$inferSelect;
-export type User = typeof users.$inferSelect;
+export type Users = typeof users.$inferSelect;

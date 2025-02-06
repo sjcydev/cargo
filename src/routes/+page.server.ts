@@ -1,8 +1,13 @@
 import { db } from "$lib/server/db";
-import { facturas, trackings, usuarios, sucursales } from "$lib/server/db/schema";
+import {
+  facturas,
+  trackings,
+  usuarios,
+  sucursales,
+} from "$lib/server/db/schema";
 import { and, between, eq, sql } from "drizzle-orm";
 import type { PageServerLoad } from "./$types";
-import { error } from "@sveltejs/kit";
+import { redirect } from "@sveltejs/kit";
 import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
 
 type DailyRevenue = {
@@ -43,7 +48,7 @@ type CustomerStats = {
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (!locals.user || locals.user.rol !== "ADMIN") {
-    throw error(403, "Unauthorized");
+    throw redirect(302, "/clientes");
   }
 
   const now = today(getLocalTimeZone());
@@ -86,9 +91,11 @@ export const load: PageServerLoad = async ({ locals }) => {
       .orderBy(sql`DATE(${facturas.createdAt})`);
 
     // Calculate growth comparing current month's paid invoices with previous month
-    const previousStartDate = new CalendarDate(now.year, now.month - 1, 1).toDate(
-      getLocalTimeZone()
-    );
+    const previousStartDate = new CalendarDate(
+      now.year,
+      now.month - 1,
+      1
+    ).toDate(getLocalTimeZone());
     const previousEndDate = new CalendarDate(now.year, now.month, 0).toDate(
       getLocalTimeZone()
     );
@@ -102,9 +109,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 
     const currentTotal = baseStats[0].total || 0;
     const previousTotal = previousMonthStats[0].total || 0;
-    const growthPercentage = previousTotal === 0 
-      ? 100 
-      : ((currentTotal - previousTotal) / previousTotal) * 100;
+    const growthPercentage =
+      previousTotal === 0
+        ? 100
+        : ((currentTotal - previousTotal) / previousTotal) * 100;
 
     // Second query for payment methods
     const paymentMethodsQuery = {

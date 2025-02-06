@@ -11,7 +11,8 @@ export const actions: Actions = {
     }
     await auth.invalidateSession(locals.session.id);
     auth.deleteSessionTokenCookie(event);
+    locals.user = null;
 
-    return redirect(302, '/login');
+    return redirect(302, "/login");
   },
 };

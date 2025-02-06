@@ -22,6 +22,7 @@ export const load: PageServerLoad = async () => {
 
   return {
     form: await superValidate(zod(userSignUpSchema)),
+    sucursales,
   };
 };
 
@@ -40,12 +41,11 @@ export const actions: Actions = {
       correo,
       nombre: currNombre,
       apellido: currApellido,
-      secret,
+      sucursalId: currSucursalId,
+      rol,
     } = form.data;
 
-    if (secret !== SECRET_CODE) {
-      return setError(form, "secret", "Codigo secreto invalido");
-    }
+    const sucursalId = parseInt(currSucursalId);
 
     const userId = generateUserId();
     const passwordHash = await hash(password, {
@@ -65,6 +65,9 @@ export const actions: Actions = {
       correo,
       nombre,
       apellido,
+      rol,
+      companyId: 1,
+      sucursalId,
     });
 
     if (!event.locals.user) {

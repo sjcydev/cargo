@@ -6,12 +6,7 @@
   import { page } from "$app/state";
   import SidebarPage from "$lib/components/sidebar-page.svelte";
 
-  let protectedRoutes = new Set([
-    "/login",
-    "/registrar",
-    "/password_update",
-    "/onboarding",
-  ]);
+  let protectedRoutes = new Set(["/login", "/password_update", "/onboarding"]);
 
   let { data, children } = $props();
 </script>
@@ -24,8 +19,12 @@
   {#await data.user}
     <h1>Loading...</h1>
   {:then user}
-    <SidebarPage {user} logo={data.logo} companyName={data.company}>
+    {#if !user}
       {@render children()}
-    </SidebarPage>
+    {:else}
+      <SidebarPage {user} logo={data.logo} companyName={data.company}>
+        {@render children()}
+      </SidebarPage>
+    {/if}
   {/await}
 {/if}

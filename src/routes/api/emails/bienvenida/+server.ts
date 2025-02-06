@@ -12,7 +12,6 @@ import NuevoCasillero from "$lib/components/emails/new-customer-admin.svelte";
 import { render } from "svelte/server";
 
 export const POST: RequestHandler = async ({ request }) => {
-  console.log("hit");
   const body = await request.json();
 
   let {
