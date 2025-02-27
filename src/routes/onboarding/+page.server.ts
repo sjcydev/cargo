@@ -12,6 +12,7 @@ import { superValidate, fail, setError } from "sveltekit-superforms";
 import { userSignUpSchema } from "./schema";
 import { zod } from "sveltekit-superforms/adapters";
 import { uploadFile } from "$lib/server/s3";
+import { randomUUID as uuid } from "crypto";
 
 export const load: PageServerLoad = async ({ locals }) => {
   const sucursales = await db.query.sucursales.findMany();
@@ -62,7 +63,7 @@ export const actions: Actions = {
 
     if (logoArchivo) {
       const fileExt = logoArchivo.type.split("/")[1] || "png";
-      const keyName = `${company}/logo.${fileExt}`;
+      const keyName = `${company}/logo-${uuid()}.${fileExt}`;
 
       const friendlyUrl = await uploadFile({
         file: logoArchivo,

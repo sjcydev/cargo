@@ -5,6 +5,7 @@
   let {
     ref = $bindable(null),
     items,
+    rol,
     ...restProps
   }: {
     items: {
@@ -13,24 +14,27 @@
       // This should be `Component` after lucide-svelte updates types
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       icon: any;
+      admin: boolean;
     }[];
-  } & ComponentProps<typeof Sidebar.Group> = $props();
+  } & ComponentProps<typeof Sidebar.Group> & { rol: string } = $props();
 </script>
 
 <Sidebar.Group bind:ref {...restProps}>
   <Sidebar.GroupContent>
     <Sidebar.Menu>
       {#each items as item (item.title)}
-        <Sidebar.MenuItem>
-          <Sidebar.MenuButton size="sm">
-            {#snippet child({ props })}
-              <a href={item.url} {...props}>
-                <item.icon />
-                <span>{item.title}</span>
-              </a>
-            {/snippet}
-          </Sidebar.MenuButton>
-        </Sidebar.MenuItem>
+        {#if (!item.admin && rol !== "ADMIN") || rol === "ADMIN"}
+          <Sidebar.MenuItem>
+            <Sidebar.MenuButton size="sm">
+              {#snippet child({ props })}
+                <a href={item.url} {...props}>
+                  <item.icon />
+                  <span>{item.title}</span>
+                </a>
+              {/snippet}
+            </Sidebar.MenuButton>
+          </Sidebar.MenuItem>
+        {/if}
       {/each}
     </Sidebar.Menu>
   </Sidebar.GroupContent>

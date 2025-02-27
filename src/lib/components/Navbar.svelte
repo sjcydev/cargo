@@ -63,11 +63,13 @@
       title: "Crear Usuario",
       url: "/registrar",
       icon: UserPlus,
+      admin: true,
     },
     {
       title: "Configuración",
       url: "/settings",
       icon: Settings,
+      admin: false,
     },
   ];
 
@@ -87,6 +89,7 @@
     apellido: string;
     correo: string;
     avatar: any;
+    rol: string;
   };
 
   let {
@@ -135,7 +138,7 @@
       {protectedRoutes}
       currentRoute={page.url.pathname}
     />
-    <NavSecondary items={navSecondary} />
+    <NavSecondary items={navSecondary} rol={user.rol} />
   </Sidebar.Content>
   <Sidebar.Footer>
     <NavUser {user} />
