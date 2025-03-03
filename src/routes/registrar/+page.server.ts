@@ -13,7 +13,11 @@ import { superValidate, fail, setError } from "sveltekit-superforms";
 import { userSignUpSchema } from "./schema";
 import { zod } from "sveltekit-superforms/adapters";
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
+  if (locals.user && locals.user.rol !== "ADMIN") {
+    throw redirect(302, "/clientes");
+  }
+
   const sucursales = await db.query.sucursales.findMany();
 
   if (sucursales.length === 0) {

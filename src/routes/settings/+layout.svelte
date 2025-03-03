@@ -4,15 +4,16 @@
   import SidebarNav from "$lib/components/settings-navbar.svelte";
   import { Separator } from "$lib/components/ui/separator";
   import InnerLayout from "$lib/components/inner-layout.svelte";
+  import { Hotel, House, ScrollText, User, Users } from "lucide-svelte";
 
   let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
   const navbarItems = [
-    { href: "/settings/account", title: "Perfil" },
-    { href: "/settings/company", title: "Empresa" },
-    { href: "/settings/sucursales", title: "Sucursales" },
-    { href: "/settings/users", title: "Usuarios" },
-    { href: "/settings/facturas", title: "Factura" },
+    { href: "/settings/perfil", title: "Perfil", icon: User },
+    { href: "/settings/empresa", title: "Empresa", icon: Hotel },
+    { href: "/settings/sucursales", title: "Sucursales", icon: House },
+    { href: "/settings/usuarios", title: "Usuarios", icon: Users },
+    { href: "/settings/facturas", title: "Factura", icon: ScrollText },
   ];
 </script>
 
@@ -23,7 +24,7 @@
         {#if data.user!.rol === "ADMIN"}
           Ajusta detalles de la empresa y de los usuarios
         {:else}
-          Ajuste de perfil
+          Ajusta los detalles de tu perfil
         {/if}
       </p>
     </div>

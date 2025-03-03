@@ -102,7 +102,7 @@
   <Form.Field {form} name="logo">
     <Form.Control>
       {#snippet children({ props })}
-        <Form.Label>Upload Image</Form.Label>
+        <Form.Label>Logo</Form.Label>
         <div class="grid place-items-center p-10">
           <img bind:this={imgRef} src={logo} class="max-h-20" alt="logo" />
         </div>

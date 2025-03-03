@@ -44,6 +44,7 @@ export const actions: Actions = {
       company: currCompany,
       sucursal,
       direccion,
+      maps,
       telefono,
       precio,
       codificacion,
@@ -98,6 +99,7 @@ export const actions: Actions = {
         codificacion,
         correo: correoSucursal,
         companyId: newCompany[0].companyId,
+        maps,
       })
       .$returningId();
 

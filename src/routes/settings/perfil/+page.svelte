@@ -6,6 +6,10 @@
   let { data }: { data: PageData } = $props();
 </script>
 
+<svelte:head>
+  <title>Detalles Personales</title>
+</svelte:head>
+
 <div class="space-y-6">
   <div>
     <h3 class="text-xl font-medium">Detalles Personales</h3>

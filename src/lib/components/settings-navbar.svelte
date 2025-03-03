@@ -4,6 +4,7 @@
   import { cn } from "$lib/utils.js";
   import { Button } from "$lib/components/ui/button";
   import { page } from "$app/state";
+  import type { ComponentType } from "svelte";
 
   let {
     rol,
@@ -11,7 +12,7 @@
     class: className,
   }: {
     rol: string;
-    items: { href: string; title: string }[];
+    items: { href: string; title: string; icon: any }[];
     class?: string;
   } = $props();
 
@@ -22,7 +23,7 @@
 </script>
 
 {#snippet sidebarButton(
-  item: { href: string; title: string },
+  item: { href: string; title: string; icon: any },
   isActive: boolean
 )}
   <Button
@@ -42,7 +43,10 @@
       ></div>
     {/if}
     <div class="relative">
-      {item.title}
+      <div class="flex items-center gap-2">
+        <item.icon />
+        {item.title}
+      </div>
     </div>
   </Button>
 {/snippet}
