@@ -6,16 +6,21 @@ import { users } from "$lib/server/db/schema";
 import { superValidate, fail, message } from "sveltekit-superforms";
 import { userLoginSchema } from "./schema";
 import { zod } from "sveltekit-superforms/adapters";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { verify } from "@node-rs/argon2";
+import { getFriendlyUrl } from "$lib/server/s3";
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (locals.user) {
     throw redirect(302, "/");
   }
 
+  const company = await db.query.companies.findFirst()!;
+  const logo = getFriendlyUrl(company!.logo!);
+
   return {
     form: await superValidate(zod(userLoginSchema)),
+    logo,
   };
 };
 
@@ -33,7 +38,7 @@ export const actions: Actions = {
     const results = await db
       .select()
       .from(users)
-      .where(eq(users.username, username));
+      .where(and(eq(users.username, username), eq(users.archivado, false)));
 
     const existingUser = results.at(0);
 
@@ -43,16 +48,12 @@ export const actions: Actions = {
       });
     }
 
-    const validPassword = await verify(
-      existingUser.passwordHash,
-      password,
-      {
-        memoryCost: 19456,
-        timeCost: 2,
-        outputLen: 32,
-        parallelism: 1,
-      },
-    );
+    const validPassword = await verify(existingUser.passwordHash, password, {
+      memoryCost: 19456,
+      timeCost: 2,
+      outputLen: 32,
+      parallelism: 1,
+    });
 
     if (!validPassword) {
       return message(form, "Username o contraseña son incorrectas", {
@@ -65,6 +66,6 @@ export const actions: Actions = {
 
     auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
 
-    redirect(302, "/");
+    throw redirect(302, "/");
   },
 };

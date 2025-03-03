@@ -1,0 +1,1 @@
+ALTER TABLE `usuarios` MODIFY COLUMN `nacimiento` varchar(19) NOT NULL;

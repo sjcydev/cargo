@@ -12,7 +12,10 @@
   } from "sveltekit-superforms";
   import { zodClient } from "sveltekit-superforms/adapters";
 
-  export let data: SuperValidated<Infer<userLoginType>>;
+  let {
+    data,
+  }: { data: SuperValidated<Infer<userLoginType>> & { logo?: string } } =
+    $props();
 
   const form = superForm(data, {
     validators: zodClient(userLoginSchema),
@@ -29,8 +32,12 @@
         <div
           class="text-xl flex place-self-center items-center gap-2 font-semibold"
         >
-          <Package2 class="h-6 w-6" />
-          <span class="">[[COMPANY NAME]]</span>
+          {#if data.logo}
+            <img src={data.logo} alt="logo" class="max-h-16 mb-2" />
+          {:else}
+            <Package2 class="h-6 w-6" />
+            <span>[[COMPANY NAME]]</span>
+          {/if}
         </div>
         <h1 class="text-3xl font-bold">Inicio de Sesión</h1>
         <p class="text-balance text-muted-foreground">

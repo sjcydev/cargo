@@ -1,0 +1,1 @@
+ALTER TABLE `sucursales` ADD `correo` varchar(255) NOT NULL;

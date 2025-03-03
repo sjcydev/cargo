@@ -1,0 +1,2 @@
+ALTER TABLE `trackings` ADD `sucursalId` int;--> statement-breakpoint
+ALTER TABLE `trackings` ADD CONSTRAINT `trackings_sucursalId_sucursales_sucursalId_fk` FOREIGN KEY (`sucursalId`) REFERENCES `sucursales`(`sucursalId`) ON DELETE no action ON UPDATE no action;

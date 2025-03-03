@@ -8,6 +8,160 @@
       "when": 1732720516845,
       "tag": "0000_initial_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1733562882655,
+      "tag": "0001_make_sucursal_not_null",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1733580268024,
+      "tag": "0002_rol_not_null",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1733582181928,
+      "tag": "0003_sucursal_nullable",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1733647163207,
+      "tag": "0004_sucursales_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1734898348920,
+      "tag": "0005_add_codificacion_and_companies",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1736043303750,
+      "tag": "0006_add_enviado_flag_to_facturas",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1736311401362,
+      "tag": "0007_add_not_null_to_facturas",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1736312301819,
+      "tag": "0008_remove_not_null_to_casillero",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1736314508659,
+      "tag": "0009_add_tipo_to_clientes",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1736738045581,
+      "tag": "0010_add_logo_column_to_company",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1736739766978,
+      "tag": "0011_edit_logo_properties",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1736744223406,
+      "tag": "0012_update_nacimiento",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1736744261504,
+      "tag": "0013_update_nacimiento",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1736744606624,
+      "tag": "0014_update_nacimiento",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "5",
+      "when": 1736795210104,
+      "tag": "0015_update_not_null",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "5",
+      "when": 1736899189595,
+      "tag": "0016_add_dominio",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "5",
+      "when": 1736976599720,
+      "tag": "0017_add_correo_sucursal",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1736984071138,
+      "tag": "0018_add_maps_to_sucursales",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1737232105867,
+      "tag": "0019_change_payment_methods",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "5",
+      "when": 1737352098181,
+      "tag": "0020_add_sucursalid_to_trackings",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "5",
+      "when": 1737403949516,
+      "tag": "0021_add_retirado_at_to_trackings",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "5",
+      "when": 1738282535983,
+      "tag": "0022_add_archivado_to_users",
+      "breakpoints": true
     }
   ]
 }

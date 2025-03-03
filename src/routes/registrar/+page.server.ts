@@ -13,9 +13,20 @@ import { superValidate, fail, setError } from "sveltekit-superforms";
 import { userSignUpSchema } from "./schema";
 import { zod } from "sveltekit-superforms/adapters";
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
+  if (locals.user && locals.user.rol !== "ADMIN") {
+    throw redirect(302, "/clientes");
+  }
+
+  const sucursales = await db.query.sucursales.findMany();
+
+  if (sucursales.length === 0) {
+    throw redirect(302, "/onboarding");
+  }
+
   return {
     form: await superValidate(zod(userSignUpSchema)),
+    sucursales,
   };
 };
 
@@ -34,12 +45,11 @@ export const actions: Actions = {
       correo,
       nombre: currNombre,
       apellido: currApellido,
-      secret,
+      sucursalId: currSucursalId,
+      rol,
     } = form.data;
 
-    if (secret !== SECRET_CODE) {
-      return setError(form, "secret", "Codigo secreto invalido");
-    }
+    const sucursalId = parseInt(currSucursalId);
 
     const userId = generateUserId();
     const passwordHash = await hash(password, {
@@ -59,12 +69,17 @@ export const actions: Actions = {
       correo,
       nombre,
       apellido,
+      rol,
+      companyId: 1,
+      sucursalId,
     });
 
-    const sessionToken = auth.generateSessionToken();
-    const session = await auth.createSession(sessionToken, userId);
+    if (!event.locals.user) {
+      const sessionToken = auth.generateSessionToken();
+      const session = await auth.createSession(sessionToken, userId);
 
-    auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
+      auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
+    }
 
     redirect(302, "/");
   },
