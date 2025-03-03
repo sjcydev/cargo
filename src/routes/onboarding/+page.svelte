@@ -183,6 +183,20 @@
             <Form.FieldErrors />
           </Form.Field>
 
+          <Form.Field {form} name="maps">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Ubicación en el Mapa</Form.Label>
+                <Input
+                  {...props}
+                  bind:value={$formData.maps}
+                  placeholder="https://maps.google.com"
+                />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
+
           <Form.Field {form} name="telefono">
             <Form.Control>
               {#snippet children({ props })}
@@ -197,13 +211,13 @@
             <Form.FieldErrors />
           </Form.Field>
 
-          <Form.Field {form} name="correo">
+          <Form.Field {form} name="correoSucursal">
             <Form.Control>
               {#snippet children({ props })}
                 <Form.Label>Correo</Form.Label>
                 <Input
                   {...props}
-                  bind:value={$formData.correo}
+                  bind:value={$formData.correoSucursal}
                   placeholder="correo@ejemplo.com"
                 />
               {/snippet}

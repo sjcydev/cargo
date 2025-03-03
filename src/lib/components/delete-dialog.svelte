@@ -3,12 +3,28 @@
   import { Button } from "$lib/components/ui/button";
   import { enhance } from "$app/forms";
 
-  export let open = false;
-  export let title = "Eliminar";
-  export let description = "¿Estás seguro que deseas eliminar este elemento?";
-  export let action = "";
-  export let itemId: string | number;
-  export let onSuccess: () => void;
+  // export let open = false;
+  // export let title = "Eliminar";
+  // export let description = "¿Estás seguro que deseas eliminar este elemento?";
+  // export let action = "";
+  // export let itemId: string | number;
+  // export let onSuccess: () => void;
+
+  let {
+    open = $bindable(false),
+    title = "Eliminar",
+    description = "¿Estás seguro que deseas eliminar este elemento?",
+    action = "",
+    itemId,
+    onSuccess,
+  }: {
+    open: boolean;
+    title: string;
+    description: string;
+    action: string;
+    itemId: string | number;
+    onSuccess: () => void;
+  } = $props();
 </script>
 
 <Dialog.Root bind:open>

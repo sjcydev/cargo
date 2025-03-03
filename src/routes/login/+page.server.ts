@@ -6,7 +6,7 @@ import { users } from "$lib/server/db/schema";
 import { superValidate, fail, message } from "sveltekit-superforms";
 import { userLoginSchema } from "./schema";
 import { zod } from "sveltekit-superforms/adapters";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { verify } from "@node-rs/argon2";
 import { getFriendlyUrl } from "$lib/server/s3";
 
@@ -38,7 +38,7 @@ export const actions: Actions = {
     const results = await db
       .select()
       .from(users)
-      .where(eq(users.username, username));
+      .where(and(eq(users.username, username), eq(users.archivado, false)));
 
     const existingUser = results.at(0);
 

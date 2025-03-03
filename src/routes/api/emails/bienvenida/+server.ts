@@ -12,7 +12,6 @@ import NuevoCasillero from "$lib/components/emails/new-customer-admin.svelte";
 import { render } from "svelte/server";
 
 export const POST: RequestHandler = async ({ request }) => {
-  console.log("hit");
   const body = await request.json();
 
   let {
@@ -51,7 +50,7 @@ export const POST: RequestHandler = async ({ request }) => {
       const emailText = await renderAsPlainText(emailHtml);
 
       const data = await resend.emails.send({
-        from: `${company.company} <no-reply-info@resend.dev>`,
+        from: `${company.company} <no-reply-info@${company.dominio}>`,
         to: [correo],
         subject: `¡Bienvenido a ${company.company}!`,
         html: emailHtml,
@@ -79,7 +78,7 @@ export const POST: RequestHandler = async ({ request }) => {
         const adminEmailText = await renderAsPlainText(adminEmailHtml);
 
         await resend.emails.send({
-          from: `${company.company} <no-reply-info@resend.dev>`,
+          from: `${company.company} <no-reply-info@${company.dominio}>`,
           to: [sucursal!.correo],
           subject: `¡Nuevo Casillero Registrado!`,
           html: adminEmailHtml,

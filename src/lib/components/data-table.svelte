@@ -37,6 +37,7 @@
     selectionChange?: (selected: number[]) => void;
     showTotal?: boolean;
     onRowClick?: (row: TData) => void;
+    headerless?: boolean;
   };
 
   let {
@@ -47,6 +48,7 @@
     selectionChange,
     showTotal = false,
     onRowClick,
+    headerless = false,
   }: DataTableProps<TData, TValue> = $props();
   let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
   let sorting = $state<SortingState>([]);
@@ -159,7 +161,7 @@
     // Check if the click was on a checkbox or action button
     const target = event.target as HTMLElement;
     const isCheckbox = target.closest('[role="checkbox"]');
-    const isActionButton = target.closest('button') || target.closest('a');
+    const isActionButton = target.closest("button") || target.closest("a");
 
     // Only trigger row click if not clicking checkbox or action button
     if (!isCheckbox && !isActionButton && onRowClick) {
@@ -168,43 +170,47 @@
   };
 </script>
 
-<div class="flex items-center justify-between pb-4">
-  <Input
-    placeholder="Buscador"
-    value={globalFilter}
-    onchange={(e) => {
-      table.setGlobalFilter(String(e.currentTarget.value));
-      goto(`?search=${e.currentTarget.value}`);
-    }}
-    oninput={(e) => {
-      table.setGlobalFilter(String(e.currentTarget.value));
-    }}
-    class="max-w-sm"
-  />
-  <div>
-    {@render actions?.()}
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger>
-        {#snippet child({ props })}
-          <Button {...props} variant="outline" class="ml-auto">Columnas</Button>
-        {/snippet}
-      </DropdownMenu.Trigger>
-      <DropdownMenu.Content align="end">
-        {#each table
-          .getAllColumns()
-          .filter((col) => col.getCanHide()) as column (column.id)}
-          <DropdownMenu.CheckboxItem
-            class="capitalize"
-            checked={column.getIsVisible()}
-            onCheckedChange={(value) => column.toggleVisibility(!!value)}
-          >
-            {column.id}
-          </DropdownMenu.CheckboxItem>
-        {/each}
-      </DropdownMenu.Content>
-    </DropdownMenu.Root>
+{#if !headerless}
+  <div class="flex items-center justify-between pb-4">
+    <Input
+      placeholder="Buscador"
+      value={globalFilter}
+      onchange={(e) => {
+        table.setGlobalFilter(String(e.currentTarget.value));
+        goto(`?search=${e.currentTarget.value}`);
+      }}
+      oninput={(e) => {
+        table.setGlobalFilter(String(e.currentTarget.value));
+      }}
+      class="max-w-sm"
+    />
+    <div>
+      {@render actions?.()}
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger>
+          {#snippet child({ props })}
+            <Button {...props} variant="outline" class="ml-auto"
+              >Columnas</Button
+            >
+          {/snippet}
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content align="end">
+          {#each table
+            .getAllColumns()
+            .filter((col) => col.getCanHide()) as column (column.id)}
+            <DropdownMenu.CheckboxItem
+              class="capitalize"
+              checked={column.getIsVisible()}
+              onCheckedChange={(value) => column.toggleVisibility(!!value)}
+            >
+              {column.id}
+            </DropdownMenu.CheckboxItem>
+          {/each}
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+    </div>
   </div>
-</div>
+{/if}
 <div class="rounded-md border">
   <Table.Root>
     <Table.Header>

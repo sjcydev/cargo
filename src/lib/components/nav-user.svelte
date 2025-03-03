@@ -5,6 +5,7 @@
   import CreditCard from "lucide-svelte/icons/credit-card";
   import LogOut from "lucide-svelte/icons/log-out";
   import Sparkles from "lucide-svelte/icons/sparkles";
+  import { Settings } from "lucide-svelte";
 
   import * as Avatar from "$lib/components/ui/avatar/index.js";
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
@@ -84,10 +85,13 @@
             <CreditCard />
             Billing
           </DropdownMenu.Item>
-          <DropdownMenu.Item>
-            <Bell />
-            Notifications
-          </DropdownMenu.Item>
+
+          <a href="/settings">
+            <DropdownMenu.Item>
+              <Settings />
+              Configuración
+            </DropdownMenu.Item>
+          </a>
         </DropdownMenu.Group>
         <DropdownMenu.Separator />
         <form method="post" action="/logout" class="w-full" use:enhance>

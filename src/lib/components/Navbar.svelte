@@ -6,6 +6,8 @@
     ReceiptText,
     FileSearch,
     BookText,
+    Settings,
+    UserPlus,
   } from "lucide-svelte";
   import { page } from "$app/state";
 
@@ -56,6 +58,21 @@
     ],
   };
 
+  const navSecondary = [
+    {
+      title: "Crear Usuario",
+      url: "/registrar",
+      icon: UserPlus,
+      admin: true,
+    },
+    {
+      title: "Configuración",
+      url: "/settings",
+      icon: Settings,
+      admin: false,
+    },
+  ];
+
   let protectedRoutes = new Set(["/registrar"]);
 </script>
 
@@ -72,6 +89,7 @@
     apellido: string;
     correo: string;
     avatar: any;
+    rol: string;
   };
 
   let {
@@ -114,12 +132,13 @@
       </Sidebar.MenuItem>
     </Sidebar.Menu>
   </Sidebar.Header>
-  <Sidebar.Content>
+  <Sidebar.Content class="justify-between">
     <NavMain
       items={data.navMain}
       {protectedRoutes}
       currentRoute={page.url.pathname}
     />
+    <NavSecondary items={navSecondary} rol={user.rol} />
   </Sidebar.Content>
   <Sidebar.Footer>
     <NavUser {user} />

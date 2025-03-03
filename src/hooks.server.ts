@@ -20,15 +20,12 @@ const authHandle: Handle = async ({ event, resolve }) => {
     event.url.pathname.startsWith("/facturas") ||
     event.url.pathname.startsWith("/tracking") ||
     event.url.pathname.startsWith("/registrar_cliente") ||
-    event.url.pathname.startsWith("/clientes");
+    event.url.pathname.startsWith("/clientes") ||
+    event.url.pathname.startsWith("/registrar");
 
   const user = event.locals.user;
 
-  if (
-    (event.url.pathname === "/registrar" ||
-      event.url.pathname.startsWith("/reportes")) &&
-    user
-  ) {
+  if (event.url.pathname.startsWith("/reportes") && user) {
     if (user?.rol !== "ADMIN") {
       throw redirect(303, "/");
     }

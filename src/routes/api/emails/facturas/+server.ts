@@ -64,7 +64,7 @@ export const POST: RequestHandler = async ({ request }) => {
     const emailText = await renderAsPlainText(emailHtml);
 
     const data = await resend.emails.send({
-      from: `${company?.company} <no-reply-info@resend.dev>`,
+      from: `${company?.company} <no-reply-facturas@${company?.dominio}>`,
       to: [factura.cliente!.correo],
       subject: `¡Tienes paquetes listos para retirar!`,
       html: emailHtml,
