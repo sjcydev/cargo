@@ -16,11 +16,17 @@
     "db:seed": "tsx src/lib/server/db/seed.ts",
     "postinstall": "drizzle-kit push"
   },
+  "exports": {
+    ".": {
+      "svelte": "./dist/index.js"
+    }
+  },
   "devDependencies": {
     "@faker-js/faker": "^9.3.0",
     "@internationalized/date": "^3.7.0",
     "@lucide/lab": "^0.1.2",
     "@sveltejs/adapter-auto": "^3.0.0",
+    "@sveltejs/adapter-vercel": "^5.6.3",
     "@sveltejs/kit": "^2.0.0",
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
     "@types/luxon": "^3.4.2",
