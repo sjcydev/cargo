@@ -23,6 +23,7 @@ export const companies = mysqlTable("companies", {
   dominio: varchar("dominio", {
     length: 255,
   }).notNull(),
+  sucursalesLimit: int("sucursalesLimit").default(1),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });

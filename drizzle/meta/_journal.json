@@ -162,6 +162,13 @@
       "when": 1738282535983,
       "tag": "0022_add_archivado_to_users",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1741134729512,
+      "tag": "0023_add_sucursales_limit",
+      "breakpoints": true
     }
   ]
 }
