@@ -7,11 +7,7 @@ import {
   usuarios,
 } from "$lib/server/db/schema";
 import { eq } from "drizzle-orm";
-import type {
-  FacturasWithTrackings,
-  User,
-  Usuarios,
-} from "$lib/server/db/schema";
+import type { FacturasWithTrackings, Usuarios } from "$lib/server/db/schema";
 import { getToday, dateToLocaleString } from "$lib/utils";
 
 export const load = (async ({ locals }) => {

@@ -1,7 +1,7 @@
 import type { PageServerLoad } from "./$types";
 import { db } from "$lib/server/db";
 import { sucursales, usuarios } from "$lib/server/db/schema";
-import { desc, eq, sql } from "drizzle-orm";
+import { desc, eq, getTableColumns, sql } from "drizzle-orm";
 import { fail, redirect } from "@sveltejs/kit";
 
 export const load = (async ({ locals }) => {
@@ -11,35 +11,41 @@ export const load = (async ({ locals }) => {
     throw redirect(302, "/login");
   }
 
+  const usuariosData = await db
+    .select({
+      ...getTableColumns(usuarios),
+      sucursal: sucursales.sucursal,
+    })
+    .from(usuarios)
+    .leftJoin(sucursales, eq(usuarios.sucursalId, sucursales.sucursalId))
+    .orderBy(desc(usuarios.id));
+
   if (user.rol !== "ADMIN") {
-    const bySucursal = await db.query.sucursales.findMany({
-      where: eq(sucursales.sucursalId, user.sucursalId!),
-      with: {
-        usuarios: {
-          orderBy: [desc(usuarios.id)],
-          with: { sucursal: true },
-        },
-      },
-    });
+    const sucursalesData = await db
+      .select()
+      .from(sucursales)
+      .where(eq(sucursales.sucursalId, user.sucursalId!));
+
+    const bySucursal = sucursalesData.map((sucursal) => ({
+      ...sucursal,
+      usuarios: usuariosData
+        .filter((user) => user.sucursalId === sucursal.sucursalId)
+        .map((user) => ({ ...user })),
+    }));
 
     return { todos: [], bySucursal, user };
   }
 
-  const bySucursal = await db.query.sucursales.findMany({
-    with: {
-      usuarios: {
-        orderBy: [desc(usuarios.casillero)],
-        with: { sucursal: true },
-      },
-    },
-  });
+  const sucursalesData = await db.select().from(sucursales);
 
-  const todos = await db.query.usuarios.findMany({
-    with: { sucursal: true },
-    orderBy: [desc(usuarios.id)],
-  });
+  const bySucursal = sucursalesData.map((sucursal) => ({
+    ...sucursal,
+    usuarios: usuariosData
+      .filter((user) => user.sucursalId === sucursal.sucursalId)
+      .map((user) => ({ ...user })),
+  }));
 
-  return { todos, bySucursal, user };
+  return { todos: usuariosData, bySucursal, user };
 }) satisfies PageServerLoad;
 
 import type { Actions } from "./$types";

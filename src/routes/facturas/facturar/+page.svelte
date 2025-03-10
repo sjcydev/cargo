@@ -14,7 +14,7 @@
     NewUsuarios,
     NewFacturas,
     NewTrackings,
-    User,
+    Users,
     UsuariosWithSucursal,
     Sucursales,
   } from "$lib/server/db/schema";
@@ -186,7 +186,7 @@
 
     try {
       const endpoint = /\d/.test(casillero) ? "clientes" : "corporativo";
-      const data = await fetchClienteData(endpoint, casillero, user as User);
+      const data = await fetchClienteData(endpoint, casillero, user as Users);
       processClienteData(data, String(casillero));
     } catch (error) {
       console.error("Error fetching client data:", error);

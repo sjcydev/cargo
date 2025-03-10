@@ -72,7 +72,7 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
       const sucursal = createRawSnippet<[Sucursales]>((getSucursal) => {
         const sucursal = getSucursal();
         return {
-          render: () => `<div>${sucursal.sucursal}</div>`,
+          render: () => `<div>${sucursal}</div>`,
         };
       });
 

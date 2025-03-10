@@ -6,7 +6,7 @@ export const load = (async ({ locals, depends, setHeaders }) => {
   const { user } = locals;
 
   const company = await db.query.companies.findFirst();
-  const logo = getFriendlyUrl(company!.logo!);
+  const logo = getFriendlyUrl(company?.logo!);
 
   return { user, company: company!.company, logo };
 }) satisfies LayoutServerLoad;

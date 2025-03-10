@@ -1,9 +1,9 @@
-import type { User } from "$lib/server/db/schema";
+import type { Users } from "$lib/server/db/schema";
 
 export async function fetchClienteData(
   endpoint: string,
   casillero: string,
-  user: User
+  user: Users
 ) {
   try {
     const response = await fetch(`/api/${endpoint}/${casillero}`, {

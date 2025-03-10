@@ -1,21 +1,59 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { db } from "$lib/server/db";
-import { eq, and, inArray } from "drizzle-orm";
-import { facturas, trackings } from "$lib/server/db/schema";
+import { eq, and, inArray, getTableColumns } from "drizzle-orm";
+import {
+  facturas,
+  trackings,
+  sucursales,
+  usuarios,
+  type Sucursales,
+  type UsuariosWithSucursal,
+} from "$lib/server/db/schema";
 import { getFriendlyUrl } from "$lib/server/s3";
 import { getLocalTimeZone, today } from "@internationalized/date";
 
 export const load = (async ({ params }) => {
   const facturaId = params.facturaId;
 
-  const factura = await db.query.facturas.findFirst({
-    where: eq(facturas.facturaId, Number(facturaId)),
-    with: { trackings: true, cliente: { with: { sucursal: true } } },
-  });
+  // const factura = await db.query.facturas.findFirst({
+  //   where: eq(facturas.facturaId, Number(facturaId)),
+  //   with: { trackings: true, cliente: { with: { sucursal: true } } },
+  // });
 
-  if (!factura) {
+  const facturaData = await db
+    .select({
+      ...getTableColumns(facturas),
+    })
+    .from(facturas)
+    .where(eq(facturas.facturaId, Number(facturaId)))
+    .limit(1);
+
+  if (!facturaData[0]) {
     throw new Error("Factura not found");
   }
+
+  const trackingsData = await db
+    .select({
+      ...getTableColumns(trackings),
+    })
+    .from(trackings)
+    .where(eq(trackings.facturaId, Number(facturaId)));
+
+  const clienteData = await db
+    .select({
+      ...getTableColumns(usuarios),
+      sucursal: { ...getTableColumns(sucursales) },
+    })
+    .from(usuarios)
+    .leftJoin(sucursales, eq(usuarios.sucursalId, sucursales.sucursalId))
+    .where(eq(usuarios.id, facturaData[0]?.clienteId))
+    .limit(1);
+
+  const factura = facturaData.map((f) => ({
+    ...f,
+    cliente: clienteData[0] as UsuariosWithSucursal,
+    trackings: trackingsData,
+  }))[0];
 
   const company = await db.query.companies.findFirst()!;
   const logo = getFriendlyUrl(company!.logo!);

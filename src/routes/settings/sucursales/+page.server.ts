@@ -43,6 +43,7 @@ export const actions = {
         telefono,
         maps,
         precio,
+        companyId: 1,
       });
 
       return { success: true, form };
