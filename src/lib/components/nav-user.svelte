@@ -70,22 +70,6 @@
         </DropdownMenu.Label>
         <DropdownMenu.Separator />
         <DropdownMenu.Group>
-          <DropdownMenu.Item>
-            <Sparkles />
-            Upgrade to Pro
-          </DropdownMenu.Item>
-        </DropdownMenu.Group>
-        <DropdownMenu.Separator />
-        <DropdownMenu.Group>
-          <DropdownMenu.Item>
-            <BadgeCheck />
-            Account
-          </DropdownMenu.Item>
-          <DropdownMenu.Item>
-            <CreditCard />
-            Billing
-          </DropdownMenu.Item>
-
           <a href="/settings">
             <DropdownMenu.Item>
               <Settings />
