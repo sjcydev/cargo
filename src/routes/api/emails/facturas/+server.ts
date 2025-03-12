@@ -16,12 +16,12 @@ import { getFriendlyUrl } from "$lib/server/s3";
 import { randomUUID as uuid } from "crypto";
 import { generateInvoice } from "$lib/facturacion/facturar/generatePDF";
 import type { Companies, UsuariosWithSucursal } from "$lib/server/db/schema";
-
 export const POST: RequestHandler = async ({ request }) => {
   const body = await request.json();
   const { facturaId, reenviando = false } = body;
 
   try {
+    console.time("factura");
     const facturaData = await db
       .select({
         ...getTableColumns(facturas),
@@ -61,47 +61,64 @@ export const POST: RequestHandler = async ({ request }) => {
       trackings: trackingsData,
     }))[0];
 
+    console.timeEnd("factura");
+
     const company = await db.query.companies.findFirst()!;
     const logo = getFriendlyUrl(company!.logo!);
 
-    const pdf = await generateInvoice({
-      info: factura,
-      cliente: factura.cliente!,
-      company: company as Companies,
-      logo,
-    });
+    async function sendEmail() {
+      try {
+        console.time("pdf");
+        const pdf = await generateInvoice({
+          info: factura,
+          cliente: factura.cliente!,
+          company: company as Companies,
+          logo,
+        });
 
-    const { body: emailHtml } = render(FacturaEmail, {
-      props: {
-        nombre: factura.cliente!.nombre,
-        casillero: String(factura.cliente!.casillero),
-        trackings: factura.trackings,
-        sucursal: factura.cliente!.sucursal.sucursal,
-        ubicacion: factura.cliente!.sucursal.direccion,
-        maps: factura.cliente!.sucursal.maps!,
-        logo,
-        nombre_de_compania: company?.company!,
-      },
-    });
+        console.timeEnd("pdf");
 
-    const emailText = await renderAsPlainText(emailHtml);
+        console.time("render");
+        const { body: emailHtml } = render(FacturaEmail, {
+          props: {
+            nombre: factura.cliente!.nombre,
+            casillero: String(factura.cliente!.casillero),
+            trackings: factura.trackings,
+            sucursal: factura.cliente!.sucursal.sucursal,
+            ubicacion: factura.cliente!.sucursal.direccion,
+            maps: factura.cliente!.sucursal.maps!,
+            logo,
+            nombre_de_compania: company?.company!,
+          },
+        });
 
-    const data = await resend.emails.send({
-      from: `${company?.company} <no-reply-facturas@${company?.dominio}>`,
-      to: [factura.cliente!.correo],
-      subject: `¡Tienes paquetes listos para retirar!`,
-      html: emailHtml,
-      text: emailText,
-      attachments: [
-        {
-          filename: `Factura-${factura.facturaId}.pdf`,
-          content: pdf as Buffer,
-        },
-      ],
-      headers: {
-        "X-Entity-Ref-ID": uuid(),
-      },
-    });
+        const emailText = await renderAsPlainText(emailHtml);
+        console.timeEnd("render");
+
+        console.time("Email");
+        const data = await resend.emails.send({
+          from: `${company?.company} <no-reply-facturas@${company?.dominio}>`,
+          to: [factura.cliente!.correo],
+          subject: `¡Tienes paquetes listos para retirar!`,
+          html: emailHtml,
+          text: emailText,
+          attachments: [
+            {
+              filename: `Factura-${factura.facturaId}.pdf`,
+              content: pdf as Buffer,
+            },
+          ],
+          headers: {
+            "X-Entity-Ref-ID": uuid(),
+          },
+        });
+        console.timeEnd("Email");
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    setTimeout(() => sendEmail(), 0);
 
     if (!reenviando) {
       await db
@@ -111,7 +128,8 @@ export const POST: RequestHandler = async ({ request }) => {
         })
         .where(eq(facturas.facturaId, facturaId));
     }
-    return json({ data, message: "Email sent successfully" });
+
+    return json({ message: "Email sent successfully" });
   } catch (error) {
     console.error("Error sending email:", error);
     return json(

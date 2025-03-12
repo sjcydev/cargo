@@ -96,13 +96,7 @@
     <Section style={main}>
       <Container style={container}>
         <Container style={logoContainer}>
-          <Img
-            src={logo}
-            width="30"
-            height="30"
-            style={logoIcon}
-            alt="Panabox Logistics Logo"
-          />
+          <Img src={logo} width="30" height="30" style={logoIcon} alt="Logo" />
         </Container>
         <Heading style={heading}>Nuevo Casillero Registrado</Heading>
         <Text style={paragraph}>
