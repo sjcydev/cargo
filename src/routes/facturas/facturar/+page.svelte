@@ -348,56 +348,65 @@
                     </Button>
                   </Dialog.Trigger>
                   <Dialog.Content class="sm:max-w-[425px]">
-                    <Dialog.Header>
-                      <Dialog.Title
-                        >{editMode ? "Editar" : "Añadir"} Tracking</Dialog.Title
-                      >
-                    </Dialog.Header>
-                    <div class="grid gap-2 mb-1">
-                      <div class="space-y-2">
-                        <Label for="item-quantity">Peso (lbs)</Label>
-                        <Input
-                          id="item-quantity"
-                          type="number"
-                          bind:value={infoTracking.peso}
-                          required
-                        />
+                    <form
+                      method="POST"
+                      onsubmit={(e) => {
+                        e.preventDefault();
+                        addTracking();
+                      }}
+                    >
+                      <Dialog.Header>
+                        <Dialog.Title
+                          >{editMode ? "Editar" : "Añadir"} Tracking</Dialog.Title
+                        >
+                      </Dialog.Header>
+                      <div class="grid gap-2 mb-1">
+                        <div class="space-y-2">
+                          <Label for="item-quantity">Peso (lbs)</Label>
+                          <Input
+                            id="item-quantity"
+                            type="number"
+                            bind:value={infoTracking.peso}
+                            required
+                          />
+                        </div>
+                        <div class="space-y-2">
+                          <Label for="tracking-number">Numero de Tracking</Label
+                          >
+                          <Input
+                            id="tracking-number"
+                            placeholder="1Z999AA1"
+                            bind:value={infoTracking.numeroTracking}
+                            required
+                          />
+                        </div>
+                        <div class="space-y-2">
+                          <Label for="precio">Precio</Label>
+                          <Input
+                            id="precio"
+                            type="number"
+                            bind:value={infoTracking.base}
+                            step={0.01}
+                            required
+                            readonly={!especial && !editMode}
+                          />
+                        </div>
+                        <div class="space-y-2">
+                          <Label for="total">Total</Label>
+                          <Input
+                            id="total"
+                            type="number"
+                            value={currPrecio}
+                            readonly
+                          />
+                        </div>
                       </div>
-                      <div class="space-y-2">
-                        <Label for="tracking-number">Numero de Tracking</Label>
-                        <Input
-                          id="tracking-number"
-                          placeholder="1Z999AA1"
-                          bind:value={infoTracking.numeroTracking}
-                          required
-                        />
-                      </div>
-                      <div class="space-y-2">
-                        <Label for="precio">Precio</Label>
-                        <Input
-                          id="precio"
-                          type="number"
-                          bind:value={infoTracking.base}
-                          step={0.01}
-                          required
-                          readonly={!especial && !editMode}
-                        />
-                      </div>
-                      <div class="space-y-2">
-                        <Label for="total">Total</Label>
-                        <Input
-                          id="total"
-                          type="number"
-                          value={currPrecio}
-                          readonly
-                        />
-                      </div>
-                    </div>
-                    <Dialog.Footer class="mt-3">
-                      <Button class="w-full" onclick={addTracking}
-                        >{editMode ? "Editar" : "Añadir"}</Button
-                      >
-                    </Dialog.Footer>
+                      <Dialog.Footer class="mt-3">
+                        <Button class="w-full" type="submit"
+                          >{editMode ? "Editar" : "Añadir"}</Button
+                        >
+                      </Dialog.Footer>
+                    </form>
                   </Dialog.Content>
                 </Dialog.Root>
               </div>

@@ -53,7 +53,7 @@ export const load = (async ({ url }) => {
   const facturasData = facturaData.map((f) => ({
     ...f,
     cliente: clienteData[0] as UsuariosWithSucursal,
-    trackings: trackingsData,
+    trackings: trackingsData.filter((t) => t.facturaId === f.facturaId),
   }));
 
   // Get the selected facturas and their related data
