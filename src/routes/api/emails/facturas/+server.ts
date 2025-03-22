@@ -16,6 +16,9 @@ import { getFriendlyUrl } from "$lib/server/s3";
 import { randomUUID as uuid } from "crypto";
 import { generateInvoice } from "$lib/facturacion/facturar/generatePDF";
 import type { Companies, UsuariosWithSucursal } from "$lib/server/db/schema";
+
+let companyCache: Companies | null = null;
+
 export const POST: RequestHandler = async ({ request }) => {
   const body = await request.json();
   const { facturaId, reenviando = false } = body;
@@ -38,14 +41,15 @@ export const POST: RequestHandler = async ({ request }) => {
         }
       );
     }
-    const trackingsData = await db
+
+    const trackingsDataPromise = db
       .select({
         ...getTableColumns(trackings),
       })
       .from(trackings)
       .where(eq(trackings.facturaId, Number(facturaId)));
 
-    const clienteData = await db
+    const clienteDataPromise = await db
       .select({
         ...getTableColumns(usuarios),
         sucursal: { ...getTableColumns(sucursales) },
@@ -55,6 +59,11 @@ export const POST: RequestHandler = async ({ request }) => {
       .where(eq(usuarios.id, facturaData[0]?.clienteId))
       .limit(1);
 
+    const [trackingsData, clienteData] = await Promise.all([
+      trackingsDataPromise,
+      clienteDataPromise,
+    ]);
+
     const factura = facturaData.map((f) => ({
       ...f,
       cliente: clienteData[0] as UsuariosWithSucursal,
@@ -62,13 +71,16 @@ export const POST: RequestHandler = async ({ request }) => {
     }))[0];
 
     console.timeEnd("factura");
-
-    const company = await db.query.companies.findFirst()!;
+    if (!companyCache) {
+      const companyFromDb = await db.query.companies.findFirst();
+      if (!companyFromDb) throw new Error("Company not found");
+      companyCache = companyFromDb;
+    }
+    const company = companyCache;
     const logo = getFriendlyUrl(company!.logo!);
 
-    async function sendEmail() {
+    Promise.resolve().then(async () => {
       try {
-        console.time("pdf");
         const pdf = await generateInvoice({
           info: factura,
           cliente: factura.cliente!,
@@ -76,9 +88,6 @@ export const POST: RequestHandler = async ({ request }) => {
           logo,
         });
 
-        console.timeEnd("pdf");
-
-        console.time("render");
         const { body: emailHtml } = render(FacturaEmail, {
           props: {
             nombre: factura.cliente!.nombre,
@@ -93,11 +102,9 @@ export const POST: RequestHandler = async ({ request }) => {
         });
 
         const emailText = await renderAsPlainText(emailHtml);
-        console.timeEnd("render");
 
-        console.time("Email");
         const data = await resend.emails.send({
-          from: `${company?.company} <no-reply-facturas@${company?.dominio}>`,
+          from: `${company?.company} <no-reply-facturas@resend.dev>`,
           to: [factura.cliente!.correo],
           subject: `¡Tienes paquetes listos para retirar!`,
           html: emailHtml,
@@ -112,24 +119,25 @@ export const POST: RequestHandler = async ({ request }) => {
             "X-Entity-Ref-ID": uuid(),
           },
         });
-        console.timeEnd("Email");
+
+        if (data.error?.message) {
+          throw new Error(data.error.message);
+        }
+
+        if (!reenviando) {
+          await db
+            .update(facturas)
+            .set({
+              enviado: true,
+            })
+            .where(eq(facturas.facturaId, facturaId));
+        }
       } catch (error) {
         console.error(error);
       }
-    }
+    });
 
-    setTimeout(() => sendEmail(), 0);
-
-    if (!reenviando) {
-      await db
-        .update(facturas)
-        .set({
-          enviado: true,
-        })
-        .where(eq(facturas.facturaId, facturaId));
-    }
-
-    return json({ message: "Email sent successfully" });
+    return json({ message: "Email sending started in background" });
   } catch (error) {
     console.error("Error sending email:", error);
     return json(
