@@ -11,9 +11,10 @@
   import TrackingList from "$lib/facturacion/facturas/components/tracking-list.svelte";
   import FacturaHeader from "$lib/facturacion/facturas/components/factura-header.svelte";
   import { enhance } from "$app/forms";
-  import { invalidateAll } from "$app/navigation";
+  import { goto, invalidateAll } from "$app/navigation";
   import { toast } from "svelte-sonner";
   import { generateInvoice } from "$lib/facturacion/facturar/generatePDF";
+  import DeleteDialog from "$lib/components/delete-dialog.svelte";
 
   let { data }: { data: PageData } = $props();
   let showCancelDialog = $state<boolean>(false);
@@ -64,37 +65,17 @@
   >
 {/snippet}
 
-<Dialog.Root bind:open={showCancelDialog}>
-  <Dialog.Content>
-    <Dialog.Header>
-      <Dialog.Title>Cancelar Factura</Dialog.Title>
-      <Dialog.Description>
-        ¿Estás seguro que deseas cancelar la factura N° {data.factura
-          .facturaId}? Esta acción no se puede deshacer.
-      </Dialog.Description>
-    </Dialog.Header>
-    <div class="flex justify-end gap-4">
-      <Button variant="outline" onclick={() => (showCancelDialog = false)}>
-        Cancelar
-      </Button>
-      <form
-        method="POST"
-        action="?/cancelFactura"
-        use:enhance={() => {
-          return async ({ result }) => {
-            if (result.type === "success") {
-              showCancelDialog = false;
-              await invalidateAll();
-            }
-          };
-        }}
-      >
-        <input type="hidden" name="facturaId" value={data.factura.facturaId} />
-        <Button variant="destructive" type="submit">Confirmar</Button>
-      </form>
-    </div>
-  </Dialog.Content>
-</Dialog.Root>
+<DeleteDialog
+  bind:open={showCancelDialog}
+  title="Cancelar Factura"
+  description={`¿Estás seguro que deseas cancelar la factura N° ${data.factura.facturaId}? Esta acción no se puede deshacer.`}
+  action={`?/cancelFactura`}
+  itemId={data.factura.facturaId}
+  buttonName="Cancelar Factura"
+  onSuccess={() => {
+    goto("/facturas");
+  }}
+/>
 
 <InnerLayout title="Detalles de Factura" back={true} {actions}>
   <div class="space-y-4">

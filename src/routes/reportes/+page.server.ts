@@ -100,7 +100,7 @@ export const actions = {
   },
   delete: async ({ request }) => {
     const data = await request.formData();
-    const id = data.get("reporteId") as string;
+    const id = data.get("id") as string;
 
     await db.delete(reportes).where(eq(reportes.reporteId, Number(id)));
     return { success: true };

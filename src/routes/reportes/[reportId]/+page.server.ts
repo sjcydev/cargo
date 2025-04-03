@@ -1,7 +1,7 @@
 import { db } from "$lib/server/db";
 import { reportes, facturas } from "$lib/server/db/schema";
 import { eq, between, and } from "drizzle-orm";
-import { error } from "@sveltejs/kit";
+import { error, type Action } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import { getFriendlyUrl } from "$lib/server/s3";
 
@@ -35,3 +35,13 @@ export const load = (async ({ params }) => {
     logo: getFriendlyUrl(company!.logo!),
   };
 }) satisfies PageServerLoad;
+
+export const actions = {
+  delete: async ({ request }) => {
+    const data = await request.formData();
+    const id = data.get("id") as string;
+
+    await db.delete(reportes).where(eq(reportes.reporteId, Number(id)));
+    return { success: true };
+  },
+} satisfies Actions

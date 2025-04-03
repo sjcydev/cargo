@@ -140,6 +140,8 @@ export const facturas = mysqlTable("facturas", {
     .notNull(),
   retirados: boolean("retirados").default(false),
   enviado: boolean("enviado").default(false),
+  cancelada: boolean("cancelada").default(false),
+  canceladaAt: timestamp("canceladaAt"),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });

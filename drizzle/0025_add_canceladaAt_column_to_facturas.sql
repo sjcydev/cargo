@@ -1,0 +1,1 @@
+ALTER TABLE `facturas` ADD `canceladaAt` timestamp;

@@ -92,23 +92,31 @@ export const actions = {
     return { type: "success" };
   },
 
-  //   cancelFactura: async ({ request }) => {
-  //     const formData = await request.formData();
-  //     const facturaId = Number(formData.get("facturaId"));
+  cancelFactura: async ({ request }) => {
+    const formData = await request.formData();
+    const facturaId = Number(formData.get("id"));
 
-  //     await db.transaction(async (tx) => {
-  //       // Update factura status
-  //       await tx
-  //         .update(facturas)
-  //         .set({
-  //           cancelada: true,
-  //           canceladaAt: new Date()
-  //         })
-  //         .where(eq(facturas.facturaId, facturaId));
-  //     });
+    await db
+      .update(facturas)
+      .set({
+        cancelada: true,
+        canceladaAt: new Date(),
+      })
+      .where(eq(facturas.facturaId, facturaId));
 
-  //     return { type: "success" };
-  //   },
+    // await db.transaction(async (tx) => {
+    //   // Update factura status
+    //   await tx
+    //     .update(facturas)
+    //     .set({
+    //       cancelada: true,
+    //       canceladaAt: new Date(),
+    //     })
+    //     .where(eq(facturas.facturaId, facturaId));
+    // });
+
+    return { type: "success" };
+  },
 
   updateTrackings: async ({ request }) => {
     const formData = await request.formData();

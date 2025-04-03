@@ -169,6 +169,20 @@
       "when": 1741134729512,
       "tag": "0023_add_sucursales_limit",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "5",
+      "when": 1743684349313,
+      "tag": "0024_add_cancelado_column_to_facturas",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "5",
+      "when": 1743684457061,
+      "tag": "0025_add_canceladaAt_column_to_facturas",
+      "breakpoints": true
     }
   ]
 }

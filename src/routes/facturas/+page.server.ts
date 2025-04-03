@@ -6,7 +6,7 @@ import {
   trackings,
   usuarios,
 } from "$lib/server/db/schema";
-import { eq, desc, getTableColumns } from "drizzle-orm";
+import { eq, desc, getTableColumns, and } from "drizzle-orm";
 
 export const load = (async () => {
   const clienteData = await db
@@ -22,7 +22,7 @@ export const load = (async () => {
       ...getTableColumns(facturas),
     })
     .from(facturas)
-    .where(eq(facturas.enviado, true))
+    .where(and(eq(facturas.enviado, true), eq(facturas.cancelada, false)))
     .orderBy(desc(facturas.facturaId));
 
   const facturasData = facturasD.map((factura) => ({
