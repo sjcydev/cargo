@@ -11,8 +11,6 @@ import type {
   Reportes,
   Facturas,
 } from "$lib/server/db/schema";
-import { deflate } from "pako";
-
 applyPlugin(jsPDF);
 
 // Constants
@@ -20,7 +18,7 @@ const PDF_CONFIG = {
   orientation: "p" as const,
   unit: "pt" as const,
   format: "a4" as const,
-  compress: true,
+  compress: false,
 };
 
 const STYLES = {
@@ -338,9 +336,7 @@ export async function generateInvoice({
     doc.save(`Factura-${info.facturaId}.pdf`);
   } else {
     const pdfBlob = doc.output("arraybuffer");
-    const compressedPdf = deflate(new Uint8Array(pdfBlob));
-
-    return Buffer.from(compressedPdf);
+    return Buffer.from(pdfBlob);
   }
 }
 

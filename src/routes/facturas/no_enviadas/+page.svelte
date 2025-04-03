@@ -19,43 +19,45 @@
     const toastId = toast.loading(
       `Enviando ${selectedFacturas.length} facturas...`
     );
-    let completedCount = 0;
 
     try {
-      for (const facturaId of selectedFacturas) {
-        try {
-          await fetch("/api/emails/facturas", {
-            method: "POST",
-            body: JSON.stringify({ facturaId }),
-          });
-          completedCount++;
-          toast.loading(
-            `Enviando facturas... (${completedCount}/${selectedFacturas.length})`,
-            {
-              id: toastId,
-            }
-          );
-        } catch (error) {
-          console.error(`Error sending email for factura ${facturaId}:`, error);
-          toast.error(`Error al enviar factura ${facturaId}`);
-        }
+      const response = await fetch("/api/emails/facturas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ facturaIds: selectedFacturas }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Error al enviar las facturas");
       }
 
-      if (completedCount === selectedFacturas.length) {
-        toast.success("Todas las facturas fueron enviadas exitosamente", {
-          id: toastId,
-        });
-        // Refresh the page to update the list
-        window.location.reload();
-      } else {
+      if (result.failed > 0) {
+        const failedDetails = result.details
+          .map((d: { facturaId: number; error: string }) => `Factura ${d.facturaId}: ${d.error}`)
+          .join("\n");
+
         toast.error(
-          `Se enviaron ${completedCount} de ${selectedFacturas.length} facturas`,
+          `Se enviaron ${result.successful} de ${result.successful + result.failed} facturas.\n\nErrores:\n${failedDetails}`,
           { id: toastId }
         );
+      } else {
+        toast.success(
+          `Se enviaron exitosamente ${result.successful} facturas`,
+          { id: toastId }
+        );
+        // Refresh the page to update the list
+        window.location.reload();
       }
     } catch (error) {
       console.error("Error sending emails:", error);
-      toast.error("Error al enviar las facturas", { id: toastId });
+      const errorMessage = error instanceof Error ? error.message : "Error al enviar las facturas";
+      toast.error(errorMessage, {
+        id: toastId,
+      });
     }
   }
 

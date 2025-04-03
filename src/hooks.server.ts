@@ -14,27 +14,6 @@ const onboardingHandle: Handle = async ({ event, resolve }) => {
   return await resolve(event);
 };
 
-export const timeoutHandle: Handle = async ({ event, resolve }) => {
-  const TIMEOUT_MS = 120000; // 120 seconds timeout
-
-  // Create a timeout promise
-  const timeoutPromise = new Promise<Response>((_, reject) => {
-    setTimeout(
-      () => reject(new Response("Request timed out", { status: 504 })),
-      TIMEOUT_MS
-    );
-  });
-
-  try {
-    return await Promise.race([resolve(event), timeoutPromise]);
-  } catch (error) {
-    if (error instanceof Response) {
-      return error; // Return the timeout response
-    }
-    throw error; // Re-throw other errors
-  }
-};
-
 const authHandle: Handle = async ({ event, resolve }) => {
   const protected_urls =
     event.route.id === "/" ||
@@ -82,7 +61,6 @@ const luciaHandle: Handle = async ({ event, resolve }) => {
 };
 
 export const handle: Handle = sequence(
-  timeoutHandle,
   luciaHandle,
   onboardingHandle,
   authHandle

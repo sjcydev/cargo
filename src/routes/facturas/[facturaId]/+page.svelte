@@ -20,16 +20,35 @@
   let showCancelDialog = $state<boolean>(false);
 
   async function enviarFactura() {
-    try {
-      await fetch("/api/emails/facturas", {
-        method: "POST",
-        body: JSON.stringify({ facturaId: data.factura.facturaId }),
-      });
-    } catch (error) {
-      console.error("Error sending emails:", error);
-    }
+    const toastId = toast.loading("Enviando factura...");
 
-    toast.success("Factura enviada correctamente");
+    try {
+      const response = await fetch("/api/emails/facturas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ facturaIds: [data.factura.facturaId] }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Error al enviar la factura");
+      }
+
+      if (result.failed > 0) {
+        toast.error(`Error al enviar la factura: ${result.details[0].error}`, {
+          id: toastId,
+        });
+      } else {
+        toast.success("Factura enviada correctamente", { id: toastId });
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+      const errorMessage = error instanceof Error ? error.message : "Error al enviar la factura";
+      toast.error(errorMessage, { id: toastId });
+    }
   }
 
   async function downloadFactura() {

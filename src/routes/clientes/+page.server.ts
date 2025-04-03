@@ -18,7 +18,7 @@ export const load = (async ({ locals }) => {
     })
     .from(usuarios)
     .leftJoin(sucursales, eq(usuarios.sucursalId, sucursales.sucursalId))
-    .orderBy(desc(usuarios.id));
+    .orderBy(desc(usuarios.casillero));
 
   if (user.rol !== "ADMIN") {
     const sucursalesData = await db
