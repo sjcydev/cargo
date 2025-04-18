@@ -111,7 +111,7 @@ export const actions = {
       total,
       empleadoId: user.id,
       sucursalId: sucursalId === 0 ? null : sucursalId,
-      metodoDePago,
+      metodoDePago: JSON.stringify(metodoDePago),
     });
 
     return { success: true };

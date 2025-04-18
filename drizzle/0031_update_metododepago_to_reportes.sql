@@ -1,0 +1,1 @@
+ALTER TABLE `reportes` MODIFY COLUMN `metodoDePago` longtext;

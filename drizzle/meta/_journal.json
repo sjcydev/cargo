@@ -218,6 +218,13 @@
       "when": 1744989459448,
       "tag": "0030_update_facturasids_to_reportes",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "5",
+      "when": 1744990875133,
+      "tag": "0031_update_metododepago_to_reportes",
+      "breakpoints": true
     }
   ]
 }

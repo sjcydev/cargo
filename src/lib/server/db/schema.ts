@@ -158,7 +158,7 @@ export const reportes = mysqlTable("reportes", {
   total: float("total"),
   empleadoId: varchar("empleadoId", { length: 255 }).references(() => users.id),
   sucursalId: int("sucursalId").references(() => sucursales.sucursalId),
-  metodoDePago: json("metodoDePago"),
+  metodoDePago: longtext("metodoDePago"),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
