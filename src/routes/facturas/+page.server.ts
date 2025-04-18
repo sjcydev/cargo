@@ -39,24 +39,23 @@ export const actions = {
     const formData = await request.formData();
     const facturaId = Number(formData.get("id"));
 
-    await db
-      .update(facturas)
-      .set({
-        cancelada: true,
-        canceladaAt: new Date(),
-      })
-      .where(eq(facturas.facturaId, facturaId));
+    await db.transaction(async (tx) => {
+      await tx
+        .update(facturas)
+        .set({
+          cancelada: true,
+          canceladaAt: new Date(),
+        })
+        .where(eq(facturas.facturaId, facturaId));
 
-    // await db.transaction(async (tx) => {
-    //   // Update factura status
-    //   await tx
-    //     .update(facturas)
-    //     .set({
-    //       cancelada: true,
-    //       canceladaAt: new Date(),
-    //     })
-    //     .where(eq(facturas.facturaId, facturaId));
-    // });
+      await tx
+        .update(trackings)
+        .set({
+          cancelada: true,
+          canceladaAt: new Date(),
+        })
+        .where(eq(trackings.facturaId, facturaId));
+    });
 
     return { type: "success" };
   },

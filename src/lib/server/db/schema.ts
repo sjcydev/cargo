@@ -169,6 +169,8 @@ export const trackings = mysqlTable("trackings", {
   sucursalId: int("sucursalId").references(() => sucursales.sucursalId),
   retirado: boolean("retirado").default(false),
   retiradoAt: timestamp("retiradoAt"),
+  cancelada: boolean("cancelada").default(false),
+  canceladaAt: timestamp("canceladaAt"),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });

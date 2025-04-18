@@ -37,7 +37,10 @@
 
       if (result.failed > 0) {
         const failedDetails = result.details
-          .map((d: { facturaId: number; error: string }) => `Factura ${d.facturaId}: ${d.error}`)
+          .map(
+            (d: { facturaId: number; error: string }) =>
+              `Factura ${d.facturaId}: ${d.error}`
+          )
           .join("\n");
 
         toast.error(
@@ -54,7 +57,8 @@
       }
     } catch (error) {
       console.error("Error sending emails:", error);
-      const errorMessage = error instanceof Error ? error.message : "Error al enviar las facturas";
+      const errorMessage =
+        error instanceof Error ? error.message : "Error al enviar las facturas";
       toast.error(errorMessage, {
         id: toastId,
       });
@@ -78,6 +82,10 @@
     <Button href="/facturas/facturar">Facturar</Button>
   </div>
 {/snippet}
+
+<svelte:head>
+  <title>Facturas No Enviadas</title>
+</svelte:head>
 
 <InnerLayout title={"Facturas No Enviadas"} {actions}>
   <VerFacturas {data} {columns} selectionChange={onSelectionChange} />

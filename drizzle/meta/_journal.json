@@ -183,6 +183,20 @@
       "when": 1743684457061,
       "tag": "0025_add_canceladaAt_column_to_facturas",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "5",
+      "when": 1744963596334,
+      "tag": "0026_add_cancelado_column_to_trackings",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "5",
+      "when": 1744963991728,
+      "tag": "0027_update_cancelado_column_trackings",
+      "breakpoints": true
     }
   ]
 }
