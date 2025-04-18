@@ -197,6 +197,13 @@
       "when": 1744963991728,
       "tag": "0027_update_cancelado_column_trackings",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "5",
+      "when": 1744964457927,
+      "tag": "0028_add_archivado_to_users",
+      "breakpoints": true
     }
   ]
 }

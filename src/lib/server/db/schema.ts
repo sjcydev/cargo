@@ -105,6 +105,8 @@ export const usuarios = mysqlTable("usuarios", {
   })
     .default("REGULAR")
     .notNull(),
+  archivado: boolean("archivado").default(false),
+  archivadoAt: timestamp("archivadoAt"),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });

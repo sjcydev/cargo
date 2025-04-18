@@ -17,6 +17,7 @@ export const load = (async ({ locals }) => {
       sucursal: sucursales.sucursal,
     })
     .from(usuarios)
+    .where(eq(usuarios.archivado, false))
     .leftJoin(sucursales, eq(usuarios.sucursalId, sucursales.sucursalId))
     .orderBy(desc(usuarios.casillero));
 
@@ -55,6 +56,12 @@ export const actions: Actions = {
     const data = await request.formData();
     const casillero = data.get("id") as string;
 
-    await db.delete(usuarios).where(eq(usuarios.casillero, Number(casillero)));
+    await db
+      .update(usuarios)
+      .set({
+        archivado: true,
+        archivadoAt: new Date(),
+      })
+      .where(eq(usuarios.casillero, Number(casillero)));
   },
 };
