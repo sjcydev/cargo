@@ -4,7 +4,7 @@
   import VerFacturas from "$lib/facturacion/facturas/ver-facturas.svelte";
   import { Button } from "$lib/components/ui/button";
   import { columns } from "./columns";
-  import { goto } from "$app/navigation";
+  import { goto, invalidate } from "$app/navigation";
 
   let { data: pageData }: { data: PageData } = $props();
   let { facturas: data } = pageData;

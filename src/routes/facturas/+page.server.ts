@@ -7,6 +7,7 @@ import {
   usuarios,
 } from "$lib/server/db/schema";
 import { eq, desc, getTableColumns, and } from "drizzle-orm";
+import { redirect, type Actions } from "@sveltejs/kit";
 
 export const load = (async () => {
   const clienteData = await db
@@ -32,3 +33,31 @@ export const load = (async () => {
 
   return { facturas: facturasData };
 }) satisfies PageServerLoad;
+
+export const actions = {
+  cancelFactura: async ({ request }) => {
+    const formData = await request.formData();
+    const facturaId = Number(formData.get("id"));
+
+    await db
+      .update(facturas)
+      .set({
+        cancelada: true,
+        canceladaAt: new Date(),
+      })
+      .where(eq(facturas.facturaId, facturaId));
+
+    // await db.transaction(async (tx) => {
+    //   // Update factura status
+    //   await tx
+    //     .update(facturas)
+    //     .set({
+    //       cancelada: true,
+    //       canceladaAt: new Date(),
+    //     })
+    //     .where(eq(facturas.facturaId, facturaId));
+    // });
+
+    return { type: "success" };
+  },
+} satisfies Actions;

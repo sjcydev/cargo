@@ -7,6 +7,7 @@ import DataTableActions from "$lib/facturacion/data-table-actions.svelte";
 import DataSortableButton from "$lib/components/data-sortable-button.svelte";
 import Estado from "$lib/facturacion/facturas/estado.svelte";
 import Checkbox from "$lib/components/data-table-checkbox.svelte";
+import { invalidate } from "$app/navigation";
 
 const columnHelper = createColumnHelper<FacturasWithCliente>();
 

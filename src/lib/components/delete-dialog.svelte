@@ -25,7 +25,7 @@
     action: string;
     itemId: string | number;
     buttonName?: string;
-    onSuccess: () => void;
+    onSuccess: () => void | Promise<void>;
   } = $props();
 </script>
 
@@ -42,11 +42,13 @@
         method="POST"
         {action}
         use:enhance={() => {
+          console.log("form");
           return async ({ result }) => {
-            console.log(result.type)
             if (result.type === "success") {
               open = false;
-              onSuccess();
+              if (onSuccess) {
+                await onSuccess();
+              }
             }
           };
         }}

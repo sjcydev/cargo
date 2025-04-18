@@ -4,8 +4,11 @@
   import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
   import { UserPen, Trash2, Receipt } from "lucide-svelte";
   import { enhance } from "$app/forms";
+  import DeleteDialog from "$lib/components/delete-dialog.svelte";
+  import { goto, invalidate, invalidateAll } from "$app/navigation";
 
   let { id }: { id: string } = $props();
+  let showCancelDialog = $state(false);
 </script>
 
 <DropdownMenu.Root>
@@ -31,10 +34,22 @@
     <DropdownMenu.Separator />
     <DropdownMenu.Item
       class="text-red-500 data-[highlighted]:text-white data-[highlighted]:bg-red-500"
-      ><form method="POST" action="?/delete" use:enhance>
-        <input type="hidden" name="id" value={id} />
-        <button class="flex gap-2"><Trash2 /> Eliminar</button>
-      </form></DropdownMenu.Item
     >
+      <button class="flex gap-2" onclick={() => (showCancelDialog = true)}>
+        <Trash2 /> Cancelar
+      </button>
+    </DropdownMenu.Item>
   </DropdownMenu.Content>
 </DropdownMenu.Root>
+
+<DeleteDialog
+  bind:open={showCancelDialog}
+  title="Cancelar Factura"
+  description={`¿Estás seguro que deseas cancelar la factura N° ${id}? Esta acción no se puede deshacer.`}
+  action="?/cancelFactura"
+  itemId={id}
+  buttonName="Cancelar Factura"
+  onSuccess={async () => {
+    window.location.reload();
+  }}
+/>

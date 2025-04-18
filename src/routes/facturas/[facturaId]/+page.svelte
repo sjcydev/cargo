@@ -88,7 +88,7 @@
   bind:open={showCancelDialog}
   title="Cancelar Factura"
   description={`¿Estás seguro que deseas cancelar la factura N° ${data.factura.facturaId}? Esta acción no se puede deshacer.`}
-  action={`?/cancelFactura`}
+  action={`/facturas?/cancelFactura`}
   itemId={data.factura.facturaId}
   buttonName="Cancelar Factura"
   onSuccess={() => {

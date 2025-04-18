@@ -1,8 +1,7 @@
 import type { ColumnDef } from "@tanstack/table-core";
 import { createColumnHelper } from "@tanstack/table-core";
-import type { FacturasWithCliente, Sucursales } from "$lib/server/db/schema";
-import { createRawSnippet } from "svelte";
-import { renderComponent, renderSnippet } from "$lib/components/ui/data-table";
+import type { FacturasWithCliente } from "$lib/server/db/schema";
+import { renderComponent } from "$lib/components/ui/data-table";
 import DataTableActions from "$lib/facturacion/data-table-actions.svelte";
 import DataSortableButton from "$lib/components/data-sortable-button.svelte";
 import Estado from "$lib/facturacion/facturas/estado.svelte";

@@ -11,6 +11,7 @@ import {
 } from "$lib/server/db/schema";
 import { getFriendlyUrl } from "$lib/server/s3";
 import { getLocalTimeZone, today } from "@internationalized/date";
+import { redirect } from "@sveltejs/kit";
 
 export const load = (async ({ params }) => {
   const facturaId = params.facturaId;
@@ -30,6 +31,10 @@ export const load = (async ({ params }) => {
 
   if (!facturaData[0]) {
     throw new Error("Factura not found");
+  }
+
+  if (facturaData[0].cancelada) {
+    throw redirect(301, "/facturas");
   }
 
   const trackingsData = await db
@@ -88,32 +93,6 @@ export const actions = {
     } catch (e) {
       console.log(e);
     }
-
-    return { type: "success" };
-  },
-
-  cancelFactura: async ({ request }) => {
-    const formData = await request.formData();
-    const facturaId = Number(formData.get("id"));
-
-    await db
-      .update(facturas)
-      .set({
-        cancelada: true,
-        canceladaAt: new Date(),
-      })
-      .where(eq(facturas.facturaId, facturaId));
-
-    // await db.transaction(async (tx) => {
-    //   // Update factura status
-    //   await tx
-    //     .update(facturas)
-    //     .set({
-    //       cancelada: true,
-    //       canceladaAt: new Date(),
-    //     })
-    //     .where(eq(facturas.facturaId, facturaId));
-    // });
 
     return { type: "success" };
   },

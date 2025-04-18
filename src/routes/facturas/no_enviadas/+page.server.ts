@@ -1,12 +1,11 @@
-import type { PageServerLoad } from "./$types";
+import type { PageServerLoad, Actions } from "./$types";
 import { db } from "$lib/server/db";
 import {
   facturas,
   sucursales,
   usuarios,
-  trackings,
 } from "$lib/server/db/schema";
-import { eq, desc, getTableColumns } from "drizzle-orm";
+import { eq, and, desc, getTableColumns } from "drizzle-orm";
 
 export const load = (async () => {
   const clienteData = await db
@@ -22,7 +21,7 @@ export const load = (async () => {
       ...getTableColumns(facturas),
     })
     .from(facturas)
-    .where(eq(facturas.enviado, false))
+    .where(and(eq(facturas.enviado, false), eq(facturas.cancelada, false)))
     .orderBy(desc(facturas.facturaId));
 
   const facturasData = facturasD.map((factura) => ({
@@ -32,3 +31,20 @@ export const load = (async () => {
 
   return { facturas: facturasData };
 }) satisfies PageServerLoad;
+
+export const actions = {
+  cancelFactura: async ({ request }) => {
+    const formData = await request.formData();
+    const facturaId = Number(formData.get("id"));
+
+    await db
+      .update(facturas)
+      .set({
+        cancelada: true,
+        canceladaAt: new Date(),
+      })
+      .where(eq(facturas.facturaId, facturaId));
+
+    return { type: "success" };
+  },
+} satisfies Actions;
