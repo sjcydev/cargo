@@ -150,10 +150,10 @@
               <Select.Root type="single" bind:value={selectedSucursal}>
                 <Select.Trigger id="sucursal"
                   >{selectedSucursal
-                    ? data.sucursales.find(
+                    ? (data.sucursales.find(
                         (sucursal) =>
                           sucursal!.sucursalId.toString() === selectedSucursal
-                      )!.sucursal
+                      )?.sucursal ?? "Todas las sucursales")
                     : "Elige una sucursal"}</Select.Trigger
                 >
                 <Select.Content>

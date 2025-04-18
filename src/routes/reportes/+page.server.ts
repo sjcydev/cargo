@@ -48,17 +48,36 @@ export const actions = {
     if (!user) throw redirect(302, "/login");
 
     const data = await request.formData();
-    const fechaInicial = parseDate(data.get("fechaInicial") as string).toDate(getLocalTimeZone());
-    const fechaFinal = parseDate(data.get("fechaFinal") as string).toDate(getLocalTimeZone());
+    const fechaInicial = parseDate(data.get("fechaInicial") as string).toDate(
+      getLocalTimeZone()
+    );
+    const fechaFinal = parseDate(data.get("fechaFinal") as string).toDate(
+      getLocalTimeZone()
+    );
     const sucursalId = parseInt(data.get("sucursalId") as string);
 
-    // Get facturas for the date range and sucursal
-    const facturasData = await db.query.facturas.findMany({
-      where: and(
-        eq(facturas.sucursalId, sucursalId),
-        between(facturas.pagadoAt, fechaInicial, fechaFinal)
-      ),
-    });
+    let facturasData = await db
+      .select()
+      .from(facturas)
+      .where(
+        and(
+          between(facturas.pagadoAt, fechaInicial, fechaFinal),
+          eq(facturas.cancelada, false)
+        )
+      );
+
+    if (sucursalId !== 0) {
+      facturasData = await db
+        .select()
+        .from(facturas)
+        .where(
+          and(
+            eq(facturas.sucursalId, sucursalId),
+            between(facturas.pagadoAt, fechaInicial, fechaFinal),
+            eq(facturas.cancelada, false)
+          )
+        );
+    }
 
     // Check if there are any invoices
     if (facturasData.length === 0) {
@@ -70,13 +89,14 @@ export const actions = {
     // Calculate totals and group by payment method
     const { total, metodoDePago } = facturasData.reduce(
       (acc, factura) => {
-        acc.total += factura.total!;
+        const totalValue = Number(factura.total) || 0;
+        acc.total += totalValue;
         const method = factura.metodoDePago;
         if (!acc.metodoDePago[method]) {
           acc.metodoDePago[method] = { count: 0, total: 0 };
         }
         acc.metodoDePago[method].count += 1;
-        acc.metodoDePago[method].total += factura.total!;
+        acc.metodoDePago[method].total += totalValue;
         return acc;
       },
       {
@@ -92,7 +112,7 @@ export const actions = {
       facturas: facturasData.length,
       total,
       empleadoId: user.id,
-      sucursalId,
+      sucursalId: sucursalId === 0 ? null : sucursalId,
       metodoDePago,
     });
 
