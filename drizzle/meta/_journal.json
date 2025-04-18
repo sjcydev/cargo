@@ -204,6 +204,20 @@
       "when": 1744964457927,
       "tag": "0028_add_archivado_to_users",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "5",
+      "when": 1744989430737,
+      "tag": "0029_add_facturasids_to_reportes",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "5",
+      "when": 1744989459448,
+      "tag": "0030_update_facturasids_to_reportes",
+      "breakpoints": true
     }
   ]
 }

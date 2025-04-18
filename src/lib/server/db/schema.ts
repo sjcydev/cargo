@@ -7,6 +7,7 @@ import {
   float,
   boolean,
   json,
+  longtext,
 } from "drizzle-orm/mysql-core";
 
 import { relations } from "drizzle-orm";
@@ -153,6 +154,7 @@ export const reportes = mysqlTable("reportes", {
   fechaInicial: datetime("fechaInicial"),
   fechaFinal: datetime("fechaFinal"),
   facturas: int("facturas"),
+  facturasIds: longtext("facturasIds"),
   total: float("total"),
   empleadoId: varchar("empleadoId", { length: 255 }).references(() => users.id),
   sucursalId: int("sucursalId").references(() => sucursales.sucursalId),

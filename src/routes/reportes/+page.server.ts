@@ -56,28 +56,21 @@ export const actions = {
     );
     const sucursalId = parseInt(data.get("sucursalId") as string);
 
-    let facturasData = await db
+    const facturasData = await db
       .select()
       .from(facturas)
       .where(
-        and(
-          between(facturas.pagadoAt, fechaInicial, fechaFinal),
-          eq(facturas.cancelada, false)
-        )
+        sucursalId === 0
+          ? and(
+              between(facturas.pagadoAt, fechaInicial, fechaFinal),
+              eq(facturas.cancelada, false)
+            )
+          : and(
+              eq(facturas.sucursalId, sucursalId),
+              between(facturas.pagadoAt, fechaInicial, fechaFinal),
+              eq(facturas.cancelada, false)
+            )
       );
-
-    if (sucursalId !== 0) {
-      facturasData = await db
-        .select()
-        .from(facturas)
-        .where(
-          and(
-            eq(facturas.sucursalId, sucursalId),
-            between(facturas.pagadoAt, fechaInicial, fechaFinal),
-            eq(facturas.cancelada, false)
-          )
-        );
-    }
 
     // Check if there are any invoices
     if (facturasData.length === 0) {
@@ -105,11 +98,16 @@ export const actions = {
       }
     );
 
+    const facturasIds = JSON.stringify(
+      facturasData.map((factura) => factura.facturaId)
+    );
+
     // Create report
     await db.insert(reportes).values({
       fechaInicial,
       fechaFinal,
       facturas: facturasData.length,
+      facturasIds,
       total,
       empleadoId: user.id,
       sucursalId: sucursalId === 0 ? null : sucursalId,
