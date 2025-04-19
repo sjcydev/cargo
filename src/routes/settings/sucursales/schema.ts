@@ -1,7 +1,8 @@
 import { z } from "zod";
 
 export const sucursalesSchema = z.object({
-  sucursal: z.string({ required_error: "Sucursal es requerida" }),
+  sucursalId: z.number(),
+  sucursal: z.string({ required_error: "Nombre de la Sucursal es requerida" }),
   precio: z
     .number()
     .min(0, { message: "Precio debe ser mayor a 0" })

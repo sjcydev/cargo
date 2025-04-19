@@ -11,7 +11,7 @@
   import type { Infer, SuperValidated } from "sveltekit-superforms";
   import { type sucursalesType, sucursalesSchema } from "./schema";
   import { toast } from "svelte-sonner";
-  import { invalidateAll } from "$app/navigation";
+  import { goto, invalidateAll } from "$app/navigation";
   import { superForm } from "sveltekit-superforms/client";
   import { zodClient } from "sveltekit-superforms/adapters";
   import type { Sucursales } from "$lib/server/db/schema";
@@ -19,7 +19,10 @@
   let {
     data,
   }: {
-    data: SuperValidated<Infer<sucursalesType>> & { sucursales: Sucursales[], limite: number };
+    data: SuperValidated<Infer<sucursalesType>> & {
+      sucursales: Sucursales[];
+      limite: number;
+    };
   } = $props();
 
   const form = superForm(data, {
@@ -37,6 +40,10 @@
   const { form: formData, enhance, errors, submitting } = form;
 
   let open = $state(false);
+
+  function handleRowClick(row: Sucursales) {
+    goto(`/settings/sucursales/${row.sucursalId}`);
+  }
 </script>
 
 <svelte:head>
@@ -54,6 +61,7 @@
     >
 
     <form method="POST" use:enhance>
+      <input type="hidden" name="sucursalId" value={0} />
       <Form.Field {form} name="sucursal">
         <Form.Control>
           {#snippet children({ props })}
@@ -133,6 +141,8 @@
               type="number"
               bind:value={$formData.precio}
               placeholder="2.75"
+              min="0"
+              step="0.01"
             />
           {/snippet}
         </Form.Control>
@@ -163,21 +173,28 @@
 <div class="space-y-6">
   <div class="flex justify-between">
     <div>
-        <h3 class="text-xl font-medium">Detalles de las Sucursales</h3>
-        <p class="text-muted-foreground text-sm">
+      <h3 class="text-xl font-medium">Detalles de las Sucursales</h3>
+      <p class="text-muted-foreground text-sm">
         Aqui puedes modificar los detalles de las sucursales.
-        </p>
+      </p>
     </div>
 
     {#if data.sucursales.length < data.limite}
-    <div>
-        <Button onclick={() => (open = true)}>Añadir Sucursal <HousePlus /></Button>
-    </div>
+      <div>
+        <Button onclick={() => (open = true)}
+          >Añadir Sucursal <HousePlus /></Button
+        >
+      </div>
     {/if}
   </div>
 
   <Separator />
 
-  <DataTable {columns} data={data.sucursales} headerless={true} />
+  <DataTable
+    {columns}
+    data={data.sucursales}
+    headerless={true}
+    onRowClick={handleRowClick}
+  />
   <!-- <SucursalForm data={data.form} sucursal={data.sucursal!} logo={data.logo} /> -->
 </div>
