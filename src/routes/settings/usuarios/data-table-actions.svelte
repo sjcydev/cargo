@@ -1,26 +1,14 @@
 <script lang="ts">
-  import type { Reportes } from "$lib/server/db/schema";
   import Ellipsis from "lucide-svelte/icons/ellipsis";
-  import { Button } from "$lib/components/ui/button";
-  import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
-  import { FileText } from "lucide-svelte";
-  import { Trash2 } from "lucide-svelte";
+  import { Button, buttonVariants } from "$lib/components/ui/button/index.js";
+  import * as DropdownMenu from "$lib/components/ui/dropdown-menu/index.js";
+  import { UserPen, Trash2, Receipt, Pen } from "lucide-svelte";
   import { invalidateAll } from "$app/navigation";
   import DeleteDialog from "$lib/components/delete-dialog.svelte";
 
-  let { reporte, user }: { reporte: Reportes; user: { rol: string } } =
-    $props();
+  let { id, current }: { id: string; current?: boolean } = $props();
   let deleteDialogOpen = $state(false);
 </script>
-
-<DeleteDialog
-  bind:open={deleteDialogOpen}
-  title="Eliminar Reporte"
-  description={`¿Estás seguro que deseas eliminar el reporte N° ${reporte.reporteId}? Esta acción no se puede deshacer.`}
-  action="/reportes?/delete"
-  itemId={reporte.reporteId}
-  onSuccess={() => invalidateAll()}
-/>
 
 <DropdownMenu.Root>
   <DropdownMenu.Trigger>
@@ -38,12 +26,12 @@
   </DropdownMenu.Trigger>
   <DropdownMenu.Content>
     <DropdownMenu.Item>
-      <a href="/reportes/{reporte.reporteId}" class="flex gap-2">
-        <FileText /> Ver Detalles
+      <a href="/settings/usuarios/{id}" class="flex gap-2">
+        <Pen /> Editar
       </a>
     </DropdownMenu.Item>
-
-    {#if user.rol === "ADMIN"}
+    {#if !current}
+      <DropdownMenu.Separator />
       <DropdownMenu.Item
         class="text-red-500 data-[highlighted]:text-white data-[highlighted]:bg-red-500"
       >
@@ -52,10 +40,20 @@
           onclick={() => (deleteDialogOpen = true)}
           tabindex="-1"
         >
-          <Trash2 />
-          Eliminar
+          <Trash2 /> Eliminar
         </button>
       </DropdownMenu.Item>
     {/if}
   </DropdownMenu.Content>
 </DropdownMenu.Root>
+
+<DeleteDialog
+  title="Eliminar Usuario"
+  description="¿Estás seguro de eliminar este usuario?"
+  open={deleteDialogOpen}
+  onSuccess={() => {
+    invalidateAll();
+  }}
+  action="?/delete"
+  itemId={id}
+/>

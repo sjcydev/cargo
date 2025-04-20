@@ -54,6 +54,8 @@
     updatedAt: null,
     sucursal: {} as Sucursales,
     tipo: "REGULAR",
+    archivado: false,
+    archivadoAt: null,
   } as const;
 
   let cliente = $state<UsuariosWithSucursal>(
