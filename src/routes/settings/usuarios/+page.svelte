@@ -6,15 +6,20 @@
   import DataTable from "$lib/components/data-table.svelte";
   import { goto } from "$app/navigation";
   import { createColumns } from "./columns";
+  import UsuarioForm from "./usuario-form.svelte";
 
   let { data }: { data: PageData } = $props();
-  const columns = createColumns(String(data.user!.id));
+  const columns = createColumns(String(data.user!.id), data.sucursales);
   let open = $state(false);
 
   function handleRowClick(row: any) {
     goto(`/settings/usuarios/${row.id}`);
   }
 </script>
+
+<svelte:head>
+  <title>Detalles de los Usuarios</title>
+</svelte:head>
 
 <div class="space-y-6">
   <div class="flex justify-between">
@@ -38,5 +43,6 @@
     headerless={true}
     onRowClick={handleRowClick}
   />
-  <!-- <SucursalForm data={data.form} sucursal={data.sucursal!} logo={data.logo} /> -->
+
+  <UsuarioForm data={data.form} sucursales={data.sucursales} bind:open />
 </div>

@@ -1,7 +1,6 @@
 import * as auth from "$lib/server/auth";
 import { redirect } from "@sveltejs/kit";
 import { hash } from "@node-rs/argon2";
-import { SECRET_CODE } from "$env/static/private";
 import { db } from "$lib/server/db";
 
 import type { Actions } from "./$types";

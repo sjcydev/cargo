@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageData } from "./$types";
   import { Separator } from "$lib/components/ui/separator";
-  import SucursalForm from "./sucursal-form.svelte";
+  import UsariosFormEdit from "./usarios-form-edit.svelte";
 
   let { data }: { data: PageData } = $props();
 </script>
@@ -20,5 +20,5 @@
     </p>
   </div>
   <Separator />
-  <!-- <SucursalForm data={data.form} sucursal={data.sucursal} /> -->
+  <UsariosFormEdit data={data.form} sucursales={data.sucursales} />
 </div>

@@ -4,10 +4,14 @@ import type { Users } from "$lib/server/db/schema";
 import { renderComponent } from "$lib/components/ui/data-table";
 import DataSortableButton from "$lib/components/data-sortable-button.svelte";
 import DataTableActions from "./data-table-actions.svelte";
+import type { Sucursales } from "$lib/server/db/schema";
 
 const columnHelper = createColumnHelper<Users>();
 
-export const createColumns = (currentUserId: string): ColumnDef<Users>[] => [
+export const createColumns = (
+  currentUserId: string,
+  sucursales: Sucursales[]
+): ColumnDef<Users>[] => [
   {
     accessorFn: (row) => row.username,
     accessorKey: "username",
@@ -45,6 +49,17 @@ export const createColumns = (currentUserId: string): ColumnDef<Users>[] => [
     header: ({ column }) =>
       renderComponent(DataSortableButton, {
         label: "Rol",
+        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
+      }),
+  },
+  {
+    accessorFn: (row) =>
+      sucursales.find((s) => s.sucursalId === row.sucursalId)?.sucursal,
+    accessorKey: "sucursalId",
+    id: "sucursalId",
+    header: ({ column }) =>
+      renderComponent(DataSortableButton, {
+        label: "Sucursal",
         onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
       }),
   },

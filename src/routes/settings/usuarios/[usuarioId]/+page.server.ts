@@ -7,14 +7,16 @@ import { fail } from "@sveltejs/kit";
 import { users } from "$lib/server/db/schema";
 import { error } from "@sveltejs/kit";
 import { eq } from "drizzle-orm";
-import { sucursalesSchema } from "../../sucursales/schema";
+import { sucursales } from "$lib/server/db/schema";
 
 export const load = (async ({ params }) => {
   const userId = params.usuarioId;
 
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-  });
+  const user = (
+    await db.select().from(users).where(eq(users.id, userId)).limit(1)
+  )[0];
+
+  const sucursalesData = await db.select().from(sucursales);
 
   if (!user) {
     throw error(404, "Usuario no encontrado");
@@ -34,6 +36,7 @@ export const load = (async ({ params }) => {
   return {
     form,
     user,
+    sucursales: sucursalesData,
   };
 }) satisfies PageServerLoad;
 
