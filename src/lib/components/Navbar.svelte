@@ -17,31 +17,37 @@
         icon: Home,
         url: "/",
         title: "Dashboard",
+        admin: true,
       },
       {
         icon: Users,
         url: "/clientes",
         title: "Clientes",
+        admin: false,
       },
       {
         title: "Facturación",
         url: "/facturas",
         icon: Package,
         isActive: true,
+        admin: false,
         items: [
           {
             icon: Package,
             url: "/facturas",
             title: "Facturas",
+            admin: false,
           },
           {
             icon: ReceiptText,
             url: "/facturas/facturar",
             title: "Facturar Cliente",
+            admin: false,
           },
           {
             url: "/facturas/no_enviadas",
             title: "No Enviadas",
+            admin: false,
           },
         ],
       },
@@ -49,11 +55,13 @@
         icon: FileSearch,
         url: "/trackings",
         title: "Trackings",
+        admin: false,
       },
       {
         icon: BookText,
         url: "/reportes",
         title: "Reportes",
+        admin: true,
       },
     ],
   };
@@ -137,6 +145,7 @@
       items={data.navMain}
       {protectedRoutes}
       currentRoute={page.url.pathname}
+      rol={user.rol as "ADMIN" | "EMPLEADO" | "SECRETARIA" | undefined}
     />
     <NavSecondary items={navSecondary} rol={user.rol} />
   </Sidebar.Content>

@@ -9,6 +9,7 @@
     items,
     protectedRoutes,
     currentRoute,
+    rol,
   }: {
     items: {
       title: string;
@@ -17,13 +18,16 @@
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       icon: any;
       isActive?: boolean;
+      admin: boolean;
       items?: {
         title: string;
         url: string;
+        admin: boolean;
       }[];
     }[];
     currentRoute: string;
     protectedRoutes: Set<string>;
+    rol: "ADMIN" | "EMPLEADO" | "SECRETARIA" | undefined;
   } = $props();
 </script>
 
@@ -31,7 +35,7 @@
   <!-- <Sidebar.GroupLabel>Sistema</Sidebar.GroupLabel> -->
   <Sidebar.Menu>
     {#each items as mainItem (mainItem.title)}
-      {#if !protectedRoutes.has(mainItem.url)}
+      {#if !protectedRoutes.has(mainItem.url) && (rol === "ADMIN" || !mainItem.admin)}
         <Collapsible.Root open={mainItem.isActive}>
           {#snippet child({ props })}
             <Sidebar.MenuItem {...props}>
@@ -69,17 +73,19 @@
                 <Collapsible.Content>
                   <Sidebar.MenuSub>
                     {#each mainItem.items as subItem (subItem.title)}
-                      <Sidebar.MenuSubItem>
-                        <Sidebar.MenuSubButton
-                          href={subItem.url}
-                          class={cn(
-                            "hover:text-primary",
-                            `${(currentRoute.startsWith(subItem.url) && subItem.url !== "/facturas") || currentRoute === subItem.url || (subItem.url === "/facturas" && /^\/facturas\/\d+/.test(currentRoute)) ? "bg-muted text-primary" : ""}`
-                          )}
-                        >
-                          <span>{subItem.title}</span>
-                        </Sidebar.MenuSubButton>
-                      </Sidebar.MenuSubItem>
+                      {#if (!subItem.admin && rol !== "ADMIN") || rol === "ADMIN"}
+                        <Sidebar.MenuSubItem>
+                          <Sidebar.MenuSubButton
+                            href={subItem.url}
+                            class={cn(
+                              "hover:text-primary",
+                              `${(currentRoute.startsWith(subItem.url) && subItem.url !== "/facturas") || currentRoute === subItem.url || (subItem.url === "/facturas" && /^\/facturas\/\d+/.test(currentRoute)) ? "bg-muted text-primary" : ""}`
+                            )}
+                          >
+                            <span>{subItem.title}</span>
+                          </Sidebar.MenuSubButton>
+                        </Sidebar.MenuSubItem>
+                      {/if}
                     {/each}
                   </Sidebar.MenuSub>
                 </Collapsible.Content>

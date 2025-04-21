@@ -3,12 +3,14 @@
   import InnerLayout from "$lib/components/inner-layout.svelte";
   import VerFacturas from "$lib/facturacion/facturas/ver-facturas.svelte";
   import { Button } from "$lib/components/ui/button";
-  import { columns } from "./columns";
+  import { columns as createColumns } from "./columns";
   import { goto, invalidate } from "$app/navigation";
 
   let { data: pageData }: { data: PageData } = $props();
   let { facturas: data } = pageData;
   let selectedFacturas = $state<number[]>([]);
+
+  const columns = createColumns(pageData.rol);
 
   function handleSelectionChange(selected: number[]) {
     selectedFacturas = selected;

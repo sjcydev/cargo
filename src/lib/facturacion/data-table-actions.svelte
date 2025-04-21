@@ -7,7 +7,11 @@
   import DeleteDialog from "$lib/components/delete-dialog.svelte";
   import { goto, invalidate, invalidateAll } from "$app/navigation";
 
-  let { id }: { id: string } = $props();
+  let {
+    id,
+    rol,
+  }: { id: string; rol: "ADMIN" | "EMPLEADO" | "SECRETARIA" | undefined } =
+    $props();
   let showCancelDialog = $state(false);
 </script>
 
@@ -31,14 +35,16 @@
         <Receipt /> Ver Factura
       </a>
     </DropdownMenu.Item>
-    <DropdownMenu.Separator />
-    <DropdownMenu.Item
-      class="text-red-500 data-[highlighted]:text-white data-[highlighted]:bg-red-500"
-    >
-      <button class="flex gap-2" onclick={() => (showCancelDialog = true)}>
-        <Trash2 /> Cancelar
-      </button>
-    </DropdownMenu.Item>
+    {#if rol === "ADMIN"}
+      <DropdownMenu.Separator />
+      <DropdownMenu.Item
+        class="text-red-500 data-[highlighted]:text-white data-[highlighted]:bg-red-500"
+      >
+        <button class="flex gap-2" onclick={() => (showCancelDialog = true)}>
+          <Trash2 /> Cancelar
+        </button>
+      </DropdownMenu.Item>
+    {/if}
   </DropdownMenu.Content>
 </DropdownMenu.Root>
 

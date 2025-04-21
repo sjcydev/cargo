@@ -11,7 +11,7 @@ import { invalidate } from "$app/navigation";
 
 const columnHelper = createColumnHelper<FacturasWithCliente>();
 
-export const columns: ColumnDef<FacturasWithCliente>[] = [
+export const columns = (rol: "ADMIN" | "EMPLEADO" | "SECRETARIA" | undefined): ColumnDef<FacturasWithCliente>[] => [
   {
     id: "select",
     cell: ({ row, table }) => {
@@ -124,6 +124,7 @@ export const columns: ColumnDef<FacturasWithCliente>[] = [
     cell: ({ row }) => {
       return renderComponent(DataTableActions, {
         id: String(row.original.facturaId),
+        rol
       });
     },
     enableHiding: false,

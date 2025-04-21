@@ -9,7 +9,7 @@ import {
 import { eq, desc, getTableColumns, and } from "drizzle-orm";
 import { redirect, type Actions } from "@sveltejs/kit";
 
-export const load = (async () => {
+export const load = (async ({ locals }) => {
   const clienteData = await db
     .select({
       ...getTableColumns(usuarios),
@@ -31,7 +31,7 @@ export const load = (async () => {
     cliente: clienteData.find((user) => user.id === factura.clienteId),
   }));
 
-  return { facturas: facturasData };
+  return { facturas: facturasData, rol: locals.user?.rol };
 }) satisfies PageServerLoad;
 
 export const actions = {
@@ -39,23 +39,39 @@ export const actions = {
     const formData = await request.formData();
     const facturaId = Number(formData.get("id"));
 
-    await db.transaction(async (tx) => {
-      await tx
-        .update(facturas)
-        .set({
-          cancelada: true,
-          canceladaAt: new Date(),
-        })
-        .where(eq(facturas.facturaId, facturaId));
+    const factura = (
+      await db
+        .select()
+        .from(facturas)
+        .where(eq(facturas.facturaId, facturaId))
+        .limit(1)
+    )[0];
 
-      await tx
-        .update(trackings)
-        .set({
-          cancelada: true,
-          canceladaAt: new Date(),
-        })
-        .where(eq(trackings.facturaId, facturaId));
-    });
+    if (!factura.enviado) {
+      await db.transaction(async (tx) => {
+        await tx.delete(trackings).where(eq(trackings.facturaId, facturaId));
+
+        await tx.delete(facturas).where(eq(facturas.facturaId, facturaId));
+      });
+    } else {
+      await db.transaction(async (tx) => {
+        await tx
+          .update(facturas)
+          .set({
+            cancelada: true,
+            canceladaAt: new Date(),
+          })
+          .where(eq(facturas.facturaId, facturaId));
+
+        await tx
+          .update(trackings)
+          .set({
+            cancelada: true,
+            canceladaAt: new Date(),
+          })
+          .where(eq(trackings.facturaId, facturaId));
+      });
+    }
 
     return { type: "success" };
   },
