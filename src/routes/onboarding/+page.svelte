@@ -364,8 +364,4 @@
       </Card.Footer>
     </Card.Root>
   </form>
-  <div class="mt-4 text-center text-sm">
-    Already have an account?
-    <a href="/login" class="underline"> Sign in </a>
-  </div>
 </div>
