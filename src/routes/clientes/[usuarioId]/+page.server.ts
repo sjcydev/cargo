@@ -110,6 +110,6 @@ export const actions: Actions = {
       })
       .where(eq(usuarios.id, Number(id)));
 
-    return { nombre: nombreCapital, apellido: apellidoCapital };
+    return { form, nombre: nombreCapital, apellido: apellidoCapital };
   },
 };

@@ -75,7 +75,7 @@ async function sendFacturaEmail({
     const emailText = await renderAsPlainText(emailHtml);
 
     const data = await resend.emails.send({
-      from: `${company.company} <no-reply-facturas@resend.dev>`,
+      from: `${company.company} <no-reply-facturas@${company.dominio}>`,
       to: [factura.cliente!.correo],
       subject: `¡Tienes paquetes listos para retirar!`,
       html: emailHtml,
@@ -162,22 +162,30 @@ export const POST: RequestHandler = async ({ request }) => {
     // Process facturas in parallel with concurrency limit
     const BATCH_SIZE = 3; // Process 3 facturas at a time
     const facturasToProcess = Array.from(facturaMap.values());
-    const emailResults: Array<{ facturaId: number; success: boolean; error?: string }> = [];
+    const emailResults: Array<{
+      facturaId: number;
+      success: boolean;
+      error?: string;
+    }> = [];
 
     for (let i = 0; i < facturasToProcess.length; i += BATCH_SIZE) {
       const batch = facturasToProcess.slice(i, i + BATCH_SIZE);
-      const batchPromises = batch.map(factura =>
+      const batchPromises = batch.map((factura) =>
         sendFacturaEmail({ factura, company, logo, reenviando })
           .then(() => ({ facturaId: factura.facturaId, success: true }))
-          .catch(error => ({ facturaId: factura.facturaId, success: false, error: error.message }))
+          .catch((error) => ({
+            facturaId: factura.facturaId,
+            success: false,
+            error: error.message,
+          }))
       );
-      
+
       const batchResults = await Promise.all(batchPromises);
       emailResults.push(...batchResults);
     }
 
-    const successful = emailResults.filter(r => r.success);
-    const failed = emailResults.filter(r => !r.success);
+    const successful = emailResults.filter((r) => r.success);
+    const failed = emailResults.filter((r) => !r.success);
 
     return json({
       message: `Processed ${emailResults.length} facturas`,
