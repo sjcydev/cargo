@@ -234,6 +234,8 @@
                   type="number"
                   bind:value={$formData.precio}
                   placeholder="2.75"
+                  min="0"
+                  step="0.01"
                 />
               {/snippet}
             </Form.Control>
