@@ -15,6 +15,7 @@
   import { invalidateAll } from "$app/navigation";
   import { Loader2 } from "lucide-svelte";
   import type { Sucursales } from "$lib/server/db/schema";
+  import Separator from "$lib/components/ui/separator/separator.svelte";
 
   let {
     data,
@@ -31,6 +32,8 @@
       }
     },
   });
+
+  const roles = ["ADMIN", "EMPLEADO", "SECRETARIA"];
 
   const { form: formData, enhance, errors, submitting } = form;
 </script>
@@ -72,7 +75,22 @@
       <Form.Control>
         {#snippet children({ props })}
           <Form.Label>Rol</Form.Label>
-          <Input {...props} bind:value={$formData.rol} placeholder="ADMIN" />
+          <Select.Root
+            type="single"
+            bind:value={$formData.rol}
+            name={props.name}
+          >
+            <Select.Trigger {...props}>
+              {$formData.rol ? $formData.rol : "Elige el rol de la persona"}
+            </Select.Trigger>
+            <Select.Content>
+              {#each roles as rol}
+                <Select.Item value={String(rol)}>
+                  {rol}
+                </Select.Item>
+              {/each}
+            </Select.Content>
+          </Select.Root>
         {/snippet}
       </Form.Control>
       <Form.FieldErrors />
@@ -109,6 +127,47 @@
         <Form.FieldErrors />
       </Form.Field>
     {/if}
+  </div>
+
+  <div class="space-y-6">
+    <div>
+      <h2 class="text-lg font-medium">Cambiar Contraseña</h2>
+      <p class="mb-4 text-sm text-muted-foreground">
+        Cambia la contraseña del usuario para garantizar la seguridad de la
+        cuenta.
+      </p>
+    </div>
+    <Separator />
+
+    <Form.Field {form} name="password">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Contraseña Nueva</Form.Label>
+          <Input
+            {...props}
+            bind:value={$formData.password}
+            placeholder="••••••••••••"
+            type="password"
+          />
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
+
+    <Form.Field {form} name="confirm">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Confirmar Contraseña Nueva</Form.Label>
+          <Input
+            {...props}
+            bind:value={$formData.confirm}
+            placeholder="••••••••••••"
+            type="password"
+          />
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
   </div>
 
   <Button type="submit" class="w-full" disabled={$submitting}>

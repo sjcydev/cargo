@@ -1,13 +1,14 @@
 import { db } from "$lib/server/db";
 import type { PageServerLoad, Actions } from "./$types";
-import { superValidate } from "sveltekit-superforms";
+import { superValidate, setError } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { userUpdateSchema } from "./schema";
 import { fail } from "@sveltejs/kit";
-import { users } from "$lib/server/db/schema";
+import { session, users } from "$lib/server/db/schema";
 import { error } from "@sveltejs/kit";
 import { eq } from "drizzle-orm";
 import { sucursales } from "$lib/server/db/schema";
+import { hash } from "@node-rs/argon2";
 
 export const load = (async ({ params }) => {
   const userId = params.usuarioId;
@@ -48,18 +49,37 @@ export const actions = {
       return fail(400, { form });
     }
 
-    let { id, sucursalId, nombre, apellido, rol } = form.data;
+    let { id, sucursalId, nombre, apellido, rol, confirm, password } =
+      form.data;
 
     try {
-      await db
-        .update(users)
-        .set({
-          nombre,
-          apellido,
-          rol,
-          sucursalId: Number(sucursalId),
-        })
-        .where(eq(users.id, id));
+      if (password && !confirm) {
+        return setError(form, "confirm", "Confirmar contraseña es requerido");
+      }
+
+      if (password && password !== confirm) {
+        return setError(form, "confirm", "Las contraseñas no coinciden");
+      }
+
+      const updateData: Record<string, any> = {
+        nombre,
+        apellido,
+        rol,
+        sucursalId: Number(sucursalId),
+      };
+
+      if (password) {
+        updateData.passwordHash = await hash(password, {
+          memoryCost: 19456,
+          timeCost: 2,
+          outputLen: 32,
+          parallelism: 1,
+        });
+
+        await db.delete(session).where(eq(session.userId, id));
+      }
+
+      await db.update(users).set(updateData).where(eq(users.id, id));
 
       const updatedForm = await superValidate(zod(userUpdateSchema));
 

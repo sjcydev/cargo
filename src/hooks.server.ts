@@ -26,7 +26,7 @@ const authHandle: Handle = async ({ event, resolve }) => {
   const user = event.locals.user;
 
   if (event.url.pathname.startsWith("/reportes") && user) {
-    if (user?.rol !== "ADMIN") {
+    if (user?.rol === "EMPLEADO") {
       throw redirect(303, "/");
     }
   }

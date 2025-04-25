@@ -93,59 +93,61 @@
     </Form.Field>
   </div>
 
-  <div class="space-y-6">
-    <div>
-      <h2 class="text-lg font-medium">Cambiar Contraseña</h2>
-      <p class="mb-4 text-sm text-muted-foreground">
-        Cambia tu contraseña para garantizar la seguridad de tu cuenta.
-      </p>
+  {#if user.rol === "ADMIN"}
+    <div class="space-y-6">
+      <div>
+        <h2 class="text-lg font-medium">Cambiar Contraseña</h2>
+        <p class="mb-4 text-sm text-muted-foreground">
+          Cambia tu contraseña para garantizar la seguridad de tu cuenta.
+        </p>
+      </div>
+      <Separator />
+      <Form.Field {form} name="oldPassword">
+        <Form.Control>
+          {#snippet children({ props })}
+            <Form.Label>Contraseña Actual</Form.Label>
+            <Input
+              {...props}
+              bind:value={$formData.oldPassword}
+              placeholder="••••••••••••"
+              type="password"
+            />
+          {/snippet}
+        </Form.Control>
+        <Form.FieldErrors />
+      </Form.Field>
+
+      <Form.Field {form} name="password">
+        <Form.Control>
+          {#snippet children({ props })}
+            <Form.Label>Contraseña Nueva</Form.Label>
+            <Input
+              {...props}
+              bind:value={$formData.password}
+              placeholder="••••••••••••"
+              type="password"
+            />
+          {/snippet}
+        </Form.Control>
+        <Form.FieldErrors />
+      </Form.Field>
+
+      <Form.Field {form} name="confirm">
+        <Form.Control>
+          {#snippet children({ props })}
+            <Form.Label>Confirmar Contraseña Nueva</Form.Label>
+            <Input
+              {...props}
+              bind:value={$formData.confirm}
+              placeholder="••••••••••••"
+              type="password"
+            />
+          {/snippet}
+        </Form.Control>
+        <Form.FieldErrors />
+      </Form.Field>
     </div>
-    <Separator />
-    <Form.Field {form} name="oldPassword">
-      <Form.Control>
-        {#snippet children({ props })}
-          <Form.Label>Contraseña Actual</Form.Label>
-          <Input
-            {...props}
-            bind:value={$formData.oldPassword}
-            placeholder="••••••••••••"
-            type="password"
-          />
-        {/snippet}
-      </Form.Control>
-      <Form.FieldErrors />
-    </Form.Field>
-
-    <Form.Field {form} name="password">
-      <Form.Control>
-        {#snippet children({ props })}
-          <Form.Label>Contraseña Nueva</Form.Label>
-          <Input
-            {...props}
-            bind:value={$formData.password}
-            placeholder="••••••••••••"
-            type="password"
-          />
-        {/snippet}
-      </Form.Control>
-      <Form.FieldErrors />
-    </Form.Field>
-
-    <Form.Field {form} name="confirm">
-      <Form.Control>
-        {#snippet children({ props })}
-          <Form.Label>Confirmar Contraseña Nueva</Form.Label>
-          <Input
-            {...props}
-            bind:value={$formData.confirm}
-            placeholder="••••••••••••"
-            type="password"
-          />
-        {/snippet}
-      </Form.Control>
-      <Form.FieldErrors />
-    </Form.Field>
-  </div>
+  {/if}
 
   <Button type="submit" class="w-full" disabled={$submitting}>
     {#if $submitting}

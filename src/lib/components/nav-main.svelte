@@ -35,7 +35,7 @@
   <!-- <Sidebar.GroupLabel>Sistema</Sidebar.GroupLabel> -->
   <Sidebar.Menu>
     {#each items as mainItem (mainItem.title)}
-      {#if !protectedRoutes.has(mainItem.url) && (rol === "ADMIN" || !mainItem.admin)}
+      {#if (!protectedRoutes.has(mainItem.url) && (rol === "ADMIN" || !mainItem.admin)) || (mainItem.url === "/reportes" && rol === "SECRETARIA")}
         <Collapsible.Root open={mainItem.isActive}>
           {#snippet child({ props })}
             <Sidebar.MenuItem {...props}>
