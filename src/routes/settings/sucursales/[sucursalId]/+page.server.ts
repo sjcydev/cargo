@@ -75,7 +75,7 @@ export const actions = {
           maps,
           precio,
         })
-        .where(eq(sucursales.sucursalId, sucursalId));
+        .where(eq(sucursales.sucursalId, Number(sucursalId!)));
 
       const updatedForm = await superValidate(zod(sucursalesSchema));
 

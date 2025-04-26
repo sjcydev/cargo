@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const sucursalesSchema = z.object({
-  sucursalId: z.number(),
+  sucursalId: z.number().optional().nullish(),
   sucursal: z.string({ required_error: "Nombre de la Sucursal es requerida" }),
   precio: z
     .number()

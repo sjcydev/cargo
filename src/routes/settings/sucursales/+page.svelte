@@ -61,7 +61,6 @@
     >
 
     <form method="POST" use:enhance>
-      <input type="hidden" name="sucursalId" value={0} />
       <Form.Field {form} name="sucursal">
         <Form.Control>
           {#snippet children({ props })}

@@ -19,11 +19,15 @@ export const columns: ColumnDef<Sucursales>[] = [
     accessorFn: (row) => row.sucursal,
     accessorKey: "sucursal",
     id: "sucursal",
-    header: ({ column }) =>
-      renderComponent(DataSortableButton, {
-        label: "Sucursal",
-        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-      }),
+    header: () => "Nombre de Sucursal",
+    cell: ({ row }) => row.getValue("sucursal"),
+  },
+  {
+    accessorFn: (row) => row.codificacion,
+    accessorKey: "codificacion",
+    id: "codificacion",
+    header: () => "Codificación",
+    cell: ({ row }) => row.getValue("codificacion"),
   },
   {
     id: "actions",
