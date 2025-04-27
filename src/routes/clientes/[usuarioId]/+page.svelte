@@ -46,9 +46,14 @@
     onResult: async ({ result }) => {
       if (result.type === "success") {
         editMode = false;
-        const sucursal = sucursales.find(s => String(s.sucursalId) === $formData.sucursalId);
-        const tipo = sucursal?.precio === Number($formData.precio) ? "REGULAR" : "ESPECIAL";
-        
+        const sucursal = sucursales.find(
+          (s) => String(s.sucursalId) === $formData.sucursalId
+        );
+        const tipo =
+          sucursal?.precio === Number($formData.precio)
+            ? "REGULAR"
+            : "ESPECIAL";
+
         cliente = {
           ...cliente,
           nombre: result.data?.nombre,
@@ -59,13 +64,13 @@
           cedula: $formData.cedula,
           sucursalId: Number($formData.sucursalId),
           precio: Number($formData.precio),
-          tipo
+          tipo,
         };
         previous = { ...$formData };
-        
+
         // Ensure everything is refreshed
         await invalidateAll();
-        
+
         // Navigate to the potentially new casillero URL
         if (cliente.casillero !== Number($formData.casillero)) {
           await goto(`/clientes/${$formData.casillero}`);
@@ -100,8 +105,12 @@
   );
 
   const currentTipo = $derived(() => {
-    const sucursal = sucursales.find(s => String(s.sucursalId) === $formData.sucursalId);
-    return sucursal?.precio === Number($formData.precio) ? "REGULAR" : "ESPECIAL";
+    const sucursal = sucursales.find(
+      (s) => String(s.sucursalId) === $formData.sucursalId
+    );
+    return sucursal?.precio === Number($formData.precio)
+      ? "REGULAR"
+      : "ESPECIAL";
   });
 
   let editMode = $state(false);
@@ -368,8 +377,14 @@
                           type="number"
                           step="0.01"
                         />
-                        <Badge 
-                          variant={editMode ? currentTipo() === "REGULAR" ? "outline" : "secondary" : cliente.tipo === "REGULAR" ? "outline" : "secondary"}
+                        <Badge
+                          variant={editMode
+                            ? currentTipo() === "REGULAR"
+                              ? "outline"
+                              : "secondary"
+                            : cliente.tipo === "REGULAR"
+                              ? "outline"
+                              : "secondary"}
                           class="py-1.5"
                         >
                           {editMode ? currentTipo() : cliente.tipo}
