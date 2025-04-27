@@ -11,8 +11,8 @@
   let { data }: { data: PageData } = $props();
 
   function handleRowClick(row: any) {
-    if (row.id) {
-      goto(`/clientes/${row.id}`);
+    if (row.casillero) {
+      goto(`/clientes/${row.casillero}`);
     }
   }
 </script>
