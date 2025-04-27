@@ -19,7 +19,7 @@ export const columns: ColumnDef<Sucursales>[] = [
     accessorFn: (row) => row.sucursal,
     accessorKey: "sucursal",
     id: "sucursal",
-    header: () => "Nombre de Sucursal",
+    header: () => "Nombre de la Sucursal",
     cell: ({ row }) => row.getValue("sucursal"),
   },
   {
