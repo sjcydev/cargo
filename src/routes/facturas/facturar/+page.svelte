@@ -62,10 +62,6 @@
     structuredClone(defaultClienteState)
   );
 
-  function resetCliente() {
-    cliente = structuredClone(defaultClienteState);
-  }
-
   const defaultTrackingsState = {
     numeroTracking: "",
     peso: 1,
@@ -105,18 +101,6 @@
       0
     );
   });
-
-  function resetInfo() {
-    facturaInfo = {
-      casillero: null,
-      trackings: [],
-      total: 0,
-      empleadoId: user!.id,
-      sucursalId: sucursales!.sucursalId,
-      clienteId: 0,
-      fecha: "",
-    };
-  }
 
   function resetAll() {
     cliente = structuredClone(defaultClienteState);

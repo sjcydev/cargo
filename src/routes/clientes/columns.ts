@@ -91,13 +91,14 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
         year: "numeric",
       });
 
-      const nac = createRawSnippet<[Date | null]>((getNacimiento) => {
+      const nac = createRawSnippet<[string | null]>((getNacimiento) => {
         const nacimiento = getNacimiento();
         return {
-          render: () => `<div>${formatter.format(nacimiento!)}</div>`,
+          render: () => `<div>${formatter.format(new Date(nacimiento!))}</div>`,
         };
       });
 
+      //@ts-ignore
       return renderSnippet(nac, row.original.nacimiento);
     },
   },
