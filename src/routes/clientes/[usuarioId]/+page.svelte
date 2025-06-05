@@ -1,7 +1,6 @@
 <script lang="ts">
   import InnerLayout from "$lib/components/inner-layout.svelte";
   import Input from "$lib/components/ui/input/input.svelte";
-  import Separator from "$lib/components/ui/separator/separator.svelte";
   import type { PageData } from "./$types";
   import * as Form from "$lib/components/ui/form";
   import * as Card from "$lib/components/ui/card";
@@ -16,10 +15,8 @@
   import {
     Edit,
     Save,
-    Send,
     User,
     Mail,
-    Phone,
     CreditCard,
     Building2,
     Package,
@@ -79,7 +76,7 @@
     },
   });
 
-  const { form: formData, enhance, message, submit } = form;
+  const { form: formData, enhance, submit } = form;
 
   // svelte-ignore state_referenced_locally
   $formData = {
@@ -425,6 +422,7 @@
           data={cliente.facturas}
           {columns}
           selectionChange={handleSelectionChange}
+          regular={true}
         />
       </Card.Content>
     </Card.Root>

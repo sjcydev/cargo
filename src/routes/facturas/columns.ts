@@ -1,17 +1,18 @@
 import type { ColumnDef } from "@tanstack/table-core";
 import { createColumnHelper } from "@tanstack/table-core";
-import type { FacturasWithCliente } from "$lib/server/db/schema";
+import type { FacturasWithCliente, Sucursales } from "$lib/server/db/schema";
 import { createRawSnippet } from "svelte";
 import { renderComponent, renderSnippet } from "$lib/components/ui/data-table";
 import DataTableActions from "$lib/facturacion/data-table-actions.svelte";
 import DataSortableButton from "$lib/components/data-sortable-button.svelte";
 import Estado from "$lib/facturacion/facturas/estado.svelte";
 import Checkbox from "$lib/components/data-table-checkbox.svelte";
-import { invalidate } from "$app/navigation";
 
 const columnHelper = createColumnHelper<FacturasWithCliente>();
 
-export const columns = (rol: "ADMIN" | "EMPLEADO" | "SECRETARIA" | undefined): ColumnDef<FacturasWithCliente>[] => [
+export const columns = (
+  rol: "ADMIN" | "EMPLEADO" | "SECRETARIA" | undefined
+): ColumnDef<FacturasWithCliente>[] => [
   {
     id: "select",
     cell: ({ row, table }) => {
@@ -95,6 +96,22 @@ export const columns = (rol: "ADMIN" | "EMPLEADO" | "SECRETARIA" | undefined): C
     header: "Telefono",
   },
   {
+    accessorFn: (row) => row.cliente!.sucursal,
+    id: "sucursal",
+    accessorKey: "sucursal",
+    header: "Sucursal",
+    cell: ({ row }) => {
+      const sucursal = createRawSnippet<[Sucursales]>((getSucursal) => {
+        const sucursal = getSucursal();
+        return {
+          render: () => `<div>${sucursal}</div>`,
+        };
+      });
+
+      return renderSnippet(sucursal, row.original.cliente!.sucursal);
+    },
+  },
+  {
     accessorFn: (row) => row.total,
     accessorKey: "total",
     id: "total",
@@ -124,7 +141,7 @@ export const columns = (rol: "ADMIN" | "EMPLEADO" | "SECRETARIA" | undefined): C
     cell: ({ row }) => {
       return renderComponent(DataTableActions, {
         id: String(row.original.facturaId),
-        rol
+        rol,
       });
     },
     enableHiding: false,

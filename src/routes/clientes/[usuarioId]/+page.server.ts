@@ -9,15 +9,6 @@ import { clientesRegisterSchema } from "$lib/clientes_registrar/schema";
 import { capitaliseWord } from "$lib/utils";
 
 export const load = (async ({ params }) => {
-  // const cliente = await db.query.usuarios.findFirst({
-  //   where: eq(usuarios.casillero, Number(params.usuarioId)),
-  //   with: {
-  //     facturas: {
-  //       orderBy: [desc(facturas.facturaId)],
-  //     },
-  //   },
-  // });
-
   const clienteData = await db
     .select()
     .from(usuarios)
@@ -31,7 +22,7 @@ export const load = (async ({ params }) => {
   const facturasData = await db
     .select()
     .from(facturas)
-    .where(eq(facturas.clienteId, Number(params.usuarioId)))
+    .where(eq(facturas.casillero, Number(params.usuarioId)))
     .orderBy(desc(facturas.facturaId));
 
   const cliente = clienteData.map((cliente) => ({
