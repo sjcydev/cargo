@@ -5,12 +5,16 @@
   import { Button } from "$lib/components/ui/button";
   import { columns as createColumns } from "./columns";
   import { toast } from "svelte-sonner";
+  import * as Tabs from "$lib/components/ui/tabs/index";
+  import { page } from "$app/state";
+  import { goto } from "$app/navigation";
+  import type { Sucursales } from "$lib/server/db/schema";
 
-  let { data: pageData }: { data: PageData } = $props();
-  let { facturas: data } = pageData;
+  let { data }: { data: PageData } = $props();
+  let { facturas, sucursales, rol, pagination } = data;
   let selectedFacturas = $state<number[]>([]);
 
-  const columns = createColumns(pageData.rol);
+  const columns = createColumns(rol);
 
   async function enviarFacturas() {
     if (selectedFacturas.length === 0) {
@@ -34,29 +38,15 @@
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Error al enviar las facturas");
+        toast.error("Hubo un error al enviar las facturas");
       }
 
-      if (result.failed > 0) {
-        const failedDetails = result.details
-          .map(
-            (d: { facturaId: number; error: string }) =>
-              `Factura ${d.facturaId}: ${d.error}`
-          )
-          .join("\n");
-
-        toast.error(
-          `Se enviaron ${result.successful} de ${result.successful + result.failed} facturas.\n\nErrores:\n${failedDetails}`,
-          { id: toastId }
-        );
-      } else {
-        toast.success(
-          `Se enviaron exitosamente ${result.successful} facturas`,
-          { id: toastId }
-        );
-        // Refresh the page to update the list
-        window.location.reload();
-      }
+      toast.info(
+        "Las facturas se están procesando en segundo plano para ser enviadas. Una vez que se envíen, se actualizará la lista.",
+        {
+          id: toastId,
+        }
+      );
     } catch (error) {
       console.error("Error sending emails:", error);
       const errorMessage =
@@ -69,6 +59,59 @@
 
   function onSelectionChange(selected: number[]) {
     selectedFacturas = selected;
+  }
+
+  let currentSucursal = $state(
+    rol === "ADMIN" ? "todos" : sucursales[0].sucursal
+  );
+
+  $effect(() => {
+    const currentPage = Number(page.url.searchParams.get("page") ?? "1");
+    const actualPage = pagination.page;
+
+    if (currentPage !== actualPage) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("page", actualPage.toString());
+
+      // Update the URL without full reload
+      goto(`${url.pathname}?${url.searchParams.toString()}`, {
+        replaceState: true,
+        keepFocus: true,
+        noScroll: true,
+      });
+    }
+  });
+
+  $effect(() => {
+    const currentSucursalValue = page.url.searchParams.get("sucursalId");
+    if (currentSucursalValue) {
+      currentSucursal =
+        sucursales.find(
+          (s: Sucursales) => s.sucursalId?.toString() === currentSucursalValue
+        )?.sucursal ?? "todos";
+    }
+  });
+
+  function handleTabChange(value: string) {
+    const url = new URL(window.location.href);
+    if (value === "todos") {
+      url.searchParams.delete("sucursalId");
+      goto(`${url.pathname}?${url.searchParams.toString()}`, {
+        replaceState: true,
+        keepFocus: true,
+        noScroll: true,
+      });
+      return;
+    }
+
+    const sucursal = sucursales.find((s: Sucursales) => s.sucursal === value);
+    currentSucursal = value;
+    url.searchParams.set("sucursalId", sucursal!.sucursalId.toString());
+    goto(`${url.pathname}?${url.searchParams.toString()}`, {
+      replaceState: true,
+      keepFocus: true,
+      noScroll: true,
+    });
   }
 </script>
 
@@ -90,5 +133,23 @@
 </svelte:head>
 
 <InnerLayout title={"Facturas No Enviadas"} {actions}>
-  <VerFacturas {data} {columns} selectionChange={onSelectionChange} />
+  <Tabs.Root bind:value={currentSucursal} onValueChange={handleTabChange}>
+    {#if sucursales.length > 1}
+      <Tabs.List class="border-b border-gray-200 mb-3">
+        <Tabs.Trigger value="todos">Todos</Tabs.Trigger>
+        {#each sucursales as sucursal}
+          <Tabs.Trigger value={`${sucursal.sucursal}`}
+            >{sucursal.sucursal}</Tabs.Trigger
+          >
+        {/each}
+      </Tabs.List>
+    {/if}
+    <VerFacturas
+      data={facturas}
+      {columns}
+      selectionChange={onSelectionChange}
+      regular={true}
+      pagination={false}
+    />
+  </Tabs.Root>
 </InnerLayout>

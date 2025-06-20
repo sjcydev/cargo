@@ -12,6 +12,7 @@
     selectionChange,
     paginationData,
     regular,
+    showPagination = true,
   }: {
     columns: any;
     data: FacturasWithCliente[] | Facturas[];
@@ -19,6 +20,7 @@
     selectionChange?: (selected: number[]) => void;
     paginationData?: any;
     regular?: boolean;
+    showPagination?: boolean;
   } = $props();
 
   function handleRowClick(row: any) {
@@ -37,6 +39,7 @@
     {selectionChange}
     showTotal={true}
     onRowClick={handleRowClick}
+    showPagination={false}
   />
 {:else}
   <DataTable

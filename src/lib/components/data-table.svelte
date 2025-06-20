@@ -38,6 +38,7 @@
     showTotal?: boolean;
     onRowClick?: (row: TData) => void;
     headerless?: boolean;
+    showPagination?: boolean;
   };
 
   let {
@@ -49,6 +50,7 @@
     showTotal = false,
     onRowClick,
     headerless = false,
+    showPagination = true,
   }: DataTableProps<TData, TValue> = $props();
   let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
   let sorting = $state<SortingState>([]);
@@ -106,6 +108,7 @@
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    manualPagination: !showPagination,
     globalFilterFn: "includesString",
     onPaginationChange: (updater) => {
       if (typeof updater === "function") {
@@ -261,6 +264,8 @@
     Total: ${currentTotal.toFixed(2)}
   </div>
 {/if}
+
+{#if showPagination}
 <div class="flex items-center justify-end space-x-2 py-4">
   <Button
     variant="outline"
@@ -279,3 +284,4 @@
     Next
   </Button>
 </div>
+{/if}
