@@ -232,6 +232,13 @@
       "when": 1750387245975,
       "tag": "0032_add_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "5",
+      "when": 1751208049447,
+      "tag": "0033_update_indexes",
+      "breakpoints": true
     }
   ]
 }

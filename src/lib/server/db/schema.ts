@@ -113,6 +113,7 @@ export const usuarios = mysqlTable("usuarios", {
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 }, (table) => ({
+  casilleroIdx: index("usuarios_casillero_idx").on(table.casillero),
   // INDEX 1: Search composite (CRITICAL for your /clientes endpoint)
   // Covers: All search patterns in your current UsuariosRepository
   searchIdx: index("usuarios_search_idx").on(
@@ -172,6 +173,7 @@ export const facturas = mysqlTable("facturas", {
     table.sucursalId,    // Common filter
     table.facturaId      // For ORDER BY DESC
   ),
+  indexIdx: index("facturas_index_idx").on(table.facturaId),
 
   // INDEX 2: Search optimization
   // Covers: casillero and facturaId searches

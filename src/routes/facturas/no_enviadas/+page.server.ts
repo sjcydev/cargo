@@ -1,9 +1,14 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { db } from "$lib/server/db";
-import { facturas, trackings, type Sucursales } from "$lib/server/db/schema";
-import { eq } from "drizzle-orm";
+import {
+  facturas,
+  usuarios,
+  sucursales,
+  trackings,
+  type Sucursales,
+} from "$lib/server/db/schema";
+import { eq, and, desc } from "drizzle-orm";
 import { redirect } from "@sveltejs/kit";
-import { API_BASE_URL, API_KEY } from "$env/static/private";
 
 export const load = (async ({ locals, url }) => {
   const { user } = locals;
@@ -12,62 +17,48 @@ export const load = (async ({ locals, url }) => {
     throw redirect(302, "/login");
   }
 
-  const sucursalId = url.searchParams.get("sucursalId") ?? "";
-  let page = url.searchParams.get("page") ?? "1";
-  const limit = url.searchParams.get("limit") ?? "10";
-  const search = url.searchParams.get("search") ?? "";
+  const conditions = [eq(facturas.enviado, false)];
 
-  const queryParams = new URLSearchParams({
-    sucursalId: user.rol !== "ADMIN" ? user.sucursalId!.toString() : sucursalId,
-    page,
-    limit,
-    search,
-  });
-
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/facturas/no-enviados?${queryParams.toString()}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${API_KEY}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Request failed with status ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    const sucursalesData =
-      user.rol === "ADMIN"
-        ? data.sucursales
-        : data.sucursales.filter(
-            (sucursal: Sucursales) => sucursal.sucursalId === user.sucursalId
-          );
-
-    return {
-      facturas: data.facturas ?? [],
-      sucursales: sucursalesData,
-      rol: user.rol,
-      pagination: data.pagination,
-    };
-  } catch (e) {
-    console.error("Error fetching facturas:", e);
-    return {
-      facturas: [],
-      rol: user.rol,
-      sucursales: [],
-      pagination: {
-        page: 1,
-        limit: 10,
-        total: 0,
-        totalPages: 0,
-      },
-    };
+  if (user.rol !== "ADMIN") {
+    conditions.push(eq(facturas.sucursalId, user.sucursalId!));
   }
+
+  const sucursalesReq = db
+    .select({
+      sucursalId: sucursales.sucursalId,
+      sucursal: sucursales.sucursal,
+    })
+    .from(sucursales);
+
+  const [sucursalesData, facturasData] = await Promise.all([
+    user.rol === "ADMIN"
+      ? sucursalesReq
+      : sucursalesReq.where(eq(sucursales.sucursalId, user.sucursalId!)),
+    db
+      .select({
+        fecha: facturas.fecha,
+        facturaId: facturas.facturaId,
+        casillero: facturas.casillero,
+        total: facturas.total,
+        pagado: facturas.pagado,
+        retirados: facturas.retirados,
+        cliente: {
+          nombre: usuarios.nombre,
+          apellido: usuarios.apellido,
+          cedula: usuarios.cedula,
+          telefono: usuarios.telefono,
+          sucursal: sucursales.sucursal,
+          sucursalId: usuarios.sucursalId,
+        },
+      })
+      .from(facturas)
+      .where(and(...conditions))
+      .leftJoin(usuarios, eq(facturas.clienteId, usuarios.id))
+      .leftJoin(sucursales, eq(facturas.sucursalId, sucursales.sucursalId))
+      .orderBy(desc(facturas.facturaId)),
+  ]);
+
+  return { facturas: facturasData, sucursales: sucursalesData };
 }) satisfies PageServerLoad;
 
 export const actions = {

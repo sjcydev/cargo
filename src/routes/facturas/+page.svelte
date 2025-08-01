@@ -8,12 +8,15 @@
   import * as Tabs from "$lib/components/ui/tabs/index";
   import { page } from "$app/state";
   import type { Sucursales } from "$lib/server/db/schema";
+  import {onMount} from "svelte";
 
-  let { data: pageData }: { data: PageData } = $props();
-  let { facturas: data } = pageData;
+  let { data }: { data: PageData } = $props();
+  let { user, sucursales } = data;
+  let facturas = $state(data.facturas);
+
   let selectedFacturas = $state<number[]>([]);
 
-  const columns = createColumns(pageData.rol);
+  const columns = createColumns(user.rol);
 
   function handleSelectionChange(selected: number[]) {
     selectedFacturas = selected;
@@ -30,59 +33,16 @@
   }
 
   let currentSucursal = $state(
-    pageData.rol === "ADMIN" ? "todos" : pageData.sucursales[0].sucursal
+    user.rol === "ADMIN" ? "todos" : sucursales[0].sucursal
   );
 
-  $effect(() => {
-    const currentPage = Number(page.url.searchParams.get("page") ?? "1");
-    const actualPage = pageData.pagination.page;
+  let loadingMore = $state(false);
 
-    if (currentPage !== actualPage) {
-      const url = new URL(window.location.href);
-      url.searchParams.set("page", actualPage.toString());
-
-      // Update the URL without full reload
-      goto(`${url.pathname}?${url.searchParams.toString()}`, {
-        replaceState: true,
-        keepFocus: true,
-        noScroll: true,
-      });
-    }
-  });
-
-  $effect(() => {
-    const currentSucursalValue = page.url.searchParams.get("sucursalId");
-    if (currentSucursalValue) {
-      currentSucursal =
-        pageData.sucursales.find(
-          (s: Sucursales) => s.sucursalId?.toString() === currentSucursalValue
-        )?.sucursal ?? "todos";
-    }
-  });
-
-  function handleTabChange(value: string) {
-    const url = new URL(window.location.href);
-    if (value === "todos") {
-      url.searchParams.delete("sucursalId");
-      goto(`${url.pathname}?${url.searchParams.toString()}`, {
-        replaceState: true,
-        keepFocus: true,
-        noScroll: true,
-      });
-      return;
-    }
-
-    const sucursal = pageData.sucursales.find(
-      (s: Sucursales) => s.sucursal === value
-    );
-    currentSucursal = value;
-    url.searchParams.set("sucursalId", sucursal!.sucursalId.toString());
-    goto(`${url.pathname}?${url.searchParams.toString()}`, {
-      replaceState: true,
-      keepFocus: true,
-      noScroll: true,
-    });
-  }
+  onMount(async () => {
+    loadingMore = true;
+    const newFacturas = await fetch("/api/facturas", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ last: data.last }) }).then(res => {loadingMore = false; return res.json()});
+    facturas = [...facturas, ...newFacturas.facturas];
+  })
 </script>
 
 <svelte:head>
@@ -106,35 +66,34 @@
   <Tabs.Root
     bind:value={currentSucursal}
     class="mb-5"
-    onValueChange={handleTabChange}
   >
-    {#if pageData.sucursales.length > 1}
+    {#if sucursales.length > 1}
       <Tabs.List class="border-b border-gray-200">
         <Tabs.Trigger value="todos">Todos</Tabs.Trigger>
-        {#each pageData.sucursales as sucursal}
+        {#each sucursales as sucursal}
           <Tabs.Trigger value={`${sucursal.sucursal}`}
             >{sucursal.sucursal}</Tabs.Trigger
           >
         {/each}
       </Tabs.List>
     {/if}
-    {#if pageData.rol === "ADMIN"}
+    {#if user.rol === "ADMIN"}
       <Tabs.Content value="todos">
         <VerFacturas
-          {data}
+          data={facturas}
           {columns}
           selectionChange={handleSelectionChange}
-          paginationData={pageData.pagination}
+          loading={loadingMore}
         />
       </Tabs.Content>
     {/if}
-    {#each pageData.sucursales as sucursal}
+    {#each sucursales as sucursal}
       <Tabs.Content value={`${sucursal.sucursal}`}>
         <VerFacturas
-          {data}
+          data={facturas.filter(f => f.sucursalId === sucursal.sucursalId)}
           {columns}
           selectionChange={handleSelectionChange}
-          paginationData={pageData.pagination}
+          loading={loadingMore}
         />
       </Tabs.Content>
     {/each}

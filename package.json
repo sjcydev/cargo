@@ -60,6 +60,7 @@
     "@tanstack/table-core": "^8.20.5",
     "@types/pako": "^2.0.3",
     "apexcharts": "^4.4.0",
+    "caniuse-lite": "^1.0.30001731",
     "debounce": "^2.2.0",
     "drizzle-orm": "^0.33.0",
     "drizzle-seed": "^0.1.3",

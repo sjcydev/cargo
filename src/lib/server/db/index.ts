@@ -11,3 +11,4 @@ export const db: MySql2Database<typeof schema> = drizzle(client, {
   mode: "default",
   schema: schema,
 });
+

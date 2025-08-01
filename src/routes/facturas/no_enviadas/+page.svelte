@@ -11,10 +11,10 @@
   import type { Sucursales } from "$lib/server/db/schema";
 
   let { data }: { data: PageData } = $props();
-  let { facturas, sucursales, rol, pagination } = data;
+  let { facturas, sucursales, user } = data;
   let selectedFacturas = $state<number[]>([]);
 
-  const columns = createColumns(rol);
+  const columns = createColumns(user.rol);
 
   async function enviarFacturas() {
     if (selectedFacturas.length === 0) {
@@ -42,7 +42,7 @@
       }
 
       toast.info(
-        "Las facturas se están procesando en segundo plano para ser enviadas. Una vez que se envíen, se actualizará la lista.",
+        "Las facturas se están procesando en segundo plano para ser enviadas. Una vez que se envíen, se actualizará la lista. Puede tardar unos minutos.",
         {
           id: toastId,
         }
@@ -62,57 +62,8 @@
   }
 
   let currentSucursal = $state(
-    rol === "ADMIN" ? "todos" : sucursales[0].sucursal
+    user.rol === "ADMIN" ? "todos" : sucursales[0].sucursal
   );
-
-  $effect(() => {
-    const currentPage = Number(page.url.searchParams.get("page") ?? "1");
-    const actualPage = pagination.page;
-
-    if (currentPage !== actualPage) {
-      const url = new URL(window.location.href);
-      url.searchParams.set("page", actualPage.toString());
-
-      // Update the URL without full reload
-      goto(`${url.pathname}?${url.searchParams.toString()}`, {
-        replaceState: true,
-        keepFocus: true,
-        noScroll: true,
-      });
-    }
-  });
-
-  $effect(() => {
-    const currentSucursalValue = page.url.searchParams.get("sucursalId");
-    if (currentSucursalValue) {
-      currentSucursal =
-        sucursales.find(
-          (s: Sucursales) => s.sucursalId?.toString() === currentSucursalValue
-        )?.sucursal ?? "todos";
-    }
-  });
-
-  function handleTabChange(value: string) {
-    const url = new URL(window.location.href);
-    if (value === "todos") {
-      url.searchParams.delete("sucursalId");
-      goto(`${url.pathname}?${url.searchParams.toString()}`, {
-        replaceState: true,
-        keepFocus: true,
-        noScroll: true,
-      });
-      return;
-    }
-
-    const sucursal = sucursales.find((s: Sucursales) => s.sucursal === value);
-    currentSucursal = value;
-    url.searchParams.set("sucursalId", sucursal!.sucursalId.toString());
-    goto(`${url.pathname}?${url.searchParams.toString()}`, {
-      replaceState: true,
-      keepFocus: true,
-      noScroll: true,
-    });
-  }
 </script>
 
 {#snippet actions()}
@@ -133,23 +84,38 @@
 </svelte:head>
 
 <InnerLayout title={"Facturas No Enviadas"} {actions}>
-  <Tabs.Root bind:value={currentSucursal} onValueChange={handleTabChange}>
+  <Tabs.Root bind:value={currentSucursal}>
     {#if sucursales.length > 1}
       <Tabs.List class="border-b border-gray-200 mb-3">
         <Tabs.Trigger value="todos">Todos</Tabs.Trigger>
         {#each sucursales as sucursal}
           <Tabs.Trigger value={`${sucursal.sucursal}`}
-            >{sucursal.sucursal}</Tabs.Trigger
+          >{sucursal.sucursal}</Tabs.Trigger
           >
         {/each}
       </Tabs.List>
     {/if}
-    <VerFacturas
-      data={facturas}
-      {columns}
-      selectionChange={onSelectionChange}
-      regular={true}
-      pagination={false}
-    />
+    {#if user.rol === "ADMIN"}
+      <Tabs.Content value="todos">
+        <VerFacturas
+          data={facturas}
+          {columns}
+          selectionChange={onSelectionChange}
+          regular={true}
+          showPagination={false}
+        />
+      </Tabs.Content>
+    {/if}
+    {#each sucursales as sucursal}
+      <Tabs.Content value={sucursal.sucursal}>
+        <VerFacturas
+          data={facturas.filter((f) => f.cliente.sucursalId === sucursal.sucursalId )}
+          {columns}
+          selectionChange={onSelectionChange}
+          regular={true}
+          showPagination={false}
+        />
+      </Tabs.Content>
+    {/each}
   </Tabs.Root>
 </InnerLayout>

@@ -5,63 +5,60 @@ import { renderComponent, renderSnippet } from "$lib/components/ui/data-table";
 import DataTableActions from "./data-table-actions.svelte";
 import DataSortableButton from "../../lib/components/data-sortable-button.svelte";
 
+function normalizeString(str: string) {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function accentInsensitiveFilter(row: any, columnId: any , filterValue: any) {
+  const rowValue = row.getValue(columnId);
+  if (typeof rowValue !== "string") return false;
+  return normalizeString(rowValue).includes(normalizeString(filterValue));
+}
+
 export const columns: ColumnDef<UsuariosWithSucursal>[] = [
   {
     accessorFn: (row) => row.casillero,
     accessorKey: "casillero",
     id: "casillero",
-    header: ({ column }) =>
-      renderComponent(DataSortableButton, {
-        label: "ID",
-        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-      }),
+    header: "ID",
     enableHiding: false,
+    filterFn: "equalsString"
   },
   {
     accessorFn: (row) => row.nombre,
     accessorKey: "nombre",
     id: "nombre",
-    header: ({ column }) =>
-      renderComponent(DataSortableButton, {
-        label: "Nombre",
-        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-      }),
+    header: "Nombre",
+    filterFn: accentInsensitiveFilter,
   },
   {
     accessorFn: (row) => row.apellido,
     accessorKey: "apellido",
     id: "apellido",
-    header: ({ column }) =>
-      renderComponent(DataSortableButton, {
-        label: "Apellido",
-        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-      }),
+    header: "Apellido",
+    filterFn: accentInsensitiveFilter,
   },
   {
     accessorFn: (row) => row.correo,
     accessorKey: "correo",
     id: "correo",
-    header: ({ column }) =>
-      renderComponent(DataSortableButton, {
-        label: "Correo",
-        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-      }),
+    header: "Correo",
+    enableGlobalFilter: false,
+
   },
   {
     accessorFn: (row) => row.cedula,
     accessorKey: "cedula",
     id: "cedula",
-    header: ({ column }) =>
-      renderComponent(DataSortableButton, {
-        label: "Cedula",
-        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-      }),
+    header: "Cedula",
+    enableGlobalFilter: false,
   },
   {
     accessorFn: (row) => row.telefono,
     accessorKey: "telefono",
     id: "telefono",
     header: "Telefono",
+    enableGlobalFilter: false,
   },
   {
     accessorFn: (row) => row.sucursal,
@@ -78,6 +75,7 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
 
       return renderSnippet(sucursal, row.original.sucursal);
     },
+    enableGlobalFilter: false,
   },
   {
     accessorFn: (row) => row.nacimiento,
@@ -101,12 +99,14 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
       //@ts-ignore
       return renderSnippet(nac, row.original.nacimiento);
     },
+    enableGlobalFilter: false,
   },
   {
     accessorFn: (row) => row.sexo,
     accessorKey: "sexo",
     id: "sexo",
     header: "Sexo",
+    enableGlobalFilter: false,
   },
   {
     id: "actions",

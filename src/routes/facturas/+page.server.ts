@@ -1,73 +1,68 @@
 import type { PageServerLoad } from "./$types";
 import { db } from "$lib/server/db";
-import { facturas, trackings, type Sucursales } from "$lib/server/db/schema";
-import { eq } from "drizzle-orm";
+import {
+  facturas,
+  sucursales,
+  trackings,
+  usuarios,
+} from "$lib/server/db/schema";
+import { eq, and, desc } from "drizzle-orm";
 import { redirect, type Actions } from "@sveltejs/kit";
-import { API_BASE_URL, API_KEY } from "$env/static/private";
 
-export const load = (async ({ locals, url }) => {
+export const load = (async ({ locals }) => {
   const { user } = locals;
 
   if (!user) {
     throw redirect(302, "/login");
   }
 
-  const sucursalId = url.searchParams.get("sucursalId") ?? "";
-  let page = url.searchParams.get("page") ?? "1";
-  const limit = url.searchParams.get("limit") ?? "10";
-  const search = url.searchParams.get("search") ?? "";
+  const sucursalesReq = db
+    .select({
+      sucursalId: sucursales.sucursalId,
+      sucursal: sucursales.sucursal,
+    })
+    .from(sucursales);
 
-  const queryParams = new URLSearchParams({
-    sucursalId: user.rol !== "ADMIN" ? user.sucursalId!.toString() : sucursalId,
-    page,
-    limit,
-    search,
-  });
+  const conditions = [eq(facturas.enviado, true)];
 
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/facturas?${queryParams.toString()}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${API_KEY}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Request failed with status ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    const sucursalesData =
-      user.rol === "ADMIN"
-        ? data.sucursales
-        : data.sucursales.filter(
-            (sucursal: Sucursales) => sucursal.sucursalId === user.sucursalId
-          );
-
-    return {
-      facturas: data.facturas ?? [],
-      sucursales: sucursalesData,
-      rol: user.rol,
-      pagination: data.pagination,
-    };
-  } catch (e) {
-    console.error("Error fetching facturas:", e);
-    return {
-      facturas: [],
-      rol: user.rol,
-      sucursales: [],
-      pagination: {
-        page: 1,
-        limit: 10,
-        total: 0,
-        totalPages: 0,
-      },
-    };
+  if (user.rol !== "ADMIN") {
+    conditions.push(eq(facturas.sucursalId, user.sucursalId!));
   }
+
+  const [sucursalesData, facturasData] = await Promise.all([
+    user.rol === "ADMIN"
+      ? sucursalesReq
+      : sucursalesReq.where(eq(sucursales.sucursalId, user.sucursalId!)),
+    db
+      .select({
+        fecha: facturas.fecha,
+        facturaId: facturas.facturaId,
+        casillero: facturas.casillero,
+        total: facturas.total,
+        pagado: facturas.pagado,
+        retirados: facturas.retirados,
+        sucursalId: facturas.sucursalId,
+        cliente: {
+          nombre: usuarios.nombre,
+          apellido: usuarios.apellido,
+          cedula: usuarios.cedula,
+          telefono: usuarios.telefono,
+          sucursal: sucursales.sucursal,
+        },
+      })
+      .from(facturas)
+      .where(and(...conditions))
+      .leftJoin(usuarios, eq(facturas.clienteId, usuarios.id))
+      .leftJoin(sucursales, eq(facturas.sucursalId, sucursales.sucursalId))
+      .orderBy(desc(facturas.facturaId))
+      .limit(100),
+  ]);
+
+  return {
+    facturas: facturasData,
+    sucursales: sucursalesData,
+    last: facturasData[facturasData.length - 1].facturaId,
+  };
 }) satisfies PageServerLoad;
 
 export const actions = {
