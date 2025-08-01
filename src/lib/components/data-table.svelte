@@ -25,6 +25,8 @@
   import { goto, pushState } from "$app/navigation";
   import { SyncLoader as Loader } from "svelte-loading-spinners";
   import { Loader2 } from "lucide-svelte";
+  import { filterFns } from '@tanstack/table-core';
+  import type { GlobalFilterFn } from '@tanstack/table-core';
 
   type TDataFactura = Partial<TData> & {
     facturaId: number;
@@ -82,6 +84,21 @@
     }
   });
 
+  export const globalFilterFn = (row, columnId, filterValue) => {
+  const column = row
+    .getAllCells()
+    .find((cell) => cell.column.id === columnId)?.column;
+
+  const customFn = column?.columnDef.meta?.globalFilterFn;
+
+  if (typeof customFn === 'function') {
+    return customFn(row, columnId, filterValue);
+  }
+
+  // fallback to built-in equalsString
+  return filterFns.equalsString(row, columnId, filterValue);
+};
+
   const table = createSvelteTable({
     get data() {
       return data;
@@ -112,7 +129,7 @@
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     manualPagination: !showPagination,
-    globalFilterFn: "equalsString",
+    globalFilterFn,
     autoResetPageIndex: false,
     onPaginationChange: (updater) => {
       if (typeof updater === "function") {

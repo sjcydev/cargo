@@ -3,17 +3,22 @@ import type { UsuariosWithSucursal, Sucursales } from "$lib/server/db/schema";
 import { createRawSnippet } from "svelte";
 import { renderComponent, renderSnippet } from "$lib/components/ui/data-table";
 import DataTableActions from "./data-table-actions.svelte";
-import DataSortableButton from "../../lib/components/data-sortable-button.svelte";
+import { normalizeString } from "$lib/utils";
+import type { FilterFn } from "@tanstack/table-core";
 
-function normalizeString(str: string) {
-  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-}
+export const accentInsensitiveFilter: FilterFn<any> = (
+  row,
+  columnId,
+  filterValue
+) => {
+  const value = row.getValue(columnId);
+  if (value == null) return false;
 
-function accentInsensitiveFilter(row: any, columnId: any , filterValue: any) {
-  const rowValue = row.getValue(columnId);
-  if (typeof rowValue !== "string") return false;
-  return normalizeString(rowValue).includes(normalizeString(filterValue));
-}
+  const valueNormalized = normalizeString(String(value));
+  const filterNormalized = normalizeString(String(filterValue));
+
+  return valueNormalized.includes(filterNormalized);
+};
 
 export const columns: ColumnDef<UsuariosWithSucursal>[] = [
   {
@@ -22,21 +27,26 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
     id: "casillero",
     header: "ID",
     enableHiding: false,
-    filterFn: "equalsString"
   },
   {
     accessorFn: (row) => row.nombre,
     accessorKey: "nombre",
     id: "nombre",
     header: "Nombre",
-    filterFn: accentInsensitiveFilter,
+    enableGlobalFilter: true,
+    meta: {
+      globalFilterFn: accentInsensitiveFilter
+    }
   },
   {
     accessorFn: (row) => row.apellido,
     accessorKey: "apellido",
     id: "apellido",
     header: "Apellido",
-    filterFn: accentInsensitiveFilter,
+    enableGlobalFilter: true,
+    meta: {
+      globalFilterFn: accentInsensitiveFilter
+    }
   },
   {
     accessorFn: (row) => row.correo,
