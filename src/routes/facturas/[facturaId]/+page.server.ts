@@ -1,12 +1,11 @@
 import type { PageServerLoad, Actions } from "./$types";
 import { db } from "$lib/server/db";
-import { eq, and, inArray, getTableColumns } from "drizzle-orm";
+import { eq, inArray, getTableColumns } from "drizzle-orm";
 import {
   facturas,
   trackings,
   sucursales,
   usuarios,
-  type Sucursales,
   type UsuariosWithSucursal,
 } from "$lib/server/db/schema";
 import { getFriendlyUrl } from "$lib/server/s3";
@@ -15,11 +14,6 @@ import { redirect } from "@sveltejs/kit";
 
 export const load = (async ({ params }) => {
   const facturaId = params.facturaId;
-
-  // const factura = await db.query.facturas.findFirst({
-  //   where: eq(facturas.facturaId, Number(facturaId)),
-  //   with: { trackings: true, cliente: { with: { sucursal: true } } },
-  // });
 
   const facturaData = await db
     .select({

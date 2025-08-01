@@ -4,7 +4,7 @@
   import * as Card from "$lib/components/ui/card";
   import Button from "$lib/components/ui/button/button.svelte";
   import Separator from "$lib/components/ui/separator/separator.svelte";
-  import { Download, Send } from "lucide-svelte";
+  import {Loader2, Download, Send } from "lucide-svelte";
   import * as Dialog from "$lib/components/ui/dialog";
   import ClienteInfo from "$lib/facturacion/facturas/components/cliente-info.svelte";
   import MetodoPago from "$lib/facturacion/facturas/components/metodo-pago.svelte";
@@ -51,14 +51,23 @@
     }
   }
 
+  let descargando = $state(false);
+
   async function downloadFactura() {
-    await generateInvoice({
-      info: data.factura,
-      cliente: data.factura.cliente!,
-      company: data.company!,
-      logo: data.logo!,
-      descargar: true,
-    });
+    descargando = true;
+
+    const url = `/api/facturas/download?facturaId=${data.factura.facturaId}`;
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = ''; // Let server headers set filename
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    setTimeout(() => {
+      descargando = false;
+    }, 1600)
   }
 </script>
 
@@ -79,9 +88,13 @@
       Cancelar Factura
     </Button>
   {/if}
-  <Button class="font-semibold" onclick={downloadFactura}
-    >Descargar <Download /></Button
-  >
+  <Button onclick={downloadFactura} disabled={descargando}>
+    {#if descargando}
+      Descargando... <Loader2 class="my-2 h-4 w-4 animate-spin" />
+    {:else}
+      Descargar <Download />
+    {/if}
+  </Button>
 {/snippet}
 
 <DeleteDialog
