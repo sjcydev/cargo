@@ -8,6 +8,8 @@
     BookText,
     Settings,
     UserPlus,
+    Handshake,
+    FileText,
   } from "lucide-svelte";
   import { page } from "$app/state";
 
@@ -64,6 +66,41 @@
         admin: true,
       },
     ],
+    corporativos: [
+      {
+        icon: Handshake,
+        url: "/corporativos",
+        title: "Corporativos",
+        admin: true,
+      },
+      {
+        title: "Facturación",
+        url: "/corporativos/manifiestos",
+        icon: FileText,
+        isActive: true,
+        admin: true,
+        items: [
+          {
+            icon: FileText,
+            url: "/corporativos/manifiestos",
+            title: "Manifiestos",
+            admin: true,
+          },
+          {
+            icon: ReceiptText,
+            url: "/corporativos/manifiestos/generar",
+            title: "Generar",
+            admin: true,
+          },
+        ],
+      },
+      {
+        icon: FileSearch,
+        url: "/trackings",
+        title: "Extraviados/Perdidos",
+        admin: true,
+      },
+    ],
   };
 
   const navSecondary = [
@@ -88,6 +125,7 @@
   import NavMain from "$lib/components/nav-main.svelte";
   import NavSecondary from "$lib/components/nav-secondary.svelte";
   import NavUser from "$lib/components/nav-user.svelte";
+  import NavCorporativo from "./nav-corporativo.svelte";
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
   import Command from "lucide-svelte/icons/command";
   import type { ComponentProps } from "svelte";
@@ -140,14 +178,22 @@
       </Sidebar.MenuItem>
     </Sidebar.Menu>
   </Sidebar.Header>
-  <Sidebar.Content class="justify-between">
+  <Sidebar.Content>
     <NavMain
       items={data.navMain}
       {protectedRoutes}
       currentRoute={page.url.pathname}
       rol={user.rol as "ADMIN" | "EMPLEADO" | "SECRETARIA" | undefined}
     />
-    <NavSecondary items={navSecondary} rol={user.rol} />
+    {#if user.rol === "ADMIN"}
+      <NavCorporativo
+        items={data.corporativos}
+        rol={user.rol}
+        {protectedRoutes}
+        currentRoute={page.url.pathname}
+      />
+    {/if}
+    <NavSecondary items={navSecondary} rol={user.rol} class="mt-auto" />
   </Sidebar.Content>
   <Sidebar.Footer>
     <NavUser {user} />

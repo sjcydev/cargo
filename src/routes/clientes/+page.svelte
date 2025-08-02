@@ -4,12 +4,9 @@
   import DataTable from "../../lib/components/data-table.svelte";
   import { columns } from "./columns";
   import * as Tabs from "$lib/components/ui/tabs/index";
-  import { goto } from "$app/navigation";
-  import { page } from "$app/state";
-  import { onMount, getContext } from "svelte";
-
+  import { onMount } from "svelte";
   import InnerLayout from "$lib/components/inner-layout.svelte";
-  import type { Sucursales } from "$lib/server/db/schema";
+  import { goto } from "$app/navigation";
 
   let { data }: { data: PageData } = $props();
   let clientes = $state(data.clientes);
@@ -19,19 +16,26 @@
   onMount(async () => {
     loading = true;
 
-      const newData = await fetch('/api/clientes', {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({last: data.last})}).then(res => {loading = false; return res.json()});
+    const newData = await fetch("/api/clientes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ last: data.last }),
+    }).then((res) => {
+      loading = false;
+      return res.json();
+    });
 
-      clientes = [...clientes, ...newData.clientes];
+    clientes = [...clientes, ...newData.clientes];
   });
 
- function handleRowClick(row: any) {
+  function handleRowClick(row: any) {
     if (row.casillero) {
       goto(`/clientes/${row.casillero}`);
     }
   }
 
   let currentSucursal = $state(
-    data.user.rol === "ADMIN" ? "todos" : data.sucursales[0].sucursal
+    data.user?.rol === "ADMIN" ? "todos" : data.sucursales[0].sucursal,
   );
 </script>
 
@@ -44,21 +48,18 @@
 {/snippet}
 
 <InnerLayout title={"Clientes"} {actions}>
-  <Tabs.Root
-    bind:value={currentSucursal}
-    class="space-y-5"
-  >
+  <Tabs.Root bind:value={currentSucursal} class="space-y-5">
     {#if data.sucursales.length > 1}
       <Tabs.List class="border-b border-gray-200">
         <Tabs.Trigger value="todos">Todos</Tabs.Trigger>
         {#each data.sucursales as sucursal}
-          <Tabs.Trigger value={`${sucursal.sucursal}`}
-            >{sucursal.sucursal}</Tabs.Trigger
-          >
+          <Tabs.Trigger value={`${sucursal.sucursal}`}>
+            {sucursal.sucursal}
+          </Tabs.Trigger>
         {/each}
       </Tabs.List>
     {/if}
-    {#if data.user.rol === "ADMIN"}
+    {#if data.user?.rol === "ADMIN"}
       <Tabs.Content value="todos">
         <DataTable
           {columns}

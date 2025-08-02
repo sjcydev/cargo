@@ -32,7 +32,7 @@
 </script>
 
 <Sidebar.Group>
-  <Sidebar.GroupLabel>Sistema</Sidebar.GroupLabel>
+  <Sidebar.GroupLabel>Corporativo</Sidebar.GroupLabel>
   <Sidebar.Menu>
     {#each items as mainItem (mainItem.title)}
       {#if (!protectedRoutes.has(mainItem.url) && (rol === "ADMIN" || !mainItem.admin)) || (mainItem.url === "/reportes" && rol === "SECRETARIA")}
@@ -50,7 +50,7 @@
                     class={cn(
                       props.class as ClassValue,
                       "hover:text-primary",
-                      `${(currentRoute.startsWith(mainItem.url) && mainItem.url !== "/") || currentRoute === mainItem.url ? "bg-muted text-primary" : ""}`
+                      `${(currentRoute.startsWith(mainItem.url) && mainItem.url !== "/corporativos") || currentRoute === mainItem.url ? "bg-muted text-primary" : ""}`,
                     )}
                   >
                     <mainItem.icon />
@@ -79,7 +79,7 @@
                             href={subItem.url}
                             class={cn(
                               "hover:text-primary",
-                              `${(currentRoute.startsWith(subItem.url) && subItem.url !== "/facturas") || currentRoute === subItem.url || (subItem.url === "/facturas" && /^\/facturas\/\d+/.test(currentRoute)) ? "bg-muted text-primary" : ""}`
+                              `${(currentRoute.startsWith(subItem.url) && subItem.url !== "/corporativos/manifiestos") || currentRoute === subItem.url || (subItem.url === "/facturas" && /^\/facturas\/\d+/.test(currentRoute)) ? "bg-muted text-primary" : ""}`,
                             )}
                           >
                             <span>{subItem.title}</span>
