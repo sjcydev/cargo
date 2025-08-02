@@ -4,7 +4,6 @@ import { createRawSnippet } from "svelte";
 import { renderComponent, renderSnippet } from "$lib/components/ui/data-table";
 import DataTableActions from "./data-table-actions.svelte";
 import { normalizeString } from "$lib/utils";
-import Fuse from "fuse.js";
 
 export const accentInsensitiveFilter: FilterFn<any> = (
   row,
@@ -17,15 +16,7 @@ export const accentInsensitiveFilter: FilterFn<any> = (
   const valueNormalized = normalizeString(String(value));
   const filterNormalized = normalizeString(String(filterValue));
 
-  const fuse = new Fuse([valueNormalized], {
-    includeScore: true,
-    threshold: 0.35, // Lower = stricter match
-    isCaseSensitive: false,
-    useExtendedSearch: false, 
-  });
-
-  const result = fuse.search(filterNormalized);
-  return result.length > 0;
+  return valueNormalized.includes(filterNormalized);
 };
 
 export const columns: ColumnDef<UsuariosWithSucursal>[] = [
