@@ -15,6 +15,7 @@
   import { toast } from "svelte-sonner";
   import { generateInvoice } from "$lib/facturacion/facturar/generatePDF";
   import DeleteDialog from "$lib/components/delete-dialog.svelte";
+  import DownloadDialog from "$lib/components/download-dialog.svelte";
 
   let { data }: { data: PageData } = $props();
   let showCancelDialog = $state<boolean>(false);
@@ -69,6 +70,8 @@
       descargando = false;
     }, 1600)
   }
+
+  let showDownloadDialog = $state(false);
 </script>
 
 <svelte:head>
@@ -88,7 +91,7 @@
       Cancelar Factura
     </Button>
   {/if}
-  <Button onclick={downloadFactura} disabled={descargando}>
+  <Button onclick={() => showDownloadDialog = true} disabled={descargando}>
     {#if descargando}
       Descargando... <Loader2 class="my-2 h-4 w-4 animate-spin" />
     {:else}
@@ -96,6 +99,8 @@
     {/if}
   </Button>
 {/snippet}
+
+<DownloadDialog bind:open={showDownloadDialog} data={data} />
 
 <DeleteDialog
   bind:open={showCancelDialog}
