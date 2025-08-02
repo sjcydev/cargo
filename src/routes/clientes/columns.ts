@@ -1,15 +1,15 @@
-import type { ColumnDef } from "@tanstack/table-core";
+import type { ColumnDef, FilterFn } from "@tanstack/table-core";
 import type { UsuariosWithSucursal, Sucursales } from "$lib/server/db/schema";
 import { createRawSnippet } from "svelte";
 import { renderComponent, renderSnippet } from "$lib/components/ui/data-table";
 import DataTableActions from "./data-table-actions.svelte";
 import { normalizeString } from "$lib/utils";
-import type { FilterFn } from "@tanstack/table-core";
+import Fuse from "fuse.js";
 
 export const accentInsensitiveFilter: FilterFn<any> = (
   row,
   columnId,
-  filterValue
+  filterValue,
 ) => {
   const value = row.getValue(columnId);
   if (value == null) return false;
@@ -17,7 +17,15 @@ export const accentInsensitiveFilter: FilterFn<any> = (
   const valueNormalized = normalizeString(String(value));
   const filterNormalized = normalizeString(String(filterValue));
 
-  return valueNormalized.includes(filterNormalized);
+  const fuse = new Fuse([valueNormalized], {
+    includeScore: true,
+    threshold: 0.35, // Lower = stricter match
+    isCaseSensitive: false,
+    useExtendedSearch: false, 
+  });
+
+  const result = fuse.search(filterNormalized);
+  return result.length > 0;
 };
 
 export const columns: ColumnDef<UsuariosWithSucursal>[] = [
@@ -29,20 +37,9 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
     enableHiding: false,
   },
   {
-    accessorFn: (row) => row.nombre,
-    accessorKey: "nombre",
-    id: "nombre",
+    accessorFn: (row) => `${row.nombre} ${row.apellido}`,
+    id: "nombreCompleto",
     header: "Nombre",
-    enableGlobalFilter: true,
-    meta: {
-      globalFilterFn: accentInsensitiveFilter
-    }
-  },
-  {
-    accessorFn: (row) => row.apellido,
-    accessorKey: "apellido",
-    id: "apellido",
-    header: "Apellido",
     enableGlobalFilter: true,
     meta: {
       globalFilterFn: accentInsensitiveFilter
@@ -54,7 +51,6 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
     id: "correo",
     header: "Correo",
     enableGlobalFilter: false,
-
   },
   {
     accessorFn: (row) => row.cedula,
