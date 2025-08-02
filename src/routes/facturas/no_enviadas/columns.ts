@@ -3,7 +3,6 @@ import { createColumnHelper } from "@tanstack/table-core";
 import type { FacturasWithCliente } from "$lib/server/db/schema";
 import { renderComponent } from "$lib/components/ui/data-table";
 import DataTableActions from "$lib/facturacion/data-table-actions.svelte";
-import DataSortableButton from "$lib/components/data-sortable-button.svelte";
 import Estado from "$lib/facturacion/facturas/estado.svelte";
 import Checkbox from "$lib/components/data-table-checkbox.svelte";
 
@@ -31,12 +30,14 @@ export const columns = (
         }),
       enableSorting: false,
       enableHiding: false,
+      enableGlobalFilter: false,
     },
     {
       accessorFn: (row) => row.fecha,
       accessorKey: "fecha",
       id: "fecha",
-      header: "Fecha"
+      header: "Fecha",
+      enableGlobalFilter: false,
     },
     {
       accessorFn: (row) => row.facturaId,
@@ -61,18 +62,26 @@ export const columns = (
         return `${nombre} ${apellido}`;
       },
     }),
-
     {
       accessorFn: (row) => row.cliente!.cedula,
       accessorKey: "cedula",
       id: "cedula",
-      header: "Cedula"
+      header: "Cedula",
+      enableGlobalFilter: false,
     },
     {
       accessorFn: (row) => row.cliente!.telefono,
       accessorKey: "telefono",
       id: "telefono",
       header: "Telefono",
+      enableGlobalFilter: false,
+    },
+    {
+      accessorFn: (row) => row.cliente!.sucursal,
+      accessorKey: "sucursal",
+      id: "sucursal",
+      header: "Sucursal",
+      enableGlobalFilter: false,
     },
     {
       accessorFn: (row) => row.total,
@@ -80,6 +89,7 @@ export const columns = (
       id: "total",
       header: "Total",
       cell: ({ row }) => row.original.total!.toFixed(2),
+      enableGlobalFilter: false,
     },
     columnHelper.display({
       id: "estado",
@@ -89,6 +99,7 @@ export const columns = (
           variant: row.original.enviado ? "success" : "destructive",
         });
       },
+      enableGlobalFilter: false,
     }),
     {
       id: "actions",
@@ -99,5 +110,6 @@ export const columns = (
         });
       },
       enableHiding: false,
+      enableGlobalFilter: false,
     },
   ];
