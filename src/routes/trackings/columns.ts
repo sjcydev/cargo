@@ -1,12 +1,8 @@
 import type { ColumnDef } from "@tanstack/table-core";
-import { createColumnHelper } from "@tanstack/table-core";
 import type { Trackings } from "$lib/server/db/schema";
 import { renderComponent } from "$lib/components/ui/data-table";
-import DataSortableButton from "$lib/components/data-sortable-button.svelte";
 import DataTableActions from "./data-table-actions.svelte";
 import Estado from "$lib/facturacion/facturas/estado.svelte";
-
-const columnHelper = createColumnHelper<Trackings>();
 
 export const columns: ColumnDef<Trackings>[] = [
   {
@@ -15,6 +11,7 @@ export const columns: ColumnDef<Trackings>[] = [
     id: "facturaId",
     header: "Factura",
     enableHiding: false,
+    enableGlobalFilter: false,
   },
   {
     accessorFn: (row) => row.numeroTracking,
@@ -22,12 +19,19 @@ export const columns: ColumnDef<Trackings>[] = [
     id: "numeroTracking",
     header: "Numero Tracking",
     enableHiding: false,
+    enableGlobalFilter: true,
+    meta: {
+      globalFilterFn: (row, columnId, filterValue) => {
+        return String(row.getValue(columnId)).includes(String(filterValue));
+      }
+    }
   },
   {
     accessorFn: (row) => row.peso,
     accessorKey: "peso",
     id: "peso",
     header: "Peso",
+    enableGlobalFilter: false,
   },
   {
     accessorFn: (row) => row.retirado,
@@ -38,6 +42,7 @@ export const columns: ColumnDef<Trackings>[] = [
       renderComponent(Estado, {
         variant: row.original.retirado ? "success" : "destructive",
       }),
+    enableGlobalFilter: false,
   },
   {
     accessorFn: (row) => row.retiradoAt,
@@ -46,6 +51,7 @@ export const columns: ColumnDef<Trackings>[] = [
     header: "Fecha de Retiro",
     cell: ({ row }) =>
       row.original.retiradoAt?.toLocaleDateString() ?? "No ha sido retirado",
+    enableGlobalFilter: false,
   },
   {
     id: "actions",
@@ -55,5 +61,6 @@ export const columns: ColumnDef<Trackings>[] = [
         id: row.original.trackingId,
       }),
     enableHiding: false,
+    enableGlobalFilter: false,
   },
 ];

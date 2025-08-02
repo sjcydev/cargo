@@ -9,11 +9,15 @@
     data,
     actions,
     selectionChange,
+    showPagination = true,
+    loading = false,
   }: {
     columns: any;
     data: FacturasWithCliente[] | Facturas[];
     actions?: Snippet;
     selectionChange?: (selected: number[]) => void;
+    showPagination?: boolean;
+    loading?: boolean;
   } = $props();
 
   function handleRowClick(row: any) {
@@ -31,4 +35,6 @@
   {selectionChange}
   showTotal={true}
   onRowClick={handleRowClick}
+  showPagination={showPagination}
+  {loading}
 />

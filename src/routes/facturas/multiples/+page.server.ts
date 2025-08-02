@@ -1,6 +1,12 @@
 import { db } from "$lib/server/db";
-import { facturas, trackings } from "$lib/server/db/schema";
-import { eq, inArray, and } from "drizzle-orm";
+import {
+  facturas,
+  trackings,
+  usuarios,
+  sucursales,
+  type UsuariosWithSucursal,
+} from "$lib/server/db/schema";
+import { eq, inArray, getTableColumns } from "drizzle-orm";
 import type { PageServerLoad } from "./$types";
 import type { Actions } from "@sveltejs/kit";
 import { getLocalTimeZone, today } from "@internationalized/date";
@@ -16,21 +22,55 @@ export const load = (async ({ url }) => {
     };
   }
 
+  const facturaData = await db
+    .select({
+      ...getTableColumns(facturas),
+    })
+    .from(facturas)
+    .where(inArray(facturas.facturaId, facturaIds));
+
+  if (!facturaData[0]) {
+    throw new Error("Factura not found");
+  }
+
+  const trackingsData = await db
+    .select({
+      ...getTableColumns(trackings),
+    })
+    .from(trackings)
+    .where(inArray(trackings.facturaId, facturaIds));
+
+  const clienteData = await db
+    .select({
+      ...getTableColumns(usuarios),
+      sucursal: { ...getTableColumns(sucursales) },
+    })
+    .from(usuarios)
+    .leftJoin(sucursales, eq(usuarios.sucursalId, sucursales.sucursalId))
+    .where(eq(usuarios.id, facturaData[0]?.clienteId))
+    .limit(1);
+
+  const facturasData = facturaData.map((f) => ({
+    ...f,
+    cliente: clienteData[0] as UsuariosWithSucursal,
+    trackings: trackingsData.filter((t) => t.facturaId === f.facturaId),
+  }));
+
   // Get the selected facturas and their related data
-  const facturasData = await db.query.facturas.findMany({
-    where: (facturas, { inArray }) => inArray(facturas.facturaId, facturaIds),
-    with: {
-      trackings: true,
-      cliente: {
-        with: {
-          sucursal: true,
-        },
-      },
-    },
-  });
+  // const facturasData = await db.query.facturas.findMany({
+  //   where: (facturas, { inArray }) => inArray(facturas.facturaId, facturaIds),
+  //   with: {
+  //     trackings: true,
+  //     cliente: {
+  //       with: {
+  //         sucursal: true,
+  //       },
+  //     },
+  //   },
+  // });
 
   // All facturas must be from the same client
-  const cliente = facturasData[0]?.cliente;
+  const cliente = clienteData[0] as UsuariosWithSucursal;
 
   return {
     facturas: facturasData,

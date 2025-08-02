@@ -1,0 +1,1 @@
+ALTER TABLE `facturas` ADD `cancelada` boolean DEFAULT false;

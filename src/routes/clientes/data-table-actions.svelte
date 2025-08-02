@@ -48,7 +48,11 @@
     <DropdownMenu.Item
       class="text-red-500 data-[highlighted]:text-white data-[highlighted]:bg-red-500"
     >
-      <button class="flex gap-2" onclick={() => (deleteDialogOpen = true)}>
+      <button
+        class="flex gap-2"
+        onclick={() => (deleteDialogOpen = true)}
+        tabindex="-1"
+      >
         <Trash2 /> Eliminar
       </button>
     </DropdownMenu.Item>

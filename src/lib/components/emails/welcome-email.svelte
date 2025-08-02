@@ -30,7 +30,7 @@
     ciudad: "MIAMI",
     zip: "33166-5461",
     pais: "UNITED STATES",
-    tel: "+1 786-622-1058",
+    tel: "+1 305-592-4534",
   };
 
   const fontFamily =

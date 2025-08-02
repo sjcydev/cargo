@@ -5,10 +5,19 @@
   import { Toaster } from "$lib/components/ui/sonner";
   import { page } from "$app/state";
   import SidebarPage from "$lib/components/sidebar-page.svelte";
-
+  import { SyncLoader as Loader } from "svelte-loading-spinners";
+  import { beforeNavigate, afterNavigate } from "$app/navigation";
   let protectedRoutes = new Set(["/login", "/password_update", "/onboarding"]);
 
   let { data, children } = $props();
+
+  let loading = $state(false);
+  beforeNavigate(() => {
+    loading = true;
+  });
+  afterNavigate(() => {
+    loading = false;
+  });
 </script>
 
 <Toaster position="top-right" richColors />
@@ -23,7 +32,13 @@
       {@render children()}
     {:else}
       <SidebarPage {user} logo={data.logo} companyName={data.company}>
-        {@render children()}
+        {#if loading}
+          <div class="flex items-center justify-center h-full">
+            <Loader color="#2563EB" />
+          </div>
+        {:else}
+          {@render children()}
+        {/if}
       </SidebarPage>
     {/if}
   {/await}

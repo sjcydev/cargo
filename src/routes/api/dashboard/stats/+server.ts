@@ -161,10 +161,10 @@ const getMonthlyStats = async (
   );
 
   const baseStatsQuery = {
-    total: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = true THEN ${facturas.total} ELSE 0 END), 0)`,
-    count: sql<number>`COUNT(*)`,
-    pagados: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = true THEN 1 ELSE 0 END), 0)`,
-    pendientes: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = false THEN 1 ELSE 0 END), 0)`,
+    total: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = true AND ${facturas.cancelada} = false THEN ${facturas.total} ELSE 0 END), 0)`,
+    count: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.cancelada} = false THEN 1 ELSE 0 END), 0)`,
+    pagados: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = true AND ${facturas.cancelada} = false THEN 1 ELSE 0 END), 0)`,
+    pendientes: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = false AND ${facturas.cancelada} = false THEN 1 ELSE 0 END), 0)`,
   };
 
   const [currentStats, previousStats, dailyRevenue, paymentStats] =
@@ -172,14 +172,14 @@ const getMonthlyStats = async (
       db.select(baseStatsQuery).from(facturas).where(whereClause),
       db
         .select({
-          total: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = true THEN ${facturas.total} ELSE 0 END), 0)`,
+          total: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = true AND ${facturas.cancelada} = false THEN ${facturas.total} ELSE 0 END), 0)`,
         })
         .from(facturas)
         .where(previousWhereClause),
       db
         .select({
           date: sql<string>`DATE(${facturas.createdAt})`,
-          total: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = true THEN ${facturas.total} ELSE 0 END), 0)`,
+          total: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = true AND ${facturas.cancelada} = false THEN ${facturas.total} ELSE 0 END), 0)`,
         })
         .from(facturas)
         .where(whereClause)
@@ -188,7 +188,7 @@ const getMonthlyStats = async (
       db
         .select({
           metodoPago: sql<string>`${facturas.metodoDePago}`,
-          count: sql<number>`COUNT(*)`,
+          count: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.cancelada} = false THEN 1 ELSE 0 END), 0)`,
         })
         .from(facturas)
         .where(whereClause)

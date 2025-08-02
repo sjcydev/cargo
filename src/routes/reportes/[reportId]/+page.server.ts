@@ -1,7 +1,7 @@
 import { db } from "$lib/server/db";
 import { reportes, facturas } from "$lib/server/db/schema";
-import { eq, between, and } from "drizzle-orm";
-import { error } from "@sveltejs/kit";
+import { eq, between, and, inArray } from "drizzle-orm";
+import { error, type Action } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
 import { getFriendlyUrl } from "$lib/server/s3";
 
@@ -20,12 +20,10 @@ export const load = (async ({ params }) => {
     throw error(404, "Report not found");
   }
 
-  const facturasData = await db.query.facturas.findMany({
-    where: and(
-      eq(facturas.sucursalId, report.sucursalId!),
-      between(facturas.pagadoAt, report.fechaInicial!, report.fechaFinal!)
-    ),
-  });
+  const facturasData = await db
+    .select()
+    .from(facturas)
+    .where(inArray(facturas.facturaId, JSON.parse(report.facturasIds ?? "[]")));
 
   const company = await db.query.companies.findFirst()!;
 
@@ -35,3 +33,13 @@ export const load = (async ({ params }) => {
     logo: getFriendlyUrl(company!.logo!),
   };
 }) satisfies PageServerLoad;
+
+export const actions = {
+  delete: async ({ request }) => {
+    const data = await request.formData();
+    const id = data.get("id") as string;
+
+    await db.delete(reportes).where(eq(reportes.reporteId, Number(id)));
+    return { success: true };
+  },
+} satisfies Actions;

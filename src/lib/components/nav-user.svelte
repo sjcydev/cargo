@@ -37,7 +37,10 @@
             class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
             <Avatar.Root class="h-8 w-8 rounded-lg">
-              <Avatar.Fallback class="rounded-lg">CN</Avatar.Fallback>
+              <Avatar.Fallback class="rounded-lg"
+                >{user.nombre.charAt(0).toUpperCase() +
+                  user.apellido.charAt(0).toUpperCase()}</Avatar.Fallback
+              >
             </Avatar.Root>
             <div class="grid flex-1 text-left text-sm leading-tight">
               <span class="truncate font-semibold"
@@ -58,7 +61,10 @@
         <DropdownMenu.Label class="p-0 font-normal">
           <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <Avatar.Root class="h-8 w-8 rounded-lg">
-              <Avatar.Fallback class="rounded-lg">CN</Avatar.Fallback>
+              <Avatar.Fallback class="rounded-lg"
+                >{user.nombre.charAt(0).toUpperCase() +
+                  user.apellido.charAt(0).toUpperCase()}</Avatar.Fallback
+              >
             </Avatar.Root>
             <div class="grid flex-1 text-left text-sm leading-tight">
               <span class="truncate font-semibold"
@@ -70,22 +76,6 @@
         </DropdownMenu.Label>
         <DropdownMenu.Separator />
         <DropdownMenu.Group>
-          <DropdownMenu.Item>
-            <Sparkles />
-            Upgrade to Pro
-          </DropdownMenu.Item>
-        </DropdownMenu.Group>
-        <DropdownMenu.Separator />
-        <DropdownMenu.Group>
-          <DropdownMenu.Item>
-            <BadgeCheck />
-            Account
-          </DropdownMenu.Item>
-          <DropdownMenu.Item>
-            <CreditCard />
-            Billing
-          </DropdownMenu.Item>
-
           <a href="/settings">
             <DropdownMenu.Item>
               <Settings />

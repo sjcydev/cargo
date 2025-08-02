@@ -1,7 +1,7 @@
 import type { RequestEvent } from "./$types";
 import { db } from "$lib/server/db";
-import { eq } from "drizzle-orm";
-import { usuarios } from "$lib/server/db/schema";
+import { eq, getTableColumns } from "drizzle-orm";
+import { usuarios, sucursales } from "$lib/server/db/schema";
 
 export const POST = async ({ params, request }: RequestEvent) => {
   const casillero = params.id;
@@ -10,10 +10,16 @@ export const POST = async ({ params, request }: RequestEvent) => {
 
   let cliente;
   if (casillero.length > 0) {
-    cliente = await db.query.usuarios.findFirst({
-      where: eq(usuarios.casillero, Number(casillero)),
-      with: { sucursal: true },
-    });
+    cliente = await db
+      .select({
+        ...getTableColumns(usuarios),
+        sucursal: { ...getTableColumns(sucursales) },
+      })
+      .from(usuarios)
+      .leftJoin(sucursales, eq(usuarios.sucursalId, sucursales.sucursalId))
+      .where(eq(usuarios.casillero, Number(casillero)))
+      .limit(1);
+    cliente = cliente[0];
   }
 
   return new Response(

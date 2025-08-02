@@ -4,42 +4,74 @@
   import * as Card from "$lib/components/ui/card";
   import Button from "$lib/components/ui/button/button.svelte";
   import Separator from "$lib/components/ui/separator/separator.svelte";
-  import { Download, Send } from "lucide-svelte";
+  import {Loader2, Download, Send } from "lucide-svelte";
   import * as Dialog from "$lib/components/ui/dialog";
   import ClienteInfo from "$lib/facturacion/facturas/components/cliente-info.svelte";
   import MetodoPago from "$lib/facturacion/facturas/components/metodo-pago.svelte";
   import TrackingList from "$lib/facturacion/facturas/components/tracking-list.svelte";
   import FacturaHeader from "$lib/facturacion/facturas/components/factura-header.svelte";
   import { enhance } from "$app/forms";
-  import { invalidateAll } from "$app/navigation";
+  import { goto, invalidateAll } from "$app/navigation";
   import { toast } from "svelte-sonner";
   import { generateInvoice } from "$lib/facturacion/facturar/generatePDF";
+  import DeleteDialog from "$lib/components/delete-dialog.svelte";
+  import DownloadDialog from "$lib/components/download-dialog.svelte";
 
   let { data }: { data: PageData } = $props();
   let showCancelDialog = $state<boolean>(false);
 
   async function enviarFactura() {
-    try {
-      await fetch("/api/emails/facturas", {
-        method: "POST",
-        body: JSON.stringify({ facturaId: data.factura.facturaId }),
-      });
-    } catch (error) {
-      console.error("Error sending emails:", error);
-    }
+    const toastId = toast.loading("Enviando factura...");
 
-    toast.success("Factura enviada correctamente");
+    try {
+      const response = await fetch("/api/emails/facturas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ facturaIds: [data.factura.facturaId] }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Error al enviar la factura");
+      }
+
+      if (result.failed > 0) {
+        toast.error(`Error al enviar la factura: ${result.details[0].error}`, {
+          id: toastId,
+        });
+      } else {
+        toast.success("Factura enviada correctamente", { id: toastId });
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+      const errorMessage = error instanceof Error ? error.message : "Error al enviar la factura";
+      toast.error(errorMessage, { id: toastId });
+    }
   }
+
+  let descargando = $state(false);
 
   async function downloadFactura() {
-    await generateInvoice({
-      info: data.factura,
-      cliente: data.factura.cliente!,
-      company: data.company!,
-      logo: data.logo!,
-      descargar: true,
-    });
+    descargando = true;
+
+    const url = `/api/facturas/download?facturaId=${data.factura.facturaId}`;
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = ''; // Let server headers set filename
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    setTimeout(() => {
+      descargando = false;
+    }, 1600)
   }
+
+  let showDownloadDialog = $state(false);
 </script>
 
 <svelte:head>
@@ -59,42 +91,28 @@
       Cancelar Factura
     </Button>
   {/if}
-  <Button class="font-semibold" onclick={downloadFactura}
-    >Descargar <Download /></Button
-  >
+  <Button onclick={() => showDownloadDialog = true} disabled={descargando}>
+    {#if descargando}
+      Descargando... <Loader2 class="my-2 h-4 w-4 animate-spin" />
+    {:else}
+      Descargar <Download />
+    {/if}
+  </Button>
 {/snippet}
 
-<Dialog.Root bind:open={showCancelDialog}>
-  <Dialog.Content>
-    <Dialog.Header>
-      <Dialog.Title>Cancelar Factura</Dialog.Title>
-      <Dialog.Description>
-        ¿Estás seguro que deseas cancelar la factura N° {data.factura
-          .facturaId}? Esta acción no se puede deshacer.
-      </Dialog.Description>
-    </Dialog.Header>
-    <div class="flex justify-end gap-4">
-      <Button variant="outline" onclick={() => (showCancelDialog = false)}>
-        Cancelar
-      </Button>
-      <form
-        method="POST"
-        action="?/cancelFactura"
-        use:enhance={() => {
-          return async ({ result }) => {
-            if (result.type === "success") {
-              showCancelDialog = false;
-              await invalidateAll();
-            }
-          };
-        }}
-      >
-        <input type="hidden" name="facturaId" value={data.factura.facturaId} />
-        <Button variant="destructive" type="submit">Confirmar</Button>
-      </form>
-    </div>
-  </Dialog.Content>
-</Dialog.Root>
+<DownloadDialog bind:open={showDownloadDialog} data={data} />
+
+<DeleteDialog
+  bind:open={showCancelDialog}
+  title="Cancelar Factura"
+  description={`¿Estás seguro que deseas cancelar la factura N° ${data.factura.facturaId}? Esta acción no se puede deshacer.`}
+  action={`/facturas?/cancelFactura`}
+  itemId={data.factura.facturaId}
+  buttonName="Cancelar Factura"
+  onSuccess={() => {
+    goto("/facturas");
+  }}
+/>
 
 <InnerLayout title="Detalles de Factura" back={true} {actions}>
   <div class="space-y-4">

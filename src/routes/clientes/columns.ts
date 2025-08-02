@@ -1,67 +1,70 @@
-import type { ColumnDef } from "@tanstack/table-core";
+import type { ColumnDef, FilterFn } from "@tanstack/table-core";
 import type { UsuariosWithSucursal, Sucursales } from "$lib/server/db/schema";
 import { createRawSnippet } from "svelte";
 import { renderComponent, renderSnippet } from "$lib/components/ui/data-table";
 import DataTableActions from "./data-table-actions.svelte";
-import DataSortableButton from "../../lib/components/data-sortable-button.svelte";
+import { normalizeString } from "$lib/utils";
+import Fuse from "fuse.js";
+
+export const accentInsensitiveFilter: FilterFn<any> = (
+  row,
+  columnId,
+  filterValue,
+) => {
+  const value = row.getValue(columnId);
+  if (value == null) return false;
+
+  const valueNormalized = normalizeString(String(value));
+  const filterNormalized = normalizeString(String(filterValue));
+
+  const fuse = new Fuse([valueNormalized], {
+    includeScore: true,
+    threshold: 0.35, // Lower = stricter match
+    isCaseSensitive: false,
+    useExtendedSearch: false, 
+  });
+
+  const result = fuse.search(filterNormalized);
+  return result.length > 0;
+};
 
 export const columns: ColumnDef<UsuariosWithSucursal>[] = [
   {
     accessorFn: (row) => row.casillero,
     accessorKey: "casillero",
     id: "casillero",
-    header: ({ column }) =>
-      renderComponent(DataSortableButton, {
-        label: "ID",
-        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-      }),
+    header: "ID",
     enableHiding: false,
   },
   {
-    accessorFn: (row) => row.nombre,
-    accessorKey: "nombre",
-    id: "nombre",
-    header: ({ column }) =>
-      renderComponent(DataSortableButton, {
-        label: "Nombre",
-        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-      }),
-  },
-  {
-    accessorFn: (row) => row.apellido,
-    accessorKey: "apellido",
-    id: "apellido",
-    header: ({ column }) =>
-      renderComponent(DataSortableButton, {
-        label: "Apellido",
-        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-      }),
+    accessorFn: (row) => `${row.nombre} ${row.apellido}`,
+    id: "nombreCompleto",
+    header: "Nombre",
+    enableGlobalFilter: true,
+    meta: {
+      globalFilterFn: accentInsensitiveFilter
+    }
   },
   {
     accessorFn: (row) => row.correo,
     accessorKey: "correo",
     id: "correo",
-    header: ({ column }) =>
-      renderComponent(DataSortableButton, {
-        label: "Correo",
-        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-      }),
+    header: "Correo",
+    enableGlobalFilter: false,
   },
   {
     accessorFn: (row) => row.cedula,
     accessorKey: "cedula",
     id: "cedula",
-    header: ({ column }) =>
-      renderComponent(DataSortableButton, {
-        label: "Cedula",
-        onclick: () => column.toggleSorting(column.getIsSorted() === "asc"),
-      }),
+    header: "Cedula",
+    enableGlobalFilter: false,
   },
   {
     accessorFn: (row) => row.telefono,
     accessorKey: "telefono",
     id: "telefono",
     header: "Telefono",
+    enableGlobalFilter: false,
   },
   {
     accessorFn: (row) => row.sucursal,
@@ -72,12 +75,13 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
       const sucursal = createRawSnippet<[Sucursales]>((getSucursal) => {
         const sucursal = getSucursal();
         return {
-          render: () => `<div>${sucursal.sucursal}</div>`,
+          render: () => `<div>${sucursal}</div>`,
         };
       });
 
       return renderSnippet(sucursal, row.original.sucursal);
     },
+    enableGlobalFilter: false,
   },
   {
     accessorFn: (row) => row.nacimiento,
@@ -91,21 +95,24 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
         year: "numeric",
       });
 
-      const nac = createRawSnippet<[Date | null]>((getNacimiento) => {
+      const nac = createRawSnippet<[string | null]>((getNacimiento) => {
         const nacimiento = getNacimiento();
         return {
-          render: () => `<div>${formatter.format(nacimiento!)}</div>`,
+          render: () => `<div>${formatter.format(new Date(nacimiento!))}</div>`,
         };
       });
 
+      //@ts-ignore
       return renderSnippet(nac, row.original.nacimiento);
     },
+    enableGlobalFilter: false,
   },
   {
     accessorFn: (row) => row.sexo,
     accessorKey: "sexo",
     id: "sexo",
     header: "Sexo",
+    enableGlobalFilter: false,
   },
   {
     id: "actions",

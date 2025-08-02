@@ -124,7 +124,7 @@
 
         <!-- Payment Methods -->
         <div class="grid grid-cols-4 gap-4">
-          {#each Object.entries(data.report.metodoDePago as Record<string, { count: number; total: number }>) as [method, info]}
+          {#each Object.entries(JSON.parse(data.report.metodoDePago ?? "{}") as Record<string, { count: number; total: number }>) as [method, info]}
             <div class="p-4 bg-muted rounded-lg">
               <p class="text-sm font-medium text-muted-foreground mb-1">
                 {capitalizeMethod(method)}

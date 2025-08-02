@@ -6,7 +6,8 @@ import {
   timestamp,
   float,
   boolean,
-  json,
+  longtext,
+  index,
 } from "drizzle-orm/mysql-core";
 
 import { relations } from "drizzle-orm";
@@ -23,6 +24,7 @@ export const companies = mysqlTable("companies", {
   dominio: varchar("dominio", {
     length: 255,
   }).notNull(),
+  sucursalesLimit: int("sucursalesLimit").default(1),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -39,7 +41,9 @@ export const sucursales = mysqlTable("sucursales", {
   companyId: int("company").references(() => companies.companyId),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
-});
+}, (table) => ({
+  sucursalIdx: index("sucursalIdx").on(table.sucursalId)
+}));
 
 export const users = mysqlTable("users", {
   id: varchar("id", {
@@ -104,9 +108,28 @@ export const usuarios = mysqlTable("usuarios", {
   })
     .default("REGULAR")
     .notNull(),
+  archivado: boolean("archivado").default(false),
+  archivadoAt: timestamp("archivadoAt"),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
-});
+}, (table) => ({
+  casilleroIdx: index("usuarios_casillero_idx").on(table.casillero),
+  // INDEX 1: Search composite (CRITICAL for your /clientes endpoint)
+  // Covers: All search patterns in your current UsuariosRepository
+  searchIdx: index("usuarios_search_idx").on(
+    table.archivado,    // Always filtered (false)
+    table.sucursalId,   // Common filter
+    table.casillero     // For ordering DESC + search
+  ),
+
+  // INDEX 2: Text search optimization (HIGH VALUE)
+  // Covers: nombre, apellido, cedula search patterns  
+  textSearchIdx: index("usuarios_text_search_idx").on(
+    table.nombre,
+    table.apellido,
+    table.cedula
+  ),
+}));
 
 export const facturas = mysqlTable("facturas", {
   facturaId: int("facturaId").autoincrement().primaryKey(),
@@ -139,19 +162,38 @@ export const facturas = mysqlTable("facturas", {
     .notNull(),
   retirados: boolean("retirados").default(false),
   enviado: boolean("enviado").default(false),
+  cancelada: boolean("cancelada").default(false),
+  canceladaAt: timestamp("canceladaAt"),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
-});
+}, (table) => ({
+  masterIdx: index("facturas_master_idx").on(
+    table.cancelada,     // Always in WHERE clause
+    table.enviado,       // Always in WHERE clause  
+    table.sucursalId,    // Common filter
+    table.facturaId      // For ORDER BY DESC
+  ),
+  indexIdx: index("facturas_index_idx").on(table.facturaId),
+
+  // INDEX 2: Search optimization
+  // Covers: casillero and facturaId searches
+  searchIdx: index("facturas_search_idx").on(table.casillero),
+
+  // INDEX 3: Foreign key for JOINs
+  // Covers: JOIN performance with usuarios table
+  clienteIdx: index("facturas_cliente_idx").on(table.clienteId),
+}));
 
 export const reportes = mysqlTable("reportes", {
   reporteId: int("reporteId").autoincrement().primaryKey(),
   fechaInicial: datetime("fechaInicial"),
   fechaFinal: datetime("fechaFinal"),
   facturas: int("facturas"),
+  facturasIds: longtext("facturasIds"),
   total: float("total"),
   empleadoId: varchar("empleadoId", { length: 255 }).references(() => users.id),
   sucursalId: int("sucursalId").references(() => sucursales.sucursalId),
-  metodoDePago: json("metodoDePago"),
+  metodoDePago: longtext("metodoDePago"),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
@@ -166,9 +208,13 @@ export const trackings = mysqlTable("trackings", {
   sucursalId: int("sucursalId").references(() => sucursales.sucursalId),
   retirado: boolean("retirado").default(false),
   retiradoAt: timestamp("retiradoAt"),
+  cancelada: boolean("cancelada").default(false),
+  canceladaAt: timestamp("canceladaAt"),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
-});
+}, (table) => ({
+  facturaIdx: index("trackings_factura_idx").on(table.facturaId),
+}));
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   sucursal: one(sucursales, {

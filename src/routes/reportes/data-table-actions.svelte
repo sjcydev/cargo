@@ -8,7 +8,8 @@
   import { invalidateAll } from "$app/navigation";
   import DeleteDialog from "$lib/components/delete-dialog.svelte";
 
-  let { reporte, user }: { reporte: Reportes; user: { rol: string } } = $props();
+  let { reporte, user }: { reporte: Reportes; user: { rol: string } } =
+    $props();
   let deleteDialogOpen = $state(false);
 </script>
 
@@ -46,7 +47,11 @@
       <DropdownMenu.Item
         class="text-red-500 data-[highlighted]:text-white data-[highlighted]:bg-red-500"
       >
-        <button class="flex gap-2" onclick={() => (deleteDialogOpen = true)}>
+        <button
+          class="flex gap-2"
+          onclick={() => (deleteDialogOpen = true)}
+          tabindex="-1"
+        >
           <Trash2 />
           Eliminar
         </button>

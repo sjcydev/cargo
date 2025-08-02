@@ -1,0 +1,1 @@
+ALTER TABLE `reportes` ADD `facturasIds` json;

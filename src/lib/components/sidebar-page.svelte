@@ -6,7 +6,7 @@
 </script>
 
 <Sidebar.Provider>
-  <AppSidebar {user} logo={logo} companyName={companyName} />
+  <AppSidebar {user} {logo} {companyName} />
   <Sidebar.Inset>
     {@render children()}
   </Sidebar.Inset>

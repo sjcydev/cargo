@@ -1,5 +1,5 @@
 import { db } from "$lib/server/db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, getTableColumns } from "drizzle-orm";
 import type { PageServerLoad, Actions } from "./$types";
 import { usuarios, facturas, sucursales } from "$lib/server/db/schema";
 import { error, fail, redirect } from "@sveltejs/kit";
@@ -9,25 +9,33 @@ import { clientesRegisterSchema } from "$lib/clientes_registrar/schema";
 import { capitaliseWord } from "$lib/utils";
 
 export const load = (async ({ params }) => {
-  const cliente = await db.query.usuarios.findFirst({
-    where: eq(usuarios.casillero, Number(params.usuarioId)),
-    with: {
-      facturas: {
-        orderBy: [desc(facturas.facturaId)],
-      },
-    },
-  });
+  const clienteData = await db
+    .select()
+    .from(usuarios)
+    .where(eq(usuarios.casillero, Number(params.usuarioId)))
+    .limit(1);
 
-  if (!cliente) {
+  if (!clienteData[0]) {
     throw redirect(302, "/clientes");
   }
 
-  const sucursales = await db.query.sucursales.findMany();
+  const facturasData = await db
+    .select()
+    .from(facturas)
+    .where(eq(facturas.casillero, Number(params.usuarioId)))
+    .orderBy(desc(facturas.facturaId));
+
+  const cliente = clienteData.map((cliente) => ({
+    ...cliente,
+    facturas: facturasData,
+  }))[0];
+
+  const sucursalesData = await db.select().from(sucursales);
 
   return {
     cliente,
     form: await superValidate(zod(clientesRegisterSchema)),
-    sucursales,
+    sucursales: sucursalesData,
   };
 }) satisfies PageServerLoad;
 
@@ -93,6 +101,6 @@ export const actions: Actions = {
       })
       .where(eq(usuarios.id, Number(id)));
 
-    return { nombre: nombreCapital, apellido: apellidoCapital };
+    return { form, nombre: nombreCapital, apellido: apellidoCapital };
   },
 };

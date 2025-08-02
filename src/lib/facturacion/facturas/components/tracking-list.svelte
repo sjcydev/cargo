@@ -8,9 +8,12 @@
   import type { Trackings } from "$lib/server/db/schema";
   import Estado from "../estado.svelte";
 
-  let { facturaIds, trackings }: { 
+  let {
+    facturaIds,
+    trackings,
+  }: {
     facturaIds: number | number[];
-    trackings: Trackings[] 
+    trackings: Trackings[];
   } = $props();
 
   let selectedTrackings = $state<number[]>([]);
@@ -86,7 +89,13 @@
         };
       }}
     >
-      <input type="hidden" name="facturaIds" value={JSON.stringify(Array.isArray(facturaIds) ? facturaIds : [facturaIds])} />
+      <input
+        type="hidden"
+        name="facturaIds"
+        value={JSON.stringify(
+          Array.isArray(facturaIds) ? facturaIds : [facturaIds]
+        )}
+      />
       <input
         type="hidden"
         name="trackingIds"
@@ -178,6 +187,11 @@
               <div>
                 Precio: ${tracking.precio!.toFixed(2)}
               </div>
+              {#if typeof facturaIds === "object"}
+                <div>
+                  Factura: {tracking.facturaId}
+                </div>
+              {/if}
             </div>
           </div>
         </div>

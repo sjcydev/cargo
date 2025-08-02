@@ -8,6 +8,13 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function normalizeString(input: string): string {
+  return input
+    .normalize("NFD")                 // Split letters and accents
+    .replace(/[\u0300-\u036f]/g, '') // Remove all diacritic marks
+    .toLowerCase();                  // Make it case-insensitive
+}
+
 export function capitaliseWord(word: string) {
   return word
     .split(" ")

@@ -234,6 +234,8 @@
                   type="number"
                   bind:value={$formData.precio}
                   placeholder="2.75"
+                  min="0"
+                  step="0.01"
                 />
               {/snippet}
             </Form.Control>
@@ -364,8 +366,4 @@
       </Card.Footer>
     </Card.Root>
   </form>
-  <div class="mt-4 text-center text-sm">
-    Already have an account?
-    <a href="/login" class="underline"> Sign in </a>
-  </div>
 </div>

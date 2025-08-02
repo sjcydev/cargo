@@ -22,8 +22,11 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
   import { page } from "$app/state";
-  import { goto } from "$app/navigation";
-  import type { Snippet } from "svelte";
+  import { goto, pushState } from "$app/navigation";
+  import { SyncLoader as Loader } from "svelte-loading-spinners";
+  import { Loader2 } from "lucide-svelte";
+  import { filterFns } from '@tanstack/table-core';
+  import type { GlobalFilterFn } from '@tanstack/table-core';
 
   type TDataFactura = Partial<TData> & {
     facturaId: number;
@@ -38,6 +41,8 @@
     showTotal?: boolean;
     onRowClick?: (row: TData) => void;
     headerless?: boolean;
+    showPagination?: boolean;
+    loading?: boolean;
   };
 
   let {
@@ -49,6 +54,8 @@
     showTotal = false,
     onRowClick,
     headerless = false,
+    showPagination = true,
+    loading = false,
   }: DataTableProps<TData, TValue> = $props();
   let pagination = $state<PaginationState>({ pageIndex: 0, pageSize: 10 });
   let sorting = $state<SortingState>([]);
@@ -76,6 +83,21 @@
       }, 0);
     }
   });
+
+  export const globalFilterFn = (row, columnId, filterValue) => {
+  const column = row
+    .getAllCells()
+    .find((cell) => cell.column.id === columnId)?.column;
+
+  const customFn = column?.columnDef.meta?.globalFilterFn;
+
+  if (typeof customFn === 'function') {
+    return customFn(row, columnId, filterValue);
+  }
+
+  // fallback to built-in equalsString
+  return filterFns.equalsString(row, columnId, filterValue);
+};
 
   const table = createSvelteTable({
     get data() {
@@ -106,7 +128,9 @@
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    globalFilterFn: "includesString",
+    manualPagination: !showPagination,
+    globalFilterFn,
+    autoResetPageIndex: false,
     onPaginationChange: (updater) => {
       if (typeof updater === "function") {
         pagination = updater(pagination);
@@ -154,7 +178,7 @@
   });
   $effect(() => {
     const search = page.url.searchParams.get("search");
-    table.setGlobalFilter(search);
+    table.setGlobalFilter(page.state.search ?? search);
   });
 
   const handleRowClick = (row: any, event: MouseEvent) => {
@@ -176,11 +200,21 @@
       placeholder="Buscador"
       value={globalFilter}
       onchange={(e) => {
-        table.setGlobalFilter(String(e.currentTarget.value));
-        goto(`?search=${e.currentTarget.value}`);
+        const searchVal = String(e.currentTarget.value);
+        table.setGlobalFilter(searchVal);
+        const url = new URL(page.url);
+
+        if (searchVal) {
+          url.searchParams.set('search', searchVal);
+        } else {
+          url.searchParams.delete('search');
+        }
+
+        pushState(url, {search: searchVal});
       }}
       oninput={(e) => {
         table.setGlobalFilter(String(e.currentTarget.value));
+        table.setPageIndex(0);
       }}
       class="max-w-sm"
     />
@@ -249,7 +283,14 @@
       {:else}
         <Table.Row>
           <Table.Cell colspan={columns.length} class="h-24 text-center">
-            0 resultados
+            {#if loading}
+              <div class="flex items-center justify-center">
+                Cargando...
+                <Loader2 class="mx-2 h-4 w-4 animate-spin" color="#2563EB"/>
+              </div>
+            {:else}
+              0 resultados
+            {/if}
           </Table.Cell>
         </Table.Row>
       {/each}
@@ -261,6 +302,8 @@
     Total: ${currentTotal.toFixed(2)}
   </div>
 {/if}
+
+{#if showPagination}
 <div class="flex items-center justify-end space-x-2 py-4">
   <Button
     variant="outline"
@@ -268,7 +311,7 @@
     onclick={() => table.previousPage()}
     disabled={!table.getCanPreviousPage()}
   >
-    Previous
+    Anterior
   </Button>
   <Button
     variant="outline"
@@ -276,6 +319,7 @@
     onclick={() => table.nextPage()}
     disabled={!table.getCanNextPage()}
   >
-    Next
+    Siguiente
   </Button>
 </div>
+{/if}

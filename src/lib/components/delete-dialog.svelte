@@ -16,6 +16,7 @@
     description = "¿Estás seguro que deseas eliminar este elemento?",
     action = "",
     itemId,
+    buttonName = "Eliminar",
     onSuccess,
   }: {
     open: boolean;
@@ -23,7 +24,8 @@
     description: string;
     action: string;
     itemId: string | number;
-    onSuccess: () => void;
+    buttonName?: string;
+    onSuccess: () => void | Promise<void>;
   } = $props();
 </script>
 
@@ -40,15 +42,18 @@
         method="POST"
         {action}
         use:enhance={() => {
+          console.log("form");
           return async ({ result }) => {
             if (result.type === "success") {
               open = false;
-              onSuccess();
+              if (onSuccess) {
+                await onSuccess();
+              }
             }
           };
         }}
       >
-        <input type="hidden" name="reporteId" value={itemId} />
+        <input type="hidden" name="id" value={itemId} />
         <div class="flex gap-2 justify-end">
           <Button
             variant="outline"
@@ -57,7 +62,7 @@
           >
             Cancelar
           </Button>
-          <Button variant="destructive" type="submit">Eliminar</Button>
+          <Button variant="destructive" type="submit">{buttonName}</Button>
         </div>
       </form>
     </Dialog.Footer>

@@ -1,0 +1,23 @@
+# .github/workflows/push-dispatch.yml
+
+name: Push Dispatch to Repos
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  fanout:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target_repo: [panabox_admin_v2]
+
+    steps:
+      - name: Dispatch to ${{ matrix.target_repo }}
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer ${{ secrets.DISPATCH_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/sjcydev/${{ matrix.target_repo }}/dispatches \
+            -d '{"event_type":"sync-from-cargo"}'

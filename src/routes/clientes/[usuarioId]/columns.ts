@@ -1,8 +1,7 @@
 import type { ColumnDef } from "@tanstack/table-core";
 import { createColumnHelper } from "@tanstack/table-core";
-import type { FacturasWithCliente, Sucursales } from "$lib/server/db/schema";
-import { createRawSnippet } from "svelte";
-import { renderComponent, renderSnippet } from "$lib/components/ui/data-table";
+import type { FacturasWithCliente } from "$lib/server/db/schema";
+import { renderComponent } from "$lib/components/ui/data-table";
 import DataTableActions from "./data-table-actions.svelte";
 import DataSortableButton from "$lib/components/data-sortable-button.svelte";
 import Estado from "$lib/facturacion/facturas/estado.svelte";
@@ -58,6 +57,7 @@ export const columns: ColumnDef<FacturasWithCliente>[] = [
     id: "total",
     header: "Total",
     cell: ({ row }) => `$${row.original.total!.toFixed(2)}`,
+    enableGlobalFilter: false,
   },
   columnHelper.display({
     id: "enviado",
@@ -67,6 +67,7 @@ export const columns: ColumnDef<FacturasWithCliente>[] = [
         variant: row.original.enviado ? "success" : "destructive",
       });
     },
+    enableGlobalFilter: false,
   }),
   columnHelper.display({
     id: "pagado",
@@ -76,6 +77,7 @@ export const columns: ColumnDef<FacturasWithCliente>[] = [
         variant: row.original.pagado ? "success" : "destructive",
       });
     },
+    enableGlobalFilter: false,
   }),
   columnHelper.display({
     id: "retirados",
@@ -85,6 +87,7 @@ export const columns: ColumnDef<FacturasWithCliente>[] = [
         variant: row.original.retirados ? "success" : "destructive",
       });
     },
+    enableGlobalFilter: false,
   }),
   {
     id: "actions",

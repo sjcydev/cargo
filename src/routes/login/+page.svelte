@@ -25,6 +25,10 @@
   const { form: formData, enhance, message } = form;
 </script>
 
+<svelte:head>
+  <title>Iniciar Sesión</title>
+</svelte:head>
+
 <div class="w-full lg:grid lg:min-h-[600px] lg:grid-cols-2 xl:min-h-screen">
   <div class="flex items-center justify-center py-12">
     <div class="mx-auto grid w-[350px] gap-6">

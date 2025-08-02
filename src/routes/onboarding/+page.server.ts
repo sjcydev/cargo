@@ -95,7 +95,7 @@ export const actions: Actions = {
         sucursal: capitaliseWord(sucursal),
         direccion: capitaliseWord(direccion),
         telefono,
-        precio,
+        precio: Number(precio),
         codificacion,
         correo: correoSucursal,
         companyId: newCompany[0].companyId,

@@ -1,0 +1,1 @@
+ALTER TABLE `companies` ADD `sucursalesLimit` int DEFAULT 1;

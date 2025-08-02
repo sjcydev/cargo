@@ -11,7 +11,6 @@ import type {
   Reportes,
   Facturas,
 } from "$lib/server/db/schema";
-
 applyPlugin(jsPDF);
 
 // Constants
@@ -19,7 +18,7 @@ const PDF_CONFIG = {
   orientation: "p" as const,
   unit: "pt" as const,
   format: "a4" as const,
-  compress: true,
+  compress: false,
 };
 
 const STYLES = {
@@ -61,9 +60,15 @@ function createTrackingRows(trackings: Trackings[]): string[][] {
   ]) as string[][];
 }
 
+let logoCache = "";
+async function getCachedLogo(logo: string) {
+  if (!logoCache) logoCache = await getBase64FromUrl(logo);
+  return logoCache;
+}
+
 // PDF Section Generators
 async function addLogo(doc: jsPDF, logo: string): Promise<void> {
-  const base64Image = await getBase64FromUrl(logo);
+  const base64Image = await getCachedLogo(logo);
   const {
     fileType,
     height: imgHeight,
@@ -330,7 +335,8 @@ export async function generateInvoice({
   if (descargar) {
     doc.save(`Factura-${info.facturaId}.pdf`);
   } else {
-    return Buffer.from(doc.output("arraybuffer"));
+    const pdfBlob = doc.output("arraybuffer");
+    return Buffer.from(pdfBlob);
   }
 }
 

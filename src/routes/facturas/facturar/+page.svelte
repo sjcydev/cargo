@@ -14,7 +14,7 @@
     NewUsuarios,
     NewFacturas,
     NewTrackings,
-    User,
+    Users,
     UsuariosWithSucursal,
     Sucursales,
   } from "$lib/server/db/schema";
@@ -54,15 +54,13 @@
     updatedAt: null,
     sucursal: {} as Sucursales,
     tipo: "REGULAR",
+    archivado: false,
+    archivadoAt: null,
   } as const;
 
   let cliente = $state<UsuariosWithSucursal>(
     structuredClone(defaultClienteState)
   );
-
-  function resetCliente() {
-    cliente = structuredClone(defaultClienteState);
-  }
 
   const defaultTrackingsState = {
     numeroTracking: "",
@@ -103,18 +101,6 @@
       0
     );
   });
-
-  function resetInfo() {
-    facturaInfo = {
-      casillero: null,
-      trackings: [],
-      total: 0,
-      empleadoId: user!.id,
-      sucursalId: sucursales!.sucursalId,
-      clienteId: 0,
-      fecha: "",
-    };
-  }
 
   function resetAll() {
     cliente = structuredClone(defaultClienteState);
@@ -186,7 +172,7 @@
 
     try {
       const endpoint = /\d/.test(casillero) ? "clientes" : "corporativo";
-      const data = await fetchClienteData(endpoint, casillero, user as User);
+      const data = await fetchClienteData(endpoint, casillero, user as Users);
       processClienteData(data, String(casillero));
     } catch (error) {
       console.error("Error fetching client data:", error);
@@ -348,56 +334,65 @@
                     </Button>
                   </Dialog.Trigger>
                   <Dialog.Content class="sm:max-w-[425px]">
-                    <Dialog.Header>
-                      <Dialog.Title
-                        >{editMode ? "Editar" : "Añadir"} Tracking</Dialog.Title
-                      >
-                    </Dialog.Header>
-                    <div class="grid gap-2 mb-1">
-                      <div class="space-y-2">
-                        <Label for="item-quantity">Peso (lbs)</Label>
-                        <Input
-                          id="item-quantity"
-                          type="number"
-                          bind:value={infoTracking.peso}
-                          required
-                        />
+                    <form
+                      method="POST"
+                      onsubmit={(e) => {
+                        e.preventDefault();
+                        addTracking();
+                      }}
+                    >
+                      <Dialog.Header>
+                        <Dialog.Title
+                          >{editMode ? "Editar" : "Añadir"} Tracking</Dialog.Title
+                        >
+                      </Dialog.Header>
+                      <div class="grid gap-2 mb-1">
+                        <div class="space-y-2">
+                          <Label for="item-quantity">Peso (lbs)</Label>
+                          <Input
+                            id="item-quantity"
+                            type="number"
+                            bind:value={infoTracking.peso}
+                            required
+                          />
+                        </div>
+                        <div class="space-y-2">
+                          <Label for="tracking-number">Numero de Tracking</Label
+                          >
+                          <Input
+                            id="tracking-number"
+                            placeholder="1Z999AA1"
+                            bind:value={infoTracking.numeroTracking}
+                            required
+                          />
+                        </div>
+                        <div class="space-y-2">
+                          <Label for="precio">Precio</Label>
+                          <Input
+                            id="precio"
+                            type="number"
+                            bind:value={infoTracking.base}
+                            step={0.01}
+                            required
+                            readonly={!especial && !editMode}
+                          />
+                        </div>
+                        <div class="space-y-2">
+                          <Label for="total">Total</Label>
+                          <Input
+                            id="total"
+                            type="number"
+                            value={currPrecio}
+                            readonly
+                          />
+                        </div>
                       </div>
-                      <div class="space-y-2">
-                        <Label for="tracking-number">Numero de Tracking</Label>
-                        <Input
-                          id="tracking-number"
-                          placeholder="1Z999AA1"
-                          bind:value={infoTracking.numeroTracking}
-                          required
-                        />
-                      </div>
-                      <div class="space-y-2">
-                        <Label for="precio">Precio</Label>
-                        <Input
-                          id="precio"
-                          type="number"
-                          bind:value={infoTracking.base}
-                          step={0.01}
-                          required
-                          readonly={!especial && !editMode}
-                        />
-                      </div>
-                      <div class="space-y-2">
-                        <Label for="total">Total</Label>
-                        <Input
-                          id="total"
-                          type="number"
-                          value={currPrecio}
-                          readonly
-                        />
-                      </div>
-                    </div>
-                    <Dialog.Footer class="mt-3">
-                      <Button class="w-full" onclick={addTracking}
-                        >{editMode ? "Editar" : "Añadir"}</Button
-                      >
-                    </Dialog.Footer>
+                      <Dialog.Footer class="mt-3">
+                        <Button class="w-full" type="submit"
+                          >{editMode ? "Editar" : "Añadir"}</Button
+                        >
+                      </Dialog.Footer>
+                    </form>
                   </Dialog.Content>
                 </Dialog.Root>
               </div>
