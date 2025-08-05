@@ -6,8 +6,6 @@
   import { columns as createColumns } from "./columns";
   import { goto } from "$app/navigation";
   import * as Tabs from "$lib/components/ui/tabs/index";
-  import { page } from "$app/state";
-  import type { Sucursales } from "$lib/server/db/schema";
   import {onMount} from "svelte";
 
   let { data }: { data: PageData } = $props();
@@ -16,7 +14,7 @@
 
   let selectedFacturas = $state<number[]>([]);
 
-  const columns = createColumns(user.rol);
+  const columns = createColumns(user?.rol);
 
   function handleSelectionChange(selected: number[]) {
     selectedFacturas = selected;
@@ -33,14 +31,14 @@
   }
 
   let currentSucursal = $state(
-    user.rol === "ADMIN" ? "todos" : sucursales[0].sucursal
+    user?.rol === "ADMIN" ? "todos" : sucursales[0].sucursal
   );
 
   let loadingMore = $state(false);
 
   onMount(async () => {
     loadingMore = true;
-    const newFacturas = await fetch("/api/facturas", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ last: data.last }) }).then(res => {loadingMore = false; return res.json()});
+    const newFacturas = await fetch("/api/facturas", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ cursor: data.last }) }).then(res => {loadingMore = false; return res.json()});
     facturas = [...facturas, ...newFacturas.facturas];
   })
 </script>
@@ -77,7 +75,7 @@
         {/each}
       </Tabs.List>
     {/if}
-    {#if user.rol === "ADMIN"}
+    {#if user?.rol === "ADMIN"}
       <Tabs.Content value="todos">
         <VerFacturas
           data={facturas}
