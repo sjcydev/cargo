@@ -23,7 +23,10 @@ export const load = (async ({ locals }) => {
     })
     .from(sucursales);
 
-  const conditions = [eq(facturas.enviado, true)];
+  const conditions = [
+    eq(facturas.enviado, true),
+    eq(facturas.cancelada, false),
+  ];
 
   if (user.rol !== "ADMIN") {
     conditions.push(eq(facturas.sucursalId, user.sucursalId!));

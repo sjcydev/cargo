@@ -14,6 +14,7 @@ export const POST = async ({ request }: RequestEvent) => {
   const conditions = [
     eq(facturasTable.enviado, true),
     lt(facturasTable.facturaId, Number(cursor)),
+    eq(facturasTable.cancelada, false)
   ];
 
   if (sucursalId) {
