@@ -1,36 +1,74 @@
 import { db } from "$lib/server/db";
-import { eq, desc, getTableColumns } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import type { PageServerLoad, Actions } from "./$types";
 import { usuarios, facturas, sucursales } from "$lib/server/db/schema";
-import { error, fail, redirect } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 import { superValidate, setError } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { clientesRegisterSchema } from "$lib/clientes_registrar/schema";
 import { capitaliseWord } from "$lib/utils";
 
 export const load = (async ({ params }) => {
+  const usuarioId = Number(params.usuarioId);
+
+  const conditions = [
+    eq(usuarios.casillero, usuarioId),
+    eq(usuarios.archivado, false),
+  ];
+
   const clienteData = await db
-    .select()
+    .select({
+      id: usuarios.id,
+      casillero: usuarios.casillero,
+      nombre: usuarios.nombre,
+      apellido: usuarios.apellido,
+      correo: usuarios.correo,
+      cedula: usuarios.cedula,
+      precio: usuarios.precio,
+      telefono: usuarios.telefono,
+      sexo: usuarios.sexo,
+      sucursalId: usuarios.sucursalId,
+      tipo: usuarios.tipo,
+    })
     .from(usuarios)
-    .where(eq(usuarios.casillero, Number(params.usuarioId)))
+    .where(and(...conditions))
     .limit(1);
 
   if (!clienteData[0]) {
     throw redirect(302, "/clientes");
   }
 
-  const facturasData = await db
-    .select()
-    .from(facturas)
-    .where(eq(facturas.casillero, Number(params.usuarioId)))
-    .orderBy(desc(facturas.facturaId));
+  const facturasConditions = [
+    eq(facturas.clienteId, clienteData[0].id),
+    eq(facturas.cancelada, false),
+  ];
+
+  const [facturasData, sucursalesData] = await Promise.all([
+    db
+      .select({
+        fecha: facturas.fecha,
+        facturaId: facturas.facturaId,
+        total: facturas.total,
+        enviado: facturas.enviado,
+        pagado: facturas.pagado,
+        retirados: facturas.retirados,
+      })
+      .from(facturas)
+      .where(and(...facturasConditions))
+      .orderBy(desc(facturas.facturaId)),
+    db
+      .select({
+        sucursalId: sucursales.sucursalId,
+        sucursal: sucursales.sucursal,
+        precio: sucursales.precio
+      })
+      .from(sucursales),
+  ]);
 
   const cliente = clienteData.map((cliente) => ({
     ...cliente,
     facturas: facturasData,
   }))[0];
-
-  const sucursalesData = await db.select().from(sucursales);
 
   return {
     cliente,
@@ -69,7 +107,7 @@ export const actions: Actions = {
       return setError(
         form,
         "casillero",
-        `Casillero debe ser unico, ya existe casillero ${form.data.casillero}`
+        `Casillero debe ser unico, ya existe casillero ${form.data.casillero}`,
       );
     }
 

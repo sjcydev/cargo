@@ -5,11 +5,9 @@
   import { columns } from "./columns";
   import * as Tabs from "$lib/components/ui/tabs/index";
   import { goto } from "$app/navigation";
-  import { page } from "$app/state";
-  import { onMount, getContext } from "svelte";
-
+  import { onMount } from "svelte";
   import InnerLayout from "$lib/components/inner-layout.svelte";
-  import type { Sucursales } from "$lib/server/db/schema";
+  import { UserRoundPlus } from "lucide-svelte";
 
   let { data }: { data: PageData } = $props();
   let clientes = $state(data.clientes);
@@ -31,7 +29,7 @@
   }
 
   let currentSucursal = $state(
-    data.user.rol === "ADMIN" ? "todos" : data.sucursales[0].sucursal
+    data.user?.rol === "ADMIN" ? "todos" : data.sucursales[0].sucursal
   );
 </script>
 
@@ -40,7 +38,7 @@
 </svelte:head>
 
 {#snippet actions()}
-  <Button href="/clientes/registrar">Crear cliente</Button>
+  <Button href="/clientes/registrar"><UserRoundPlus class="w-4 h-4"/> Crear cliente</Button>
 {/snippet}
 
 <InnerLayout title={"Clientes"} {actions}>
@@ -58,7 +56,7 @@
         {/each}
       </Tabs.List>
     {/if}
-    {#if data.user.rol === "ADMIN"}
+    {#if data.user?.rol === "ADMIN"}
       <Tabs.Content value="todos">
         <DataTable
           {columns}
