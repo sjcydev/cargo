@@ -8,7 +8,7 @@ import {
 import { and, between, eq, sql } from "drizzle-orm";
 import type { PageServerLoad } from "./$types";
 import { redirect } from "@sveltejs/kit";
-import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
+import { CalendarDate, today } from "@internationalized/date";
 
 type DailyRevenue = {
   date: string;
@@ -51,12 +51,12 @@ export const load: PageServerLoad = async ({ locals }) => {
     throw redirect(302, "/clientes");
   }
 
-  const now = today(getLocalTimeZone());
+  const now = today("America/Panama");
   const startDate = new CalendarDate(now.year, now.month, 1).toDate(
-    getLocalTimeZone()
+    "America/Panama"
   );
   const endDate = new CalendarDate(now.year, now.month + 1, 0).toDate(
-    getLocalTimeZone()
+    "America/Panama"
   );
 
   const getSucursales = async (): Promise<any[]> => {
@@ -95,9 +95,9 @@ export const load: PageServerLoad = async ({ locals }) => {
       now.year,
       now.month - 1,
       1
-    ).toDate(getLocalTimeZone());
+    ).toDate("America/Panama");
     const previousEndDate = new CalendarDate(now.year, now.month, 0).toDate(
-      getLocalTimeZone()
+      "America/Panama"
     );
 
     const previousMonthStats = await db

@@ -15,16 +15,13 @@
   } from "$lib/components/ui/select";
   import DateRangePicker from "$lib/components/ui/date-range-picker.svelte";
   import {
-    CalendarDate,
     endOfMonth,
-    getLocalTimeZone,
     startOfMonth,
     today,
   } from "@internationalized/date";
   import { onMount, onDestroy } from "svelte";
   import { browser } from "$app/environment";
   import type { DateRange } from "bits-ui";
-  import type { ApexOptions } from "apexcharts";
   import type { DashboardStats } from "$lib/types/dashboard";
   import {
     revenueChartConfig,
@@ -39,8 +36,8 @@
   // State management with runes
   let selectedSucursal = $state("all");
   let dateRange = $state<DateRange>({
-    start: startOfMonth(today(getLocalTimeZone())),
-    end: endOfMonth(today(getLocalTimeZone())),
+    start: startOfMonth(today("America/Panama")),
+    end: endOfMonth(today("America/Panama")),
   });
 
   let stats: DashboardStats = $state({
