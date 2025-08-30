@@ -20,12 +20,14 @@
     CreditCard,
     Building2,
     Package,
+    ReceiptText,
   } from "lucide-svelte";
   import Button from "$lib/components/ui/button/button.svelte";
   import { goto, invalidateAll } from "$app/navigation";
   import VerFacturas from "$lib/facturacion/facturas/ver-facturas.svelte";
   import { columns } from "./columns";
   import { Badge } from "$lib/components/ui/badge";
+  import { toast } from "svelte-sonner";
 
   let {
     data,
@@ -44,7 +46,7 @@
       if (result.type === "success") {
         editMode = false;
         const sucursal = sucursales.find(
-          (s) => String(s.sucursalId) === $formData.sucursalId
+          (s) => String(s.sucursalId) === $formData.sucursalId,
         );
         const tipo =
           sucursal?.precio === Number($formData.precio)
@@ -93,17 +95,17 @@
   };
   let previous = $state({ ...$formData });
   let disableChange = $derived(
-    JSON.stringify($formData) === JSON.stringify(previous)
+    JSON.stringify($formData) === JSON.stringify(previous),
   );
 
   const sucursalTrigger = $derived(
     sucursales.find((f) => $formData.sucursalId === String(f.sucursalId))
-      ?.sucursal ?? "Elige la sucursal"
+      ?.sucursal ?? "Elige la sucursal",
   );
 
   const currentTipo = $derived(() => {
     const sucursal = sucursales.find(
-      (s) => String(s.sucursalId) === $formData.sucursalId
+      (s) => String(s.sucursalId) === $formData.sucursalId,
     );
     return sucursal?.precio === Number($formData.precio)
       ? "REGULAR"
@@ -126,7 +128,7 @@
   }
 
   async function sendEmail(
-    e: SubmitEvent & { currentTarget: HTMLFormElement & EventTarget }
+    e: SubmitEvent & { currentTarget: HTMLFormElement & EventTarget },
   ) {
     e.preventDefault();
 
@@ -144,7 +146,11 @@
       }),
     });
 
-    const data = await response.json();
+    if (response.ok) {
+      toast.success("Correo de bienvenida enviado!");
+    } else {
+      toast.error("Hubo un error al enviar el correo. Contacte al tecnico!");
+    }
   }
 
   function restorePreviousState() {
@@ -186,6 +192,7 @@
     {/if}
   </div>
 {/snippet}
+
 
 <InnerLayout
   title={`${cliente?.nombre} ${cliente?.apellido}`}
@@ -406,15 +413,23 @@
             <CreditCard class="w-5 h-5" />
             Facturas
           </Card.Title>
-          {#if selectedFacturas.length > 0}
-            <Button variant="outline" onclick={procesarMultiples} class="gap-2">
+          <div class="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onclick={procesarMultiples}
+              class="gap-2"
+              disabled={selectedFacturas.length < 1}
+            >
               <Package class="w-4 h-4" />
               Procesar {selectedFacturas.length} factura{selectedFacturas.length ===
               1
                 ? ""
                 : "s"}
             </Button>
-          {/if}
+            <Button href="/facturas/facturar/?search={cliente.casillero}"
+              ><ReceiptText class="w-4 h-4" /> Facturar Cliente</Button
+            >
+          </div>
         </div>
       </Card.Header>
       <Card.Content>
@@ -422,7 +437,6 @@
           data={cliente.facturas}
           {columns}
           selectionChange={handleSelectionChange}
-          regular={true}
         />
       </Card.Content>
     </Card.Root>

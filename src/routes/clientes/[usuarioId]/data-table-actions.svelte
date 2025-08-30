@@ -28,17 +28,12 @@
         <Receipt /> Ver Factura
       </a>
     </DropdownMenu.Item>
-    <DropdownMenu.Separator />
-    <DropdownMenu.Item
-      ><a href="/clientes/{id}" class="flex gap-2"><UserPen /> Perfil</a
-      ></DropdownMenu.Item
-    >
-    <DropdownMenu.Item
-      class="text-red-500 data-[highlighted]:text-white data-[highlighted]:bg-red-500"
-      ><form method="POST" action="?/delete" use:enhance>
-        <input type="hidden" name="id" value={id} />
-        <button class="flex gap-2"><Trash2 /> Eliminar</button>
-      </form></DropdownMenu.Item
-    >
+    <!-- <DropdownMenu.Item -->
+    <!--   class="text-red-500 data-[highlighted]:text-white data-[highlighted]:bg-red-500" -->
+    <!--   ><form method="POST" action="?/delete" use:enhance> -->
+    <!--     <input type="hidden" name="id" value={id} /> -->
+    <!--     <button class="flex gap-2"><Trash2 /> Eliminar</button> -->
+    <!--   </form></DropdownMenu.Item -->
+    <!-- > -->
   </DropdownMenu.Content>
 </DropdownMenu.Root>

@@ -22,11 +22,10 @@
   import { Button } from "$lib/components/ui/button/index.js";
   import { Input } from "$lib/components/ui/input/index.js";
   import { page } from "$app/state";
-  import { goto, pushState } from "$app/navigation";
-  import { SyncLoader as Loader } from "svelte-loading-spinners";
+  import { pushState } from "$app/navigation";
   import { Loader2 } from "lucide-svelte";
   import { filterFns } from '@tanstack/table-core';
-  import type { GlobalFilterFn } from '@tanstack/table-core';
+  import type { Snippet } from "svelte";
 
   type TDataFactura = Partial<TData> & {
     facturaId: number;

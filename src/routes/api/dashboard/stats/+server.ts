@@ -5,11 +5,9 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import {
   CalendarDate,
-  getLocalTimeZone,
   startOfMonth,
   today,
   endOfMonth,
-  toCalendarDate,
 } from "@internationalized/date";
 import type { DateRange } from "bits-ui";
 import { formatCompactPercentage } from "$lib/utils";
@@ -77,7 +75,7 @@ const calculateGrowthPercentage = (
 };
 
 const createDateRange = (dateRange?: DateRange) => {
-  const now = today(getLocalTimeZone());
+  const now = today("America/Panama");
   const defaultStart = startOfMonth(now);
   const defaultEnd = endOfMonth(now);
 
@@ -86,14 +84,14 @@ const createDateRange = (dateRange?: DateRange) => {
 
   // Convert to JavaScript Date objects
   const currentStart = new CalendarDate(start.year, start.month, start.day);
-  const currentStartDate = currentStart.toDate(getLocalTimeZone());
+  const currentStartDate = currentStart.toDate("America/Panama");
 
   const currentEnd = new CalendarDate(end.year, end.month, end.day);
-  const currentEndDate = currentEnd.toDate(getLocalTimeZone());
+  const currentEndDate = currentEnd.toDate("America/Panama");
 
   // Set time boundaries
   currentStartDate.setHours(0, 0, 0, 0);
-  currentEndDate.setHours(23, 59, 59, 999);
+  currentEndDate.setHours(23, 59, 59);
 
   const timeDifference = currentEndDate.getTime() - currentStartDate.getTime();
   const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
@@ -105,14 +103,14 @@ const createDateRange = (dateRange?: DateRange) => {
     currPreviousEnd.year,
     currPreviousEnd.month,
     currPreviousEnd.day
-  ).toDate(getLocalTimeZone());
+  ).toDate("America/Panama");
   const previousStart = new CalendarDate(
     currPreviousStart.year,
     currPreviousStart.month,
     currPreviousStart.day
-  ).toDate(getLocalTimeZone());
+  ).toDate("America/Panama");
 
-  previousEnd.setHours(23, 59, 59, 999);
+  previousEnd.setHours(23, 59, 59);
   previousStart.setHours(0, 0, 0, 0);
 
   return {
@@ -137,6 +135,22 @@ const createWhereClause = (
     : between(table.createdAt, dateStart, dateEnd);
 };
 
+
+const createFacturaClause = (
+  table: typeof facturas,
+  dateStart: Date,
+  dateEnd: Date,
+  sucursalId: string
+) => {
+  return sucursalId !== "all"
+    ? and(
+        between(table.pagadoAt, dateStart, dateEnd),
+        eq(table.sucursalId, Number(sucursalId))
+      )
+    : between(table.pagadoAt, dateStart, dateEnd);
+};
+
+
 // Stats calculation functions
 const getMonthlyStats = async (
   sucursalId: string,
@@ -147,13 +161,14 @@ const getMonthlyStats = async (
     previousEnd,
   }: ReturnType<typeof createDateRange>
 ): Promise<MonthlyStats> => {
-  const whereClause = createWhereClause(
+  const whereClause = createFacturaClause(
     facturas,
     currentStart,
     currentEnd,
     sucursalId
   );
-  const previousWhereClause = createWhereClause(
+
+  const previousWhereClause = createFacturaClause(
     facturas,
     previousStart,
     previousEnd,

@@ -16,7 +16,7 @@
   import type { Sucursales } from "$lib/server/db/schema";
   import { toast } from "svelte-sonner";
   import { goto } from "$app/navigation";
-  import { today, getLocalTimeZone } from "@internationalized/date";
+  import { today } from "@internationalized/date";
   import DatePicker from "$lib/components/ui/date-picker.svelte";
 
   let {
@@ -40,13 +40,13 @@
     },
   });
 
-  let nacimientoDate = $state(today(getLocalTimeZone()));
+  let nacimientoDate = $state(today("America/Panama"));
 
   const { form: formData, enhance, message } = form;
 
   const sucursalTrigger = $derived(
     sucursales.find((f) => $formData.sucursalId === String(f.sucursalId))
-      ?.sucursal ?? "Elige la sucursal"
+      ?.sucursal ?? "Elige la sucursal",
   );
 
   $effect(() => {

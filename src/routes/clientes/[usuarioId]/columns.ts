@@ -89,13 +89,13 @@ export const columns: ColumnDef<FacturasWithCliente>[] = [
     },
     enableGlobalFilter: false,
   }),
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      return renderComponent(DataTableActions, {
-        id: String(row.original.facturaId),
-      });
-    },
-    enableHiding: false,
-  },
+  // {
+  //   id: "actions",
+  //   cell: ({ row }) => {
+  //     return renderComponent(DataTableActions, {
+  //       id: String(row.original.facturaId),
+  //     });
+  //   },
+  //   enableHiding: false,
+  // },
 ];
