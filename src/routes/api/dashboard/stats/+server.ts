@@ -198,8 +198,8 @@ const getMonthlyStats = async (
         })
         .from(facturas)
         .where(whereClause)
-        .groupBy(sql`DATE(${facturas.createdAt})`)
-        .orderBy(sql`DATE(${facturas.createdAt})`),
+        .groupBy(sql`DATE(${facturas.pagadoAt})`)
+        .orderBy(sql`DATE(${facturas.pagadoAt})`),
       db
         .select({
           metodoPago: sql<string>`${facturas.metodoDePago}`,
