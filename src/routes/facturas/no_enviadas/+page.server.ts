@@ -5,19 +5,18 @@ import {
   usuarios,
   sucursales,
   trackings,
-  type Sucursales,
 } from "$lib/server/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { redirect } from "@sveltejs/kit";
 
-export const load = (async ({ locals, url }) => {
+export const load = (async ({ locals }) => {
   const { user } = locals;
 
   if (!user) {
     throw redirect(302, "/login");
   }
 
-  const conditions = [eq(facturas.enviado, false)];
+  const conditions = [eq(facturas.enviado, false), eq(facturas.cancelada, false)];
 
   if (user.rol !== "ADMIN") {
     conditions.push(eq(facturas.sucursalId, user.sucursalId!));

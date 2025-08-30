@@ -2,18 +2,21 @@ import { clientesRegisterSchema } from "$lib/clientes_registrar/schema";
 import { db } from "$lib/server/db";
 import type { Actions, PageServerLoad } from "./$types";
 import { usuarios, sucursales } from "$lib/server/db/schema";
-import { superValidate, fail, message } from "sveltekit-superforms";
+import { superValidate, fail } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { eq } from "drizzle-orm";
 import { capitaliseWord } from "$lib/utils";
 import {
-  CalendarDate,
-  getLocalTimeZone,
   parseDate,
   today,
 } from "@internationalized/date";
+import { redirect } from "@sveltejs/kit";
 
 export const load: PageServerLoad = async ({ locals }) => {
+  if (!locals.user) {
+    redirect(401, "/login");
+  }
+
   const sucursales = await db.query.sucursales.findMany();
 
   return {
@@ -66,8 +69,8 @@ export const actions: Actions = {
         sexo,
         sucursalId: Number(sucursalId),
         nacimiento: nacimiento
-          ? parseDate(nacimiento).toDate(getLocalTimeZone())
-          : today(getLocalTimeZone()).toDate(getLocalTimeZone()),
+          ? parseDate(nacimiento).toDate("America/Panama")
+          : today("America/Panama").toDate("America/Panama"),
         precio,
         tipo: sucursal!.precio === precio ? "REGULAR" : "ESPECIAL",
       })

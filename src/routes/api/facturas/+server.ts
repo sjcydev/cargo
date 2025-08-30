@@ -1,42 +1,56 @@
-import { API_BASE_URL, API_KEY } from "$env/static/private";
 import type { RequestEvent } from "../../$types";
-import { error } from "@sveltejs/kit";
+import {
+  facturas as facturasTable,
+  usuarios,
+  sucursales,
+} from "$lib/server/db/schema";
+import { lt, eq, and, desc } from "drizzle-orm";
+import { db } from "$lib/server/db";
 
 export const POST = async ({ request }: RequestEvent) => {
-  const data: { last: number } = await request.json();
+  const { cursor, sucursalId }: { cursor: number; sucursalId?: number } =
+    await request.json();
 
-  try {
-    const res = await fetch(`${API_BASE_URL}/facturas`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${API_KEY}` },
-      body: JSON.stringify({ cursor: data.last }),
-    });
-    
-    if (!res.ok) {
-      const msg = await res.text();
-      console.error("Remote API error:", msg);
-      throw error(res.status, msg);
-    }
+  const conditions = [
+    eq(facturasTable.enviado, true),
+    lt(facturasTable.facturaId, Number(cursor)),
+    eq(facturasTable.cancelada, false)
+  ];
 
-    const facturasData = await res.json();
-
-    return new Response(
-      JSON.stringify({
-        facturas: facturasData.facturas,
-      }),
-      {
-        headers: { "Content-Type": "application/json" },
-        status: 200,
-      },
-    );
-  } catch (e) {
-    console.log(e);
-    return new Response(
-      JSON.stringify({error: "error"}),
-      {
-        headers: { "Content-Type": "application/json"},
-        status: 500
-      }
-    )
+  if (sucursalId) {
+    conditions.push(eq(facturasTable.sucursalId, Number(sucursalId)));
   }
+
+  const facturasData = await db
+    .select({
+      fecha: facturasTable.fecha,
+      facturaId: facturasTable.facturaId,
+      casillero: facturasTable.casillero,
+      total: facturasTable.total,
+      pagado: facturasTable.pagado,
+      retirados: facturasTable.retirados,
+      sucursalId: facturasTable.sucursalId,
+      cliente: {
+        nombre: usuarios.nombre,
+        apellido: usuarios.apellido,
+        cedula: usuarios.cedula,
+        telefono: usuarios.telefono,
+        sucursal: sucursales.sucursal,
+      },
+    })
+    .from(facturasTable)
+    .where(and(...conditions))
+    .leftJoin(usuarios, eq(facturasTable.clienteId, usuarios.id))
+    .leftJoin(sucursales, eq(facturasTable.sucursalId, sucursales.sucursalId))
+    .orderBy(desc(facturasTable.facturaId));
+
+  return new Response(
+    JSON.stringify({
+      facturas: facturasData,
+    }),
+    {
+      headers: { "Content-Type": "application/json" },
+      status: 200,
+    },
+  );
 };

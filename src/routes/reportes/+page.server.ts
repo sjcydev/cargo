@@ -1,9 +1,9 @@
 import type { Actions, PageServerLoad } from "./$types";
 import { db } from "$lib/server/db";
-import { reportes, sucursales, facturas } from "$lib/server/db/schema";
-import { desc, eq, and, between, sql } from "drizzle-orm";
-import { redirect, error, json, fail } from "@sveltejs/kit";
-import { getLocalTimeZone, parseDate } from "@internationalized/date";
+import { reportes, facturas } from "$lib/server/db/schema";
+import { desc, eq, and, between } from "drizzle-orm";
+import { redirect, fail } from "@sveltejs/kit";
+import { parseDateTime } from "@internationalized/date";
 
 export const load = (async ({ locals }) => {
   const { user } = locals;
@@ -48,12 +48,15 @@ export const actions = {
     if (!user) throw redirect(302, "/login");
 
     const data = await request.formData();
-    const fechaInicial = parseDate(data.get("fechaInicial") as string).toDate(
-      getLocalTimeZone()
-    );
-    const fechaFinal = parseDate(data.get("fechaFinal") as string).toDate(
-      getLocalTimeZone()
-    );
+
+    const fechaInicial = parseDateTime(
+      data.get("fechaInicial") as string,
+    ).toDate("America/Panama");
+
+    const fechaFinal = parseDateTime(data.get("fechaFinal") as string)
+      .set({ hour: 23, minute: 59, second: 59 })
+      .toDate("America/Panama");
+
     const sucursalId = parseInt(data.get("sucursalId") as string);
 
     const facturasData = await db
@@ -62,14 +65,14 @@ export const actions = {
       .where(
         sucursalId === 0
           ? and(
-              between(facturas.pagadoAt, fechaInicial, fechaFinal),
-              eq(facturas.cancelada, false)
-            )
+            between(facturas.pagadoAt, fechaInicial, fechaFinal),
+            eq(facturas.cancelada, false),
+          )
           : and(
-              eq(facturas.sucursalId, sucursalId),
-              between(facturas.pagadoAt, fechaInicial, fechaFinal),
-              eq(facturas.cancelada, false)
-            )
+            eq(facturas.sucursalId, sucursalId),
+            between(facturas.pagadoAt, fechaInicial, fechaFinal),
+            eq(facturas.cancelada, false),
+          ),
       );
 
     // Check if there are any invoices
@@ -95,11 +98,11 @@ export const actions = {
       {
         total: 0,
         metodoDePago: {} as Record<string, { count: number; total: number }>,
-      }
+      },
     );
 
     const facturasIds = JSON.stringify(
-      facturasData.map((factura) => factura.facturaId)
+      facturasData.map((factura) => factura.facturaId),
     );
 
     // Create report

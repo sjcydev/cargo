@@ -9,8 +9,8 @@ import {
   type UsuariosWithSucursal,
 } from "$lib/server/db/schema";
 import { getFriendlyUrl } from "$lib/server/s3";
-import { getLocalTimeZone, today } from "@internationalized/date";
 import { redirect } from "@sveltejs/kit";
+import { getToday } from "$lib/utils";
 
 export const load = (async ({ params }) => {
   const facturaId = params.facturaId;
@@ -80,7 +80,7 @@ export const actions = {
           pagado: metodoPago !== "no_pagado",
           pagadoAt:
             metodoPago !== "no_pagado"
-              ? today(getLocalTimeZone()).toDate(getLocalTimeZone())
+              ? getToday().toJSDate()
               : null,
         })
         .where(inArray(facturas.facturaId, facturaIds));
@@ -106,7 +106,7 @@ export const actions = {
         .set({
           retirado: setRetirado,
           retiradoAt: setRetirado
-            ? today(getLocalTimeZone()).toDate(getLocalTimeZone())
+            ? getToday().toJSDate()
             : null,
         })
         .where(inArray(trackings.trackingId, trackingIds));

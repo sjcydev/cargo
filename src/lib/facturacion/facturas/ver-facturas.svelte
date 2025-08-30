@@ -13,7 +13,7 @@
     loading = false,
   }: {
     columns: any;
-    data: FacturasWithCliente[] | Facturas[];
+    data: Partial<FacturasWithCliente>[] | Partial<Facturas>[];
     actions?: Snippet;
     selectionChange?: (selected: number[]) => void;
     showPagination?: boolean;
