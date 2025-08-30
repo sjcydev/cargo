@@ -74,7 +74,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
     // Query for daily revenue
     const dailyRevenueQuery = {
-      date: sql<string>`DATE(${facturas.createdAt})`,
+      date: sql<string>`DATE(${facturas.pagadoAt})`,
       total: sql<number>`SUM(CASE WHEN ${facturas.pagado} = true THEN ${facturas.total} ELSE 0 END)`,
     };
 
@@ -86,9 +86,9 @@ export const load: PageServerLoad = async ({ locals }) => {
     const dailyRevenue = await db
       .select(dailyRevenueQuery)
       .from(facturas)
-      .where(between(facturas.createdAt, startDate, endDate))
-      .groupBy(sql`DATE(${facturas.createdAt})`)
-      .orderBy(sql`DATE(${facturas.createdAt})`);
+      .where(between(facturas.pagadoAt, startDate, endDate))
+      .groupBy(sql`DATE(${facturas.pagadoAt})`)
+      .orderBy(sql`DATE(${facturas.pagadoAt})`);
 
     // Calculate growth comparing current month's paid invoices with previous month
     const previousStartDate = new CalendarDate(
@@ -105,7 +105,7 @@ export const load: PageServerLoad = async ({ locals }) => {
         total: sql<number>`SUM(CASE WHEN ${facturas.pagado} = true THEN ${facturas.total} ELSE 0 END)`,
       })
       .from(facturas)
-      .where(between(facturas.createdAt, previousStartDate, previousEndDate));
+      .where(between(facturas.pagadoAt, previousStartDate, previousEndDate));
 
     const currentTotal = baseStats[0].total || 0;
     const previousTotal = previousMonthStats[0].total || 0;
@@ -125,7 +125,7 @@ export const load: PageServerLoad = async ({ locals }) => {
       .from(facturas)
       .where(
         and(
-          between(facturas.createdAt, startDate, endDate),
+          between(facturas.pagadoAt, startDate, endDate),
           eq(facturas.pagado, true)
         )
       )

@@ -91,7 +91,7 @@ const createDateRange = (dateRange?: DateRange) => {
 
   // Set time boundaries
   currentStartDate.setHours(0, 0, 0, 0);
-  currentEndDate.setHours(23, 59, 59, 999);
+  currentEndDate.setHours(23, 59, 59);
 
   const timeDifference = currentEndDate.getTime() - currentStartDate.getTime();
   const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
@@ -110,7 +110,7 @@ const createDateRange = (dateRange?: DateRange) => {
     currPreviousStart.day
   ).toDate("America/Panama");
 
-  previousEnd.setHours(23, 59, 59, 999);
+  previousEnd.setHours(23, 59, 59);
   previousStart.setHours(0, 0, 0, 0);
 
   return {
@@ -135,6 +135,22 @@ const createWhereClause = (
     : between(table.createdAt, dateStart, dateEnd);
 };
 
+
+const createFacturaClause = (
+  table: typeof facturas,
+  dateStart: Date,
+  dateEnd: Date,
+  sucursalId: string
+) => {
+  return sucursalId !== "all"
+    ? and(
+        between(table.pagadoAt, dateStart, dateEnd),
+        eq(table.sucursalId, Number(sucursalId))
+      )
+    : between(table.pagadoAt, dateStart, dateEnd);
+};
+
+
 // Stats calculation functions
 const getMonthlyStats = async (
   sucursalId: string,
@@ -145,13 +161,14 @@ const getMonthlyStats = async (
     previousEnd,
   }: ReturnType<typeof createDateRange>
 ): Promise<MonthlyStats> => {
-  const whereClause = createWhereClause(
+  const whereClause = createFacturaClause(
     facturas,
     currentStart,
     currentEnd,
     sucursalId
   );
-  const previousWhereClause = createWhereClause(
+
+  const previousWhereClause = createFacturaClause(
     facturas,
     previousStart,
     previousEnd,
