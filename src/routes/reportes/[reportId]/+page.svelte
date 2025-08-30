@@ -27,6 +27,7 @@
     return new Intl.DateTimeFormat("es-PA", {
       timeZone: "America/Panama",
       dateStyle: "long",
+      timeStyle: "short"
     }).format(date);
   }
 

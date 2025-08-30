@@ -50,14 +50,10 @@ export const actions = {
           .where(eq(companies.companyId, companyId));
       }
 
-      console.log(companyId);
-
       await db
         .update(companies)
         .set({ company, dominio })
         .where(eq(companies.companyId, companyId));
-
-      console.log("updated");
 
       const updatedForm = await superValidate(zod(companiesSettingsSchema));
 

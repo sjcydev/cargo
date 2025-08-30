@@ -8,6 +8,7 @@ import {
   startOfMonth,
   today,
   endOfMonth,
+  CalendarDateTime,
 } from "@internationalized/date";
 import type { DateRange } from "bits-ui";
 import { formatCompactPercentage } from "$lib/utils";
@@ -83,15 +84,11 @@ const createDateRange = (dateRange?: DateRange) => {
   const end = dateRange?.end || defaultEnd;
 
   // Convert to JavaScript Date objects
-  const currentStart = new CalendarDate(start.year, start.month, start.day);
+  const currentStart = new CalendarDateTime(start.year, start.month, start.day, 0,0,0);
   const currentStartDate = currentStart.toDate("America/Panama");
 
-  const currentEnd = new CalendarDate(end.year, end.month, end.day);
+  const currentEnd = new CalendarDateTime(end.year, end.month, end.day, 23, 59, 59);
   const currentEndDate = currentEnd.toDate("America/Panama");
-
-  // Set time boundaries
-  currentStartDate.setHours(0, 0, 0, 0);
-  currentEndDate.setHours(23, 59, 59);
 
   const timeDifference = currentEndDate.getTime() - currentStartDate.getTime();
   const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
@@ -99,19 +96,18 @@ const createDateRange = (dateRange?: DateRange) => {
   const currPreviousEnd = currentEnd.subtract({ days: daysDifference + 1 });
   const currPreviousStart = currentStart.subtract({ days: daysDifference + 1 });
 
-  const previousEnd = new CalendarDate(
+  const previousEnd = new CalendarDateTime(
     currPreviousEnd.year,
     currPreviousEnd.month,
-    currPreviousEnd.day
+    currPreviousEnd.day,
+    0,0,0
   ).toDate("America/Panama");
-  const previousStart = new CalendarDate(
+  const previousStart = new CalendarDateTime(
     currPreviousStart.year,
     currPreviousStart.month,
-    currPreviousStart.day
+    currPreviousStart.day,
+    23,59,59
   ).toDate("America/Panama");
-
-  previousEnd.setHours(23, 59, 59);
-  previousStart.setHours(0, 0, 0, 0);
 
   return {
     currentStart: currentStartDate,
@@ -193,7 +189,7 @@ const getMonthlyStats = async (
         .where(previousWhereClause),
       db
         .select({
-          date: sql<string>`DATE(${facturas.createdAt})`,
+          date: sql<string>`DATE(${facturas.pagadoAt})`,
           total: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = true AND ${facturas.cancelada} = false THEN ${facturas.total} ELSE 0 END), 0)`,
         })
         .from(facturas)
