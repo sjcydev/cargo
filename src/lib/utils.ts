@@ -4,6 +4,20 @@ import { encodeBase32LowerCase } from "@oslojs/encoding";
 import { toast as mainToast } from "svelte-sonner";
 import { DateTime, Settings } from "luxon";
 
+Settings.defaultZone = "America/Panama";
+
+export function getToday() {
+  return DateTime.now().setZone("America/Panama");
+}
+
+export function dateToLocaleString(date: DateTime) {
+  return date.setLocale("en-GB").toLocaleString();
+}
+
+export function getDateFromISO(iso: string) {
+  return DateTime.fromISO(iso, { zone: "America/Panama" });
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -97,7 +111,6 @@ export async function getBase64FromUrl(url: string): Promise<string> {
   return `data:image/png;base64,${buffer.toString("base64")}`;
 }
 
-Settings.defaultZone = "America/Panama";
 
 export function formatCurrency(value: number): string {
   if (value === 0) return "$0";
@@ -135,17 +148,6 @@ export function formatFullCurrency(value: number): string {
   }).format(value);
 }
 
-export function getToday() {
-  return DateTime.now().setZone("America/Panama");
-}
-
-export function dateToLocaleString(date: DateTime) {
-  return date.setLocale("en-GB").toLocaleString();
-}
-
-export function getDateFromISO(iso: string) {
-  return DateTime.fromISO(iso, { zone: "America/Panama" });
-}
 
 type DimensionsType = {
   imgWidth: number;

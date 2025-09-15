@@ -8,7 +8,7 @@ import {
 import { and, between, eq, sql } from "drizzle-orm";
 import type { PageServerLoad } from "./$types";
 import { redirect } from "@sveltejs/kit";
-import { CalendarDate, getLocalTimeZone, today } from "@internationalized/date";
+import { CalendarDate, today } from "@internationalized/date";
 
 type DailyRevenue = {
   date: string;
@@ -51,12 +51,12 @@ export const load: PageServerLoad = async ({ locals }) => {
     throw redirect(302, "/clientes");
   }
 
-  const now = today(getLocalTimeZone());
+  const now = today("America/Panama");
   const startDate = new CalendarDate(now.year, now.month, 1).toDate(
-    getLocalTimeZone()
+    "America/Panama"
   );
   const endDate = new CalendarDate(now.year, now.month + 1, 0).toDate(
-    getLocalTimeZone()
+    "America/Panama"
   );
 
   const getSucursales = async (): Promise<any[]> => {
@@ -74,7 +74,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
     // Query for daily revenue
     const dailyRevenueQuery = {
-      date: sql<string>`DATE(${facturas.createdAt})`,
+      date: sql<string>`DATE(${facturas.pagadoAt})`,
       total: sql<number>`SUM(CASE WHEN ${facturas.pagado} = true THEN ${facturas.total} ELSE 0 END)`,
     };
 
@@ -86,18 +86,18 @@ export const load: PageServerLoad = async ({ locals }) => {
     const dailyRevenue = await db
       .select(dailyRevenueQuery)
       .from(facturas)
-      .where(between(facturas.createdAt, startDate, endDate))
-      .groupBy(sql`DATE(${facturas.createdAt})`)
-      .orderBy(sql`DATE(${facturas.createdAt})`);
+      .where(between(facturas.pagadoAt, startDate, endDate))
+      .groupBy(sql`DATE(${facturas.pagadoAt})`)
+      .orderBy(sql`DATE(${facturas.pagadoAt})`);
 
     // Calculate growth comparing current month's paid invoices with previous month
     const previousStartDate = new CalendarDate(
       now.year,
       now.month - 1,
       1
-    ).toDate(getLocalTimeZone());
+    ).toDate("America/Panama");
     const previousEndDate = new CalendarDate(now.year, now.month, 0).toDate(
-      getLocalTimeZone()
+      "America/Panama"
     );
 
     const previousMonthStats = await db
@@ -105,7 +105,7 @@ export const load: PageServerLoad = async ({ locals }) => {
         total: sql<number>`SUM(CASE WHEN ${facturas.pagado} = true THEN ${facturas.total} ELSE 0 END)`,
       })
       .from(facturas)
-      .where(between(facturas.createdAt, previousStartDate, previousEndDate));
+      .where(between(facturas.pagadoAt, previousStartDate, previousEndDate));
 
     const currentTotal = baseStats[0].total || 0;
     const previousTotal = previousMonthStats[0].total || 0;
@@ -125,7 +125,7 @@ export const load: PageServerLoad = async ({ locals }) => {
       .from(facturas)
       .where(
         and(
-          between(facturas.createdAt, startDate, endDate),
+          between(facturas.pagadoAt, startDate, endDate),
           eq(facturas.pagado, true)
         )
       )

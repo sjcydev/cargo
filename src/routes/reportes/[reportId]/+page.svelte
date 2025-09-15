@@ -24,11 +24,11 @@
   });
 
   function formatDate(date: Date) {
-    return new Date(date).toLocaleDateString("es-ES", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+    return new Intl.DateTimeFormat("es-PA", {
+      timeZone: "America/Panama",
+      dateStyle: "long",
+      timeStyle: "short"
+    }).format(date);
   }
 
   function capitalizeMethod(method: string) {

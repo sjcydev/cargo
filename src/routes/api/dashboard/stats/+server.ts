@@ -5,11 +5,10 @@ import { json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import {
   CalendarDate,
-  getLocalTimeZone,
   startOfMonth,
   today,
   endOfMonth,
-  toCalendarDate,
+  CalendarDateTime,
 } from "@internationalized/date";
 import type { DateRange } from "bits-ui";
 import { formatCompactPercentage } from "$lib/utils";
@@ -77,7 +76,7 @@ const calculateGrowthPercentage = (
 };
 
 const createDateRange = (dateRange?: DateRange) => {
-  const now = today(getLocalTimeZone());
+  const now = today("America/Panama");
   const defaultStart = startOfMonth(now);
   const defaultEnd = endOfMonth(now);
 
@@ -85,15 +84,11 @@ const createDateRange = (dateRange?: DateRange) => {
   const end = dateRange?.end || defaultEnd;
 
   // Convert to JavaScript Date objects
-  const currentStart = new CalendarDate(start.year, start.month, start.day);
-  const currentStartDate = currentStart.toDate(getLocalTimeZone());
+  const currentStart = new CalendarDateTime(start.year, start.month, start.day, 0,0,0);
+  const currentStartDate = currentStart.toDate("America/Panama");
 
-  const currentEnd = new CalendarDate(end.year, end.month, end.day);
-  const currentEndDate = currentEnd.toDate(getLocalTimeZone());
-
-  // Set time boundaries
-  currentStartDate.setHours(0, 0, 0, 0);
-  currentEndDate.setHours(23, 59, 59, 999);
+  const currentEnd = new CalendarDateTime(end.year, end.month, end.day, 23, 59, 59);
+  const currentEndDate = currentEnd.toDate("America/Panama");
 
   const timeDifference = currentEndDate.getTime() - currentStartDate.getTime();
   const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
@@ -101,19 +96,18 @@ const createDateRange = (dateRange?: DateRange) => {
   const currPreviousEnd = currentEnd.subtract({ days: daysDifference + 1 });
   const currPreviousStart = currentStart.subtract({ days: daysDifference + 1 });
 
-  const previousEnd = new CalendarDate(
+  const previousEnd = new CalendarDateTime(
     currPreviousEnd.year,
     currPreviousEnd.month,
-    currPreviousEnd.day
-  ).toDate(getLocalTimeZone());
-  const previousStart = new CalendarDate(
+    currPreviousEnd.day,
+    0,0,0
+  ).toDate("America/Panama");
+  const previousStart = new CalendarDateTime(
     currPreviousStart.year,
     currPreviousStart.month,
-    currPreviousStart.day
-  ).toDate(getLocalTimeZone());
-
-  previousEnd.setHours(23, 59, 59, 999);
-  previousStart.setHours(0, 0, 0, 0);
+    currPreviousStart.day,
+    23,59,59
+  ).toDate("America/Panama");
 
   return {
     currentStart: currentStartDate,
@@ -137,6 +131,22 @@ const createWhereClause = (
     : between(table.createdAt, dateStart, dateEnd);
 };
 
+
+const createFacturaClause = (
+  table: typeof facturas,
+  dateStart: Date,
+  dateEnd: Date,
+  sucursalId: string
+) => {
+  return sucursalId !== "all"
+    ? and(
+        between(table.pagadoAt, dateStart, dateEnd),
+        eq(table.sucursalId, Number(sucursalId))
+      )
+    : between(table.pagadoAt, dateStart, dateEnd);
+};
+
+
 // Stats calculation functions
 const getMonthlyStats = async (
   sucursalId: string,
@@ -147,13 +157,14 @@ const getMonthlyStats = async (
     previousEnd,
   }: ReturnType<typeof createDateRange>
 ): Promise<MonthlyStats> => {
-  const whereClause = createWhereClause(
+  const whereClause = createFacturaClause(
     facturas,
     currentStart,
     currentEnd,
     sucursalId
   );
-  const previousWhereClause = createWhereClause(
+
+  const previousWhereClause = createFacturaClause(
     facturas,
     previousStart,
     previousEnd,
@@ -178,13 +189,13 @@ const getMonthlyStats = async (
         .where(previousWhereClause),
       db
         .select({
-          date: sql<string>`DATE(${facturas.createdAt})`,
+          date: sql<string>`DATE(${facturas.pagadoAt})`,
           total: sql<number>`COALESCE(SUM(CASE WHEN ${facturas.pagado} = true AND ${facturas.cancelada} = false THEN ${facturas.total} ELSE 0 END), 0)`,
         })
         .from(facturas)
         .where(whereClause)
-        .groupBy(sql`DATE(${facturas.createdAt})`)
-        .orderBy(sql`DATE(${facturas.createdAt})`),
+        .groupBy(sql`DATE(${facturas.pagadoAt})`)
+        .orderBy(sql`DATE(${facturas.pagadoAt})`),
       db
         .select({
           metodoPago: sql<string>`${facturas.metodoDePago}`,

@@ -1,11 +1,8 @@
 import type { ColumnDef } from "@tanstack/table-core";
-import { createColumnHelper } from "@tanstack/table-core";
 import type { Reportes } from "$lib/server/db/schema";
 import { renderComponent } from "$lib/components/ui/data-table";
 import DataSortableButton from "$lib/components/data-sortable-button.svelte";
 import DataTableActions from "./data-table-actions.svelte";
-
-const columnHelper = createColumnHelper<Reportes>();
 
 export const columns = (user: { rol: string }): ColumnDef<Reportes>[] => [
   {
@@ -26,7 +23,7 @@ export const columns = (user: { rol: string }): ColumnDef<Reportes>[] => [
       }),
     cell: ({ row }) => {
       const date = new Date(row.getValue("fechaInicial"));
-      return date.toLocaleDateString();
+      return new Intl.DateTimeFormat("es-PA", { timeZone: "America/Panama", dateStyle: "short"}).format(date);
     },
   },
   {
@@ -40,7 +37,7 @@ export const columns = (user: { rol: string }): ColumnDef<Reportes>[] => [
       }),
     cell: ({ row }) => {
       const date = new Date(row.getValue("fechaFinal"));
-      return date.toLocaleDateString();
+      return new Intl.DateTimeFormat("es-PA", { timeZone: "America/Panama", dateStyle: "short"}).format(date);
     },
   },
   {
