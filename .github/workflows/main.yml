@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target_repo: [panabox_admin_v2, heavycargo_admin, sakurabox_admin]
+        target_repo: [panabox_admin_v2, heavycargo_admin, sakurabox_admin, qualitycargo_admin_v2]
 
     steps:
       - name: Dispatch to ${{ matrix.target_repo }}
