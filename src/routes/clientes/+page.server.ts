@@ -19,7 +19,7 @@ export const load = (async ({ locals }) => {
     const [sucursalesData, clientes] = await Promise.all([
       db
         .select({
-          sucursalId: sucursales.sucursal,
+          sucursalId: sucursales.sucursalId,
           sucursal: sucursales.sucursal,
         })
         .from(sucursales)
