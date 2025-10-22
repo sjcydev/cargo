@@ -11,7 +11,6 @@
   import { PlusIcon, PencilIcon, TrashIcon } from "lucide-svelte";
   import { Rainbow as Loader } from "svelte-loading-spinners";
   import type {
-    NewUsuarios,
     NewFacturas,
     NewTrackings,
     Users,

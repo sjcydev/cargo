@@ -4,7 +4,13 @@ import { usuarios, sucursales } from "$lib/server/db/schema";
 import { lt, eq, and, desc } from "drizzle-orm";
 
 export const POST = async ({ request }: RequestEvent) => {
-  const data: { last: number } = await request.json();
+  const data: { last: number, sucursalId: number | null } = await request.json();
+
+  const conditions = [eq(usuarios.archivado, false), lt(usuarios.casillero, data.last)];
+
+  if (data.sucursalId) {
+    conditions.push(eq(usuarios.sucursalId, data.sucursalId));
+  }
 
   const clientes = await db
     .select({
@@ -22,7 +28,7 @@ export const POST = async ({ request }: RequestEvent) => {
     })
     .from(usuarios)
     .where(
-      and(eq(usuarios.archivado, false), lt(usuarios.casillero, data.last)),
+      and(...conditions),
     )
     .leftJoin(sucursales, eq(usuarios.sucursalId, sucursales.sucursalId))
     .orderBy(desc(usuarios.casillero));

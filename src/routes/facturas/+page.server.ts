@@ -64,7 +64,7 @@ export const load = (async ({ locals }) => {
   return {
     facturas: facturasData,
     sucursales: sucursalesData,
-    last: facturasData[facturasData.length - 1].facturaId,
+    last: facturasData[facturasData.length - 1].facturaId ?? 0,
   };
 }) satisfies PageServerLoad;
 

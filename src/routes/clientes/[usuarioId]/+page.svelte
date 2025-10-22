@@ -5,8 +5,8 @@
   import * as Form from "$lib/components/ui/form";
   import * as Card from "$lib/components/ui/card";
   import {
-    type clientesRegsiterType,
-    clientesRegisterSchema,
+    type clientesRegsiterWithTipoType,
+    regWithTipoSchema,
   } from "$lib/clientes_registrar/schema";
   import type { SuperValidated, Infer } from "sveltekit-superforms";
   import { superForm } from "sveltekit-superforms";
@@ -19,6 +19,7 @@
     Mail,
     CreditCard,
     Building2,
+    Building,
     Package,
     ReceiptText,
   } from "lucide-svelte";
@@ -31,14 +32,14 @@
 
   let {
     data,
-  }: { data: SuperValidated<Infer<clientesRegsiterType>> & PageData } =
+  }: { data: SuperValidated<Infer<clientesRegsiterWithTipoType>> & PageData } =
     $props();
-  let { sucursales } = data;
+  let { sucursales, allowCorps } = data;
 
   let cliente = $state(data.cliente);
 
   const form = superForm(data, {
-    validators: zodClient(clientesRegisterSchema),
+    validators: zodClient(regWithTipoSchema),
     dataType: "json",
     invalidateAll: true,
     resetForm: false,
@@ -48,10 +49,15 @@
         const sucursal = sucursales.find(
           (s) => String(s.sucursalId) === $formData.sucursalId,
         );
-        const tipo =
-          sucursal?.precio === Number($formData.precio)
-            ? "REGULAR"
-            : "ESPECIAL";
+
+        let tipo = $formData.tipo;
+
+        if (!allowCorps || tipo !== "CORPORATIVO") {
+          tipo =
+            sucursal?.precio === Number($formData.precio)
+              ? "REGULAR"
+              : "ESPECIAL";
+        }
 
         cliente = {
           ...cliente,
@@ -64,7 +70,9 @@
           sucursalId: Number($formData.sucursalId),
           precio: Number($formData.precio),
           tipo,
+          codificacion: $formData.codificacion,
         };
+
         previous = { ...$formData };
 
         // Ensure everything is refreshed
@@ -92,6 +100,8 @@
     sexo: cliente.sexo,
     precio: cliente.precio,
     id: String(cliente.id),
+    tipo: cliente.tipo,
+    codificacion: cliente.codificacion,
   };
   let previous = $state({ ...$formData });
   let disableChange = $derived(
@@ -103,10 +113,15 @@
       ?.sucursal ?? "Elige la sucursal",
   );
 
+  const tiposDeClientes = ["REGULAR", "CORPORATIVO"];
+
   const currentTipo = $derived(() => {
+    if ($formData.tipo === "CORPORATIVO") return $formData.tipo;
+
     const sucursal = sucursales.find(
       (s) => String(s.sucursalId) === $formData.sucursalId,
     );
+
     return sucursal?.precio === Number($formData.precio)
       ? "REGULAR"
       : "ESPECIAL";
@@ -192,7 +207,6 @@
     {/if}
   </div>
 {/snippet}
-
 
 <InnerLayout
   title={`${cliente?.nombre} ${cliente?.apellido}`}
@@ -330,6 +344,65 @@
               </Form.Field>
             </div>
           </div>
+
+          {#if allowCorps}
+            <div class="space-y-4">
+              {#if $formData.tipo === "CORPORATIVO"}
+                <div class="flex items-center gap-2">
+                  <Building class="w-5 h-5 text-primary" />
+                  <h3 class="font-semibold">
+                    Corporativo
+                  </h3>
+                </div>
+              {/if}
+
+              <div class="grid md:grid-cols-2 gap-6">
+                <Form.Field {form} name="tipo">
+                  <Form.Control>
+                    {#snippet children({ props })}
+                      <Form.Label>Tipo de Cliente</Form.Label>
+                      <Select.Root
+                        type="single"
+                        bind:value={$formData.tipo}
+                        name={props.name}
+                        disabled={!editMode}
+                      >
+                        <Select.Trigger {...props}>
+                          {$formData.tipo}
+                        </Select.Trigger>
+                        <Select.Content>
+                          {#each tiposDeClientes as tc}
+                            <Select.Item value={tc}>
+                              {tc}
+                            </Select.Item>
+                          {/each}
+                        </Select.Content>
+                      </Select.Root>
+                    {/snippet}
+                  </Form.Control>
+                  <Form.FieldErrors />
+                </Form.Field>
+
+                {#if $formData.tipo === "CORPORATIVO"}
+                  <Form.Field {form} name="codificacion">
+                    <Form.Control>
+                      {#snippet children({ props })}
+                        <Form.Label>Codificación</Form.Label>
+                        <Input
+                          {...props}
+                          bind:value={$formData.codificacion}
+                          placeholder="XX"
+                          disabled={!editMode}
+                          required={$formData.tipo === "CORPORATIVO"}
+                        />
+                      {/snippet}
+                    </Form.Control>
+                    <Form.FieldErrors />
+                  </Form.Field>
+                {/if}
+              </div>
+            </div>
+          {/if}
 
           <!-- Branch and Price Information -->
           <div class="space-y-4 pt-2">

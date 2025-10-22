@@ -11,23 +11,26 @@
 
   let { data }: { data: PageData } = $props();
   let clientes = $state(data.clientes);
+  $inspect(clientes)
 
   let loading = $state(false);
 
-  onMount(async () => {
-    loading = true;
+  if (data.clientes.length >= 100) {
+    onMount(async () => {
+      loading = true;
 
-    const newData = await fetch("/api/clientes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ last: data.last }),
-    }).then((res) => {
-      loading = false;
-      return res.json();
+      const newData = await fetch("/api/clientes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ last: data.last, sucursalId: data.user?.rol !== 'ADMIN' ? data.user?.sucursalId : null }),
+      }).then((res) => {
+        loading = false;
+        return res.json();
+      });
+
+      clientes = [...clientes, ...newData.clientes];
     });
-
-    clientes = [...clientes, ...newData.clientes];
-  });
+  }
 
   function handleRowClick(row: any) {
     if (row.casillero) {

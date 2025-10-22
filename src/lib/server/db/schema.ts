@@ -25,25 +25,30 @@ export const companies = mysqlTable("companies", {
     length: 255,
   }).notNull(),
   sucursalesLimit: int("sucursalesLimit").default(1),
+  allowCorporativos: boolean("allowCorporativos").default(false),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
-export const sucursales = mysqlTable("sucursales", {
-  sucursalId: int("sucursalId").autoincrement().primaryKey(),
-  sucursal: varchar("nombre", { length: 255 }).notNull(),
-  direccion: varchar("direccion", { length: 255 }).notNull(),
-  maps: varchar("maps", { length: 255 }),
-  telefono: varchar("telefono", { length: 255 }).notNull(),
-  precio: float("precio").default(2.75).notNull(),
-  codificacion: varchar("codificacion", { length: 4 }).notNull(),
-  correo: varchar("correo", { length: 255 }).notNull(),
-  companyId: int("company").references(() => companies.companyId),
-  createdAt: timestamp("createdAt").defaultNow(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
-}, (table) => ({
-  sucursalIdx: index("sucursalIdx").on(table.sucursalId)
-}));
+export const sucursales = mysqlTable(
+  "sucursales",
+  {
+    sucursalId: int("sucursalId").autoincrement().primaryKey(),
+    sucursal: varchar("nombre", { length: 255 }).notNull(),
+    direccion: varchar("direccion", { length: 255 }).notNull(),
+    maps: varchar("maps", { length: 255 }),
+    telefono: varchar("telefono", { length: 255 }).notNull(),
+    precio: float("precio").default(2.75).notNull(),
+    codificacion: varchar("codificacion", { length: 4 }).notNull(),
+    correo: varchar("correo", { length: 255 }).notNull(),
+    companyId: int("company").references(() => companies.companyId),
+    createdAt: timestamp("createdAt").defaultNow(),
+    updatedAt: timestamp("updatedAt").onUpdateNow(),
+  },
+  (table) => ({
+    sucursalIdx: index("sucursalIdx").on(table.sucursalId),
+  }),
+);
 
 export const users = mysqlTable("users", {
   id: varchar("id", {
@@ -85,104 +90,113 @@ export const session = mysqlTable("session", {
   expiresAt: datetime("expires_at").notNull(),
 });
 
-export const usuarios = mysqlTable("usuarios", {
-  id: int("id").autoincrement().primaryKey(),
-  nombre: varchar("nombre", { length: 100 }).notNull(),
-  apellido: varchar("apellido", { length: 100 }).notNull(),
-  cedula: varchar("cedula", { length: 20 }).notNull(),
-  telefono: varchar("telefono", { length: 25 }).notNull(),
-  casillero: int("casillero").unique(),
-  sucursalId: int("sucursalId")
-    .references(() => sucursales.sucursalId)
-    .notNull(),
-  nacimiento: datetime("nacimiento").notNull(),
-  correo: varchar("correo", { length: 255 }).notNull(),
-  sexo: varchar("sexo", {
-    enum: ["Masculino", "Femenino", "Otros"],
-    length: 9,
-  }).default("Otros"),
-  precio: float("precio").default(2.75),
-  tipo: varchar("tipo", {
-    enum: ["REGULAR", "ESPECIAL", "CORPORATIVO"],
-    length: 11,
-  })
-    .default("REGULAR")
-    .notNull(),
-  archivado: boolean("archivado").default(false),
-  archivadoAt: timestamp("archivadoAt"),
-  createdAt: timestamp("createdAt").defaultNow(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
-}, (table) => ({
-  casilleroIdx: index("usuarios_casillero_idx").on(table.casillero),
-  // INDEX 1: Search composite (CRITICAL for your /clientes endpoint)
-  // Covers: All search patterns in your current UsuariosRepository
-  searchIdx: index("usuarios_search_idx").on(
-    table.archivado,    // Always filtered (false)
-    table.sucursalId,   // Common filter
-    table.casillero     // For ordering DESC + search
-  ),
+export const usuarios = mysqlTable(
+  "usuarios",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    nombre: varchar("nombre", { length: 100 }).notNull(),
+    apellido: varchar("apellido", { length: 100 }).notNull(),
+    cedula: varchar("cedula", { length: 20 }).notNull(),
+    telefono: varchar("telefono", { length: 25 }).notNull(),
+    casillero: int("casillero").unique(),
+    sucursalId: int("sucursalId")
+      .references(() => sucursales.sucursalId)
+      .notNull(),
+    nacimiento: datetime("nacimiento").notNull(),
+    correo: varchar("correo", { length: 255 }).notNull(),
+    sexo: varchar("sexo", {
+      enum: ["Masculino", "Femenino", "Otros"],
+      length: 9,
+    }).default("Otros"),
+    precio: float("precio").default(2.75),
+    tipo: varchar("tipo", {
+      enum: ["REGULAR", "ESPECIAL", "CORPORATIVO"],
+      length: 11,
+    })
+      .default("REGULAR")
+      .notNull(),
+    codificacion: varchar("codificacion", { length: 5 }),
+    archivado: boolean("archivado").default(false),
+    archivadoAt: timestamp("archivadoAt"),
+    createdAt: timestamp("createdAt").defaultNow(),
+    updatedAt: timestamp("updatedAt").onUpdateNow(),
+  },
+  (table) => ({
+    casilleroIdx: index("usuarios_casillero_idx").on(table.casillero),
+    // INDEX 1: Search composite (CRITICAL for your /clientes endpoint)
+    // Covers: All search patterns in your current UsuariosRepository
+    searchIdx: index("usuarios_search_idx").on(
+      table.archivado, // Always filtered (false)
+      table.sucursalId, // Common filter
+      table.casillero, // For ordering DESC + search
+    ),
 
-  // INDEX 2: Text search optimization (HIGH VALUE)
-  // Covers: nombre, apellido, cedula search patterns  
-  textSearchIdx: index("usuarios_text_search_idx").on(
-    table.nombre,
-    table.apellido,
-    table.cedula
-  ),
-}));
+    // INDEX 2: Text search optimization (HIGH VALUE)
+    // Covers: nombre, apellido, cedula search patterns
+    textSearchIdx: index("usuarios_text_search_idx").on(
+      table.nombre,
+      table.apellido,
+      table.cedula,
+    ),
+  }),
+);
 
-export const facturas = mysqlTable("facturas", {
-  facturaId: int("facturaId").autoincrement().primaryKey(),
-  casillero: int("casillero"),
-  fecha: varchar("fecha", { length: 50 }).notNull(),
-  pagado: boolean("pagado").default(false),
-  clienteId: int("clienteId")
-    .references(() => usuarios.id)
-    .notNull(),
-  total: float("total").default(0),
-  metodoDePago: varchar("metodoDePago", {
-    length: 15,
-    enum: [
-      "transferencia",
-      "efectivo",
-      "yappy",
-      "tarjeta",
-      "otros",
-      "no_pagado",
-    ],
-  })
-    .default("no_pagado")
-    .notNull(),
-  pagadoAt: timestamp("pagadoAt"),
-  sucursalId: int("sucursalId")
-    .references(() => sucursales.sucursalId)
-    .notNull(),
-  empleadoId: varchar("empleadoId", { length: 255 })
-    .references(() => users.id)
-    .notNull(),
-  retirados: boolean("retirados").default(false),
-  enviado: boolean("enviado").default(false),
-  cancelada: boolean("cancelada").default(false),
-  canceladaAt: timestamp("canceladaAt"),
-  createdAt: timestamp("createdAt").defaultNow(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
-}, (table) => ({
-  masterIdx: index("facturas_master_idx").on(
-    table.cancelada,     // Always in WHERE clause
-    table.enviado,       // Always in WHERE clause  
-    table.sucursalId,    // Common filter
-    table.facturaId      // For ORDER BY DESC
-  ),
-  indexIdx: index("facturas_index_idx").on(table.facturaId),
+export const facturas = mysqlTable(
+  "facturas",
+  {
+    facturaId: int("facturaId").autoincrement().primaryKey(),
+    casillero: int("casillero"),
+    fecha: varchar("fecha", { length: 50 }).notNull(),
+    pagado: boolean("pagado").default(false),
+    clienteId: int("clienteId")
+      .references(() => usuarios.id)
+      .notNull(),
+    total: float("total").default(0),
+    metodoDePago: varchar("metodoDePago", {
+      length: 15,
+      enum: [
+        "transferencia",
+        "efectivo",
+        "yappy",
+        "tarjeta",
+        "otros",
+        "no_pagado",
+      ],
+    })
+      .default("no_pagado")
+      .notNull(),
+    pagadoAt: timestamp("pagadoAt"),
+    sucursalId: int("sucursalId")
+      .references(() => sucursales.sucursalId)
+      .notNull(),
+    empleadoId: varchar("empleadoId", { length: 255 })
+      .references(() => users.id)
+      .notNull(),
+    retirados: boolean("retirados").default(false),
+    enviado: boolean("enviado").default(false),
+    cancelada: boolean("cancelada").default(false),
+    canceladaAt: timestamp("canceladaAt"),
+    createdAt: timestamp("createdAt").defaultNow(),
+    updatedAt: timestamp("updatedAt").onUpdateNow(),
+  },
+  (table) => ({
+    masterIdx: index("facturas_master_idx").on(
+      table.cancelada, // Always in WHERE clause
+      table.enviado, // Always in WHERE clause
+      table.sucursalId, // Common filter
+      table.facturaId, // For ORDER BY DESC
+    ),
+    indexIdx: index("facturas_index_idx").on(table.facturaId),
 
-  // INDEX 2: Search optimization
-  // Covers: casillero and facturaId searches
-  searchIdx: index("facturas_search_idx").on(table.casillero),
+    // INDEX 2: Search optimization
+    // Covers: casillero and facturaId searches
+    searchIdx: index("facturas_search_idx").on(table.casillero),
 
-  // INDEX 3: Foreign key for JOINs
-  // Covers: JOIN performance with usuarios table
-  clienteIdx: index("facturas_cliente_idx").on(table.clienteId),
-}));
+    // INDEX 3: Foreign key for JOINs
+    // Covers: JOIN performance with usuarios table
+    clienteIdx: index("facturas_cliente_idx").on(table.clienteId),
+  }),
+);
 
 export const reportes = mysqlTable("reportes", {
   reporteId: int("reporteId").autoincrement().primaryKey(),
@@ -198,23 +212,27 @@ export const reportes = mysqlTable("reportes", {
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });
 
-export const trackings = mysqlTable("trackings", {
-  trackingId: int("trackingId").autoincrement().primaryKey(),
-  facturaId: int("facturaId").references(() => facturas.facturaId),
-  numeroTracking: varchar("numeroTracking", { length: 255 }),
-  peso: int("peso"),
-  base: float("base"),
-  precio: float("precio"),
-  sucursalId: int("sucursalId").references(() => sucursales.sucursalId),
-  retirado: boolean("retirado").default(false),
-  retiradoAt: timestamp("retiradoAt"),
-  cancelada: boolean("cancelada").default(false),
-  canceladaAt: timestamp("canceladaAt"),
-  createdAt: timestamp("createdAt").defaultNow(),
-  updatedAt: timestamp("updatedAt").onUpdateNow(),
-}, (table) => ({
-  facturaIdx: index("trackings_factura_idx").on(table.facturaId),
-}));
+export const trackings = mysqlTable(
+  "trackings",
+  {
+    trackingId: int("trackingId").autoincrement().primaryKey(),
+    facturaId: int("facturaId").references(() => facturas.facturaId),
+    numeroTracking: varchar("numeroTracking", { length: 255 }),
+    peso: int("peso"),
+    base: float("base"),
+    precio: float("precio"),
+    sucursalId: int("sucursalId").references(() => sucursales.sucursalId),
+    retirado: boolean("retirado").default(false),
+    retiradoAt: timestamp("retiradoAt"),
+    cancelada: boolean("cancelada").default(false),
+    canceladaAt: timestamp("canceladaAt"),
+    createdAt: timestamp("createdAt").defaultNow(),
+    updatedAt: timestamp("updatedAt").onUpdateNow(),
+  },
+  (table) => ({
+    facturaIdx: index("trackings_factura_idx").on(table.facturaId),
+  }),
+);
 
 export const usersRelations = relations(users, ({ one, many }) => ({
   sucursal: one(sucursales, {

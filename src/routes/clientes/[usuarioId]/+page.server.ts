@@ -1,11 +1,11 @@
 import { db } from "$lib/server/db";
 import { eq, desc, and } from "drizzle-orm";
 import type { PageServerLoad, Actions } from "./$types";
-import { usuarios, facturas, sucursales } from "$lib/server/db/schema";
+import { usuarios, facturas, sucursales, companies } from "$lib/server/db/schema";
 import { fail, redirect } from "@sveltejs/kit";
 import { superValidate, setError } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
-import { clientesRegisterSchema } from "$lib/clientes_registrar/schema";
+import { regWithTipoSchema } from "$lib/clientes_registrar/schema";
 import { capitaliseWord } from "$lib/utils";
 
 export const load = (async ({ params }) => {
@@ -29,6 +29,7 @@ export const load = (async ({ params }) => {
       sexo: usuarios.sexo,
       sucursalId: usuarios.sucursalId,
       tipo: usuarios.tipo,
+      codificacion: usuarios.codificacion
     })
     .from(usuarios)
     .where(and(...conditions))
@@ -43,7 +44,7 @@ export const load = (async ({ params }) => {
     eq(facturas.cancelada, false),
   ];
 
-  const [facturasData, sucursalesData] = await Promise.all([
+  const [facturasData, sucursalesData, allowCorps] = await Promise.all([
     db
       .select({
         fecha: facturas.fecha,
@@ -63,6 +64,8 @@ export const load = (async ({ params }) => {
         precio: sucursales.precio
       })
       .from(sucursales),
+    db
+      .select({ allowCorps: companies.allowCorporativos }).from(companies).then(res => res[0].allowCorps)
   ]);
 
   const cliente = clienteData.map((cliente) => ({
@@ -72,7 +75,8 @@ export const load = (async ({ params }) => {
 
   return {
     cliente,
-    form: await superValidate(zod(clientesRegisterSchema)),
+    allowCorps,
+    form: await superValidate(zod(regWithTipoSchema)),
     sucursales: sucursalesData,
   };
 }) satisfies PageServerLoad;
@@ -80,7 +84,7 @@ export const load = (async ({ params }) => {
 export const actions: Actions = {
   default: async (event) => {
     const { request } = event;
-    const form = await superValidate(request, zod(clientesRegisterSchema));
+    const form = await superValidate(request, zod(regWithTipoSchema));
 
     if (!form.valid) {
       return fail(400, { form });
@@ -97,6 +101,8 @@ export const actions: Actions = {
       casillero,
       precio: currPrecio,
       id,
+      tipo,
+      codificacion,
     } = form.data;
 
     const cliente = await db.query.usuarios.findFirst({
@@ -135,7 +141,8 @@ export const actions: Actions = {
         sexo,
         sucursalId: Number(sucursalId),
         precio,
-        tipo: sucursal!.precio === precio ? "REGULAR" : "ESPECIAL",
+        tipo: tipo !== "CORPORATIVO" ? sucursal!.precio === precio ? "REGULAR" : "ESPECIAL" : tipo,
+        codificacion: tipo === "CORPORATIVO" ? codificacion?.toUpperCase() : null
       })
       .where(eq(usuarios.id, Number(id)));
 

@@ -40,4 +40,12 @@ export const clientesRegisterSchema = z.object({
   nacimiento: z.string().optional(),
 });
 
+export const regWithTipoSchema = clientesRegisterSchema.extend({
+  tipo: z.enum(["REGULAR", "ESPECIAL", "CORPORATIVO"]),
+  codificacion: z
+    .string()
+    .max(5, { message: "Codificación debe ser menos de 5 carácteres." }).nullable(),
+});
+
 export type clientesRegsiterType = typeof clientesRegisterSchema;
+export type clientesRegsiterWithTipoType = typeof regWithTipoSchema;

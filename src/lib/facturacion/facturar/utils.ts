@@ -5,6 +5,7 @@ export async function fetchClienteData(
   casillero: string,
   user: Users
 ) {
+  console.log(casillero, endpoint)
   try {
     const response = await fetch(`/api/${endpoint}/${casillero}`, {
       headers: {
