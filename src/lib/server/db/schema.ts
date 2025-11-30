@@ -115,7 +115,7 @@ export const usuarios = mysqlTable(
     })
       .default("REGULAR")
       .notNull(),
-    codificacion: varchar("codificacion", { length: 5 }),
+    codificacion: varchar("codificacion", { length: 5 }).unique(),
     archivado: boolean("archivado").default(false),
     archivadoAt: timestamp("archivadoAt"),
     createdAt: timestamp("createdAt").defaultNow(),
@@ -138,6 +138,10 @@ export const usuarios = mysqlTable(
       table.apellido,
       table.cedula,
     ),
+
+    // INDEX 3: Corporate account lookup optimization
+    // Covers: /api/corporativo/[codigo] endpoint
+    codificacionIdx: index("usuarios_codificacion_idx").on(table.codificacion),
   }),
 );
 

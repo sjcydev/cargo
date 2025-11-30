@@ -3,10 +3,8 @@ import { db } from "$lib/server/db";
 import { eq, getTableColumns } from "drizzle-orm";
 import { usuarios, sucursales } from "$lib/server/db/schema";
 
-export const POST = async ({ params, request }: RequestEvent) => {
+export const POST = async ({ params }: RequestEvent) => {
   const casillero = params.id;
-
-  const data = await request.json();
 
   let cliente;
   if (casillero.length > 0) {

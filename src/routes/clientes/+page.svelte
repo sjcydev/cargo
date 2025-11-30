@@ -11,7 +11,6 @@
 
   let { data }: { data: PageData } = $props();
   let clientes = $state(data.clientes);
-  $inspect(clientes)
 
   let loading = $state(false);
 

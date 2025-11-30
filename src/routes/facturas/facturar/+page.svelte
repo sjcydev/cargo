@@ -36,6 +36,8 @@
   let currentTracking = $state<number | null>(null);
   let especial = $state(false);
   let searching = $state(false);
+  let manifiesto = $state(false);
+  let casillero = $state("");
 
   const defaultClienteState = {
     id: 0,
@@ -48,6 +50,7 @@
     cedula: "",
     sucursalId: sucursales!.sucursalId,
     nacimiento: today("America/Panama").toDate("America/Panama"),
+    codificacion: null,
     sexo: null,
     createdAt: null,
     updatedAt: null,
@@ -58,7 +61,7 @@
   } as const;
 
   let cliente = $state<UsuariosWithSucursal>(
-    structuredClone(defaultClienteState)
+    structuredClone(defaultClienteState),
   );
 
   const defaultTrackingsState = {
@@ -71,7 +74,7 @@
   } as const;
 
   let infoTracking = $state<Tracking | NewTrackings>(
-    structuredClone(defaultTrackingsState)
+    structuredClone(defaultTrackingsState),
   );
 
   function resetTrackingInfo() {
@@ -81,7 +84,7 @@
   }
 
   let currPrecio = $derived(
-    Number(Number(infoTracking.base) * Number(infoTracking.peso)).toFixed(2)
+    Number(Number(infoTracking.base) * Number(infoTracking.peso)).toFixed(2),
   );
 
   let facturaInfo = $state<NewFacturas & { trackings: NewTrackings[] }>({
@@ -97,7 +100,7 @@
   $effect(() => {
     facturaInfo.total = facturaInfo.trackings.reduce(
       (sum, tracking) => sum + Number(tracking.precio),
-      0
+      0,
     );
   });
 
@@ -121,7 +124,53 @@
     currentTracking = null;
   }
 
+  let fileContent = $state([]);
+
+  function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      const text = e.target?.result;
+      // Split by line breaks
+      fileContent = text
+        ?.split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0);
+
+      let peso = (Number(infoTracking?.peso) / fileContent.length).toFixed(4);
+      let precio = (Number(currPrecio) / fileContent.length).toFixed(4);
+
+      console.log(peso, precio);
+    };
+
+    reader.readAsText(file);
+  }
+
   function addTracking() {
+    if (fileContent.length !== 0) {
+      const n = fileContent.length;
+      const peso = (Number(infoTracking?.peso) / n).toFixed(4);
+      const precio = (Number(currPrecio) / n).toFixed(4);
+
+      fileContent.forEach((f: string) => {
+        const newTracking = {
+          ...infoTracking,
+          numeroTracking: f,
+          peso: Number(peso),
+          precio: Number(precio),
+        };
+
+        facturaInfo.trackings.push(newTracking as NewTrackings);
+      });
+
+      fileContent = [];
+      resetTrackingInfo();
+      return;
+    }
+
     const newTracking = {
       ...infoTracking,
       precio: Number(currPrecio),
@@ -145,11 +194,13 @@
 
   function processClienteData(
     data: { cliente?: UsuariosWithSucursal },
-    casillero: string
+    casillero: string,
   ) {
     if (data.cliente) {
       cliente = data.cliente;
+      facturaInfo.casillero = cliente.casillero;
       especial = cliente.precio !== precioBase;
+      facturaInfo.casillero = cliente.casillero;
       infoTracking.base = cliente.precio;
       infoTracking.precio = infoTracking.base;
     } else {
@@ -162,7 +213,6 @@
   }
 
   const handleCasilleroChange = debounce(async () => {
-    const casillero = String(facturaInfo.casillero);
     if (!casillero.length) {
       resetAll();
       searching = false;
@@ -170,7 +220,8 @@
     }
 
     try {
-      const endpoint = /\d/.test(casillero) ? "clientes" : "corporativo";
+      // Check if casillero is ONLY digits (numeric casillero) vs alphanumeric (codificacion)
+      const endpoint = /^\d+$/.test(casillero) ? "clientes" : "corporativo";
       const data = await fetchClienteData(endpoint, casillero, user as Users);
       processClienteData(data, String(casillero));
     } catch (error) {
@@ -209,7 +260,7 @@
           <Input
             id="casillero"
             placeholder="Introduzca el Casillero del Cliente"
-            bind:value={facturaInfo.casillero}
+            bind:value={casillero}
             oninput={() => {
               searching = true;
               handleCasilleroChange();
@@ -287,14 +338,22 @@
           {#if cliente.id}
             <Card.Title class="text-lg">Tipo de Casillero</Card.Title>
             <RadioGroup.Root
-              value={especial ? "especial" : "regular"}
+              value={especial
+                ? manifiesto
+                  ? "manifiesto"
+                  : "especial"
+                : "regular"}
               onValueChange={(val) => {
-                especial = val === "especial";
-
-                if (val !== "especial") {
-                  infoTracking.base = precioBase;
-                } else {
+                if (val === "manifiesto") {
+                  especial = true;
+                  manifiesto = true;
+                } else if (val === "especial") {
+                  especial = true;
+                  manifiesto = false;
                   infoTracking.base = cliente.precio;
+                } else {
+                  especial = false;
+                  infoTracking.base = precioBase;
                 }
               }}
             >
@@ -306,6 +365,12 @@
                 <RadioGroup.Item value="especial" id="r2" />
                 <Label for="r2">Cliente Precio Especial</Label>
               </div>
+              {#if cliente.tipo == "CORPORATIVO"}
+                <div class="flex items-center space-x-2">
+                  <RadioGroup.Item value="manifiesto" id="r3" />
+                  <Label for="r3">Corporativo por Saco</Label>
+                </div>
+              {/if}
             </RadioGroup.Root>
 
             <Separator />
@@ -355,16 +420,19 @@
                             required
                           />
                         </div>
-                        <div class="space-y-2">
-                          <Label for="tracking-number">Numero de Tracking</Label
-                          >
-                          <Input
-                            id="tracking-number"
-                            placeholder="1Z999AA1"
-                            bind:value={infoTracking.numeroTracking}
-                            required
-                          />
-                        </div>
+                        {#if !manifiesto}
+                          <div class="space-y-2">
+                            <Label for="tracking-number"
+                              >Numero de Tracking</Label
+                            >
+                            <Input
+                              id="tracking-number"
+                              placeholder="1Z999AA1"
+                              bind:value={infoTracking.numeroTracking}
+                              required
+                            />
+                          </div>
+                        {/if}
                         <div class="space-y-2">
                           <Label for="precio">Precio</Label>
                           <Input
@@ -385,6 +453,17 @@
                             readonly
                           />
                         </div>
+                        {#if manifiesto}
+                          <div class="space-y-2">
+                            <Label for="trackings-file">Trackings</Label>
+                            <Input
+                              id="trackings-file"
+                              type="file"
+                              accept=".txt,.csv"
+                              onchange={handleFileUpload}
+                            />
+                          </div>
+                        {/if}
                       </div>
                       <Dialog.Footer class="mt-3">
                         <Button class="w-full" type="submit"
