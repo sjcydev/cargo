@@ -33,8 +33,8 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
     header: "Nombre",
     enableGlobalFilter: true,
     meta: {
-      globalFilterFn: accentInsensitiveFilter
-    }
+      globalFilterFn: accentInsensitiveFilter,
+    },
   },
   {
     accessorFn: (row) => row.correo,
@@ -104,6 +104,14 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
     id: "sexo",
     header: "Sexo",
     enableGlobalFilter: false,
+  },
+  {
+    accessorFn: (row) => row.codificacion,
+    accessorKey: "codificacion",
+    id: "codificacion",
+    header: () => null,
+    cell: () => null,
+    enableGlobalFilter: true,
   },
   {
     id: "actions",

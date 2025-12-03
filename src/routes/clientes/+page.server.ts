@@ -37,6 +37,7 @@ export const load = (async ({ locals }) => {
           sexo: usuarios.sexo,
           sucursal: sucursales.sucursal,
           sucursalId: usuarios.sucursalId,
+          codificacion: usuarios.codificacion,
         })
         .from(usuarios)
         .where(and(...conditions))
@@ -51,7 +52,6 @@ export const load = (async ({ locals }) => {
       last: clientes[clientes.length - 1].casillero,
     };
   }
-
 
   const [sucursalesData, clientes] = await Promise.all([
     db
@@ -73,6 +73,7 @@ export const load = (async ({ locals }) => {
         sexo: usuarios.sexo,
         sucursal: sucursales.sucursal,
         sucursalId: usuarios.sucursalId,
+        codificacion: usuarios.codificacion,
       })
       .from(usuarios)
       .where(and(...conditions))
@@ -80,7 +81,6 @@ export const load = (async ({ locals }) => {
       .orderBy(desc(usuarios.casillero))
       .limit(100),
   ]);
-
 
   return {
     sucursales: sucursalesData,
