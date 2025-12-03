@@ -122,28 +122,113 @@
     open = false;
     editMode = false;
     currentTracking = null;
+    fileContent = [];
+    uploadingFile = false;
   }
 
-  let fileContent = $state([]);
+  let fileContent = $state<string[]>([]);
+  let uploadingFile = $state(false);
 
-  function handleFileUpload(event) {
-    const file = event.target.files[0];
+  function handleFileUpload(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+
     if (!file) return;
 
+    // Validate file type
+    const validTypes = ['text/plain', 'text/csv', 'application/vnd.ms-excel'];
+    const validExtensions = ['.txt', '.csv'];
+    const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+
+    if (!validTypes.includes(file.type) && !validExtensions.includes(fileExtension)) {
+      toast({
+        message: 'Tipo de archivo inválido. Solo se permiten archivos .txt o .csv',
+        type: 'error',
+      });
+      target.value = ''; // Reset input
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast({
+        message: 'El archivo es demasiado grande. Tamaño máximo: 5MB',
+        type: 'error',
+      });
+      target.value = '';
+      return;
+    }
+
+    uploadingFile = true;
     const reader = new FileReader();
 
     reader.onload = (e) => {
-      const text = e.target?.result;
-      // Split by line breaks
-      fileContent = text
-        ?.split(/\r?\n/)
-        .map((line) => line.trim())
-        .filter((line) => line.length > 0);
+      try {
+        const text = e.target?.result as string;
 
-      let peso = (Number(infoTracking?.peso) / fileContent.length).toFixed(4);
-      let precio = (Number(currPrecio) / fileContent.length).toFixed(4);
+        if (!text || text.trim().length === 0) {
+          throw new Error('El archivo está vacío');
+        }
 
-      console.log(peso, precio);
+        // Parse content - handle both CSV and plain text
+        let trackingNumbers: string[];
+
+        if (fileExtension === '.csv') {
+          // Parse CSV - handle comma or semicolon separated values
+          trackingNumbers = text
+            .split(/\r?\n/)
+            .flatMap(line => line.split(/[,;]/))
+            .map(item => item.trim())
+            .filter(item => item.length > 0);
+        } else {
+          // Parse plain text - one tracking per line
+          trackingNumbers = text
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+        }
+
+        // Remove duplicates
+        trackingNumbers = [...new Set(trackingNumbers)];
+
+        if (trackingNumbers.length === 0) {
+          throw new Error('No se encontraron números de tracking válidos en el archivo');
+        }
+
+        // Validate we have weight to distribute
+        const peso = Number(infoTracking.peso);
+        if (!peso || peso <= 0) {
+          throw new Error('Debe ingresar un peso válido antes de cargar el archivo');
+        }
+
+        fileContent = trackingNumbers;
+
+        toast({
+          message: `${trackingNumbers.length} números de tracking cargados exitosamente`,
+          type: 'success',
+        });
+
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error al procesar el archivo';
+        toast({
+          message: errorMessage,
+          type: 'error',
+        });
+        fileContent = [];
+        target.value = '';
+      } finally {
+        uploadingFile = false;
+      }
+    };
+
+    reader.onerror = () => {
+      toast({
+        message: 'Error al leer el archivo. Por favor intente de nuevo.',
+        type: 'error',
+      });
+      uploadingFile = false;
+      target.value = '';
     };
 
     reader.readAsText(file);
@@ -168,6 +253,7 @@
 
       fileContent = [];
       resetTrackingInfo();
+      open = false; // Close dialog after bulk add
       return;
     }
 
@@ -183,6 +269,7 @@
       resetEditMode();
     } else {
       facturaInfo.trackings = [...facturaInfo.trackings, newTracking];
+      open = false; // Close dialog after single add
     }
 
     resetTrackingInfo();
@@ -235,8 +322,7 @@
   $effect(() => {
     if (page.url.searchParams.get("search")) {
       searching = true;
-      facturaInfo.casillero =
-        Number(page.url.searchParams.get("search")) || null;
+      casillero = page.url.searchParams.get("search") || "";
       handleCasilleroChange();
     }
   });
@@ -455,13 +541,24 @@
                         </div>
                         {#if manifiesto}
                           <div class="space-y-2">
-                            <Label for="trackings-file">Trackings</Label>
+                            <Label for="trackings-file" class="flex gap-2 items-center">
+                              Trackings
+                              {#if uploadingFile}
+                                <Loader color="#2563eb" size="16" unit="px" />
+                              {/if}
+                            </Label>
                             <Input
                               id="trackings-file"
                               type="file"
                               accept=".txt,.csv"
                               onchange={handleFileUpload}
+                              disabled={uploadingFile}
                             />
+                            {#if fileContent.length > 0}
+                              <p class="text-sm text-muted-foreground">
+                                {fileContent.length} tracking{fileContent.length !== 1 ? 's' : ''} cargado{fileContent.length !== 1 ? 's' : ''}
+                              </p>
+                            {/if}
                           </div>
                         {/if}
                       </div>
