@@ -186,9 +186,18 @@
     const isCheckbox = target.closest('[role="checkbox"]');
     const isActionButton = target.closest("button") || target.closest("a");
 
-    // Only trigger row click if not clicking checkbox or action button
-    if (!isCheckbox && !isActionButton && onRowClick) {
-      onRowClick(row.original);
+    // Only proceed if not clicking checkbox or action button
+    if (!isCheckbox && !isActionButton) {
+      // Check if any rows are currently selected (selection mode)
+      const hasSelectedRows = Object.keys(rowSelection).length > 0;
+
+      if (hasSelectedRows && enableSelection) {
+        // In selection mode: toggle the row's selection
+        row.toggleSelected();
+      } else if (onRowClick) {
+        // Not in selection mode: trigger the row click callback (navigate)
+        onRowClick(row.original);
+      }
     }
   };
 </script>
