@@ -114,17 +114,17 @@
 
   const tiposDeClientes = ["REGULAR", "CORPORATIVO"];
 
-  const currentTipo = $derived(() => {
-    if ($formData.tipo === "CORPORATIVO") return $formData.tipo;
-
-    const sucursal = sucursales.find(
-      (s) => String(s.sucursalId) === $formData.sucursalId,
-    );
-
-    return sucursal?.precio === Number($formData.precio)
-      ? "REGULAR"
-      : "ESPECIAL";
-  });
+  // const currentTipo = $derived(() => {
+  //   if ($formData.tipo === "CORPORATIVO") return $formData.tipo;
+  //
+  //   const sucursal = sucursales.find(
+  //     (s) => String(s.sucursalId) === $formData.sucursalId,
+  //   );
+  //
+  //   return sucursal?.precio === Number($formData.precio)
+  //     ? "REGULAR"
+  //     : "ESPECIAL";
+  // });
 
   let editMode = $state(false);
   let selectedFacturas = $state<number[]>([]);
