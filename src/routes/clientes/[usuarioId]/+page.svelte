@@ -27,7 +27,6 @@
   import { goto, invalidateAll } from "$app/navigation";
   import VerFacturas from "$lib/facturacion/facturas/ver-facturas.svelte";
   import { columns } from "./columns";
-  import { Badge } from "$lib/components/ui/badge";
   import { toast } from "svelte-sonner";
 
   let {
@@ -454,18 +453,6 @@
                           type="number"
                           step="0.01"
                         />
-                        <Badge
-                          variant={editMode
-                            ? currentTipo() === "REGULAR"
-                              ? "outline"
-                              : "secondary"
-                            : cliente.tipo === "REGULAR"
-                              ? "outline"
-                              : "secondary"}
-                          class="py-1.5"
-                        >
-                          {editMode ? currentTipo() : cliente.tipo}
-                        </Badge>
                       </div>
                     </div>
                   {/snippet}

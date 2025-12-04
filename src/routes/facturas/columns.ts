@@ -26,7 +26,7 @@ export const columns = (
       return renderComponent(Checkbox, {
         checked: row.getIsSelected(),
         disabled: isDisabled,
-        onCheckedChange: (value) => {
+        onCheckedChange: (value: boolean) => {
           if (!isDisabled) {
             row.toggleSelected(!!value);
           }
