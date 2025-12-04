@@ -10,16 +10,27 @@ import { eq } from "drizzle-orm";
 import { randomUUID as uuid } from "crypto";
 
 export const load = (async () => {
-  const companyData = await db.query.companies.findFirst();
+  const companyResult = await db
+    .select({
+      companyId: companies.companyId,
+      company: companies.company,
+      logo: companies.logo,
+      dominio: companies.dominio,
+      sucursalesLimit: companies.sucursalesLimit,
+      allowCorporativos: companies.allowCorporativos,
+    })
+    .from(companies)
+    .limit(1);
 
-  const logo = getFriendlyUrl(companyData!.logo!);
+  const companyData = companyResult[0];
+  const logo = getFriendlyUrl(companyData.logo!);
 
   const form = await superValidate(zod(companiesSettingsSchema));
 
   form.data = {
-    company: companyData!.company,
-    companyId: String(companyData!.companyId),
-    dominio: companyData!.dominio,
+    company: companyData.company,
+    companyId: String(companyData.companyId),
+    dominio: companyData.dominio,
   };
 
   return { form, company: companyData, logo };

@@ -107,7 +107,9 @@ export const columns = (
     cell: ({ row }) => `$${row.original.total!.toFixed(2)}`,
     enableGlobalFilter: false,
   },
-  columnHelper.display({
+  {
+    accessorFn: (row) => row.pagado ? "pagado" : "pendiente",
+    accessorKey: "pagado",
     id: "pagado",
     header: "Pagado",
     cell: ({ row }) => {
@@ -115,8 +117,23 @@ export const columns = (
         variant: row.original.pagado ? "success" : "destructive",
       });
     },
-    enableGlobalFilter: false,
-  }),
+    enableGlobalFilter: true,
+    filterFn: (row, columnId, filterValue) => {
+      const searchTerm = filterValue.toLowerCase();
+      const isPagado = row.original.pagado;
+
+      if (searchTerm.includes("pagado") || searchTerm.includes("pagada")) {
+        return isPagado === true;
+      }
+      if (searchTerm.includes("pendiente") || searchTerm.includes("no pagado")) {
+        return isPagado === false;
+      }
+
+      // Default behavior: match the accessor value
+      const cellValue = isPagado ? "pagado" : "pendiente";
+      return cellValue.toLowerCase().includes(searchTerm);
+    },
+  },
   columnHelper.display({
     id: "retirados",
     header: "Retirados",
@@ -127,6 +144,14 @@ export const columns = (
     },
     enableGlobalFilter: false,
   }),
+  {
+    accessorFn: (row) => row.cliente?.codificacion,
+    accessorKey: "codificacion",
+    id: "codificacion",
+    header: () => null,
+    cell: () => null,
+    enableGlobalFilter: true,
+  },
   {
     id: "actions",
     cell: ({ row }) => {

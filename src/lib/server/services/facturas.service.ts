@@ -28,19 +28,125 @@ export class FacturasService {
       conditions.push(eq(facturas.sucursalId, sucursalId));
     }
 
-    return await db.query.facturas.findFirst({
-      where: and(...conditions),
-      with: {
-        cliente: {
-          with: {
-            sucursal: true,
-          },
-        },
-        trackings: true,
-        sucursal: true,
-        empleado: true,
-      },
-    });
+    // Get factura with minimal columns
+    const factura = await db
+      .select({
+        facturaId: facturas.facturaId,
+        casillero: facturas.casillero,
+        fecha: facturas.fecha,
+        pagado: facturas.pagado,
+        clienteId: facturas.clienteId,
+        total: facturas.total,
+        metodoDePago: facturas.metodoDePago,
+        pagadoAt: facturas.pagadoAt,
+        sucursalId: facturas.sucursalId,
+        empleadoId: facturas.empleadoId,
+        retirados: facturas.retirados,
+        enviado: facturas.enviado,
+        cancelada: facturas.cancelada,
+        canceladaAt: facturas.canceladaAt,
+      })
+      .from(facturas)
+      .where(and(...conditions))
+      .limit(1);
+
+    if (factura.length === 0) {
+      return undefined;
+    }
+
+    const result = factura[0];
+
+    // Fetch relations in parallel
+    const [cliente, facturaTrackings, sucursal, empleado] = await Promise.all([
+      // Get cliente with sucursal
+      db
+        .select({
+          id: usuarios.id,
+          nombre: usuarios.nombre,
+          apellido: usuarios.apellido,
+          cedula: usuarios.cedula,
+          telefono: usuarios.telefono,
+          casillero: usuarios.casillero,
+          correo: usuarios.correo,
+          tipo: usuarios.tipo,
+          precio: usuarios.precio,
+          sucursalId: usuarios.sucursalId,
+        })
+        .from(usuarios)
+        .where(eq(usuarios.id, result.clienteId))
+        .limit(1)
+        .then(async (clienteRows) => {
+          if (clienteRows.length === 0) return null;
+          const c = clienteRows[0];
+          // Get cliente's sucursal
+          const clienteSucursal = await db
+            .select({
+              sucursalId: sucursales.sucursalId,
+              sucursal: sucursales.sucursal,
+              direccion: sucursales.direccion,
+              telefono: sucursales.telefono,
+              correo: sucursales.correo,
+            })
+            .from(sucursales)
+            .where(eq(sucursales.sucursalId, c.sucursalId))
+            .limit(1);
+          return {
+            ...c,
+            sucursal: clienteSucursal[0] || null,
+          };
+        }),
+      // Get trackings
+      db
+        .select({
+          trackingId: trackings.trackingId,
+          facturaId: trackings.facturaId,
+          numeroTracking: trackings.numeroTracking,
+          peso: trackings.peso,
+          base: trackings.base,
+          precio: trackings.precio,
+          sucursalId: trackings.sucursalId,
+          retirado: trackings.retirado,
+          retiradoAt: trackings.retiradoAt,
+          cancelada: trackings.cancelada,
+          canceladaAt: trackings.canceladaAt,
+        })
+        .from(trackings)
+        .where(eq(trackings.facturaId, result.facturaId)),
+      // Get sucursal
+      db
+        .select({
+          sucursalId: sucursales.sucursalId,
+          sucursal: sucursales.sucursal,
+          direccion: sucursales.direccion,
+          telefono: sucursales.telefono,
+          correo: sucursales.correo,
+          precio: sucursales.precio,
+        })
+        .from(sucursales)
+        .where(eq(sucursales.sucursalId, result.sucursalId))
+        .limit(1),
+      // Get empleado
+      db
+        .select({
+          id: users.id,
+          nombre: users.nombre,
+          apellido: users.apellido,
+          username: users.username,
+          correo: users.correo,
+          rol: users.rol,
+        })
+        .from(users)
+        .where(eq(users.id, result.empleadoId))
+        .limit(1),
+    ]);
+
+    return {
+      ...result,
+      cliente: cliente,
+      trackings: facturaTrackings,
+      sucursal: sucursal[0] || null,
+      empleado: empleado[0] || null,
+    };
   }
 
   /**
@@ -89,6 +195,7 @@ export class FacturasService {
           cedula: usuarios.cedula,
           telefono: usuarios.telefono,
           sucursal: sucursales.sucursal,
+          codificacion: usuarios.codificacion
         },
       })
       .from(facturas)
@@ -248,24 +355,88 @@ export class FacturasService {
       conditions.push(eq(facturas.sucursalId, sucursalId));
     }
 
-    return await db.query.facturas.findMany({
-      where: and(...conditions),
-      with: {
+    // Get facturas with cliente info in a single query
+    const results = await db
+      .select({
+        facturaId: facturas.facturaId,
+        casillero: facturas.casillero,
+        fecha: facturas.fecha,
+        pagado: facturas.pagado,
+        clienteId: facturas.clienteId,
+        total: facturas.total,
+        retirados: facturas.retirados,
+        enviado: facturas.enviado,
+        sucursalId: facturas.sucursalId,
         cliente: {
-          with: {
-            sucursal: true,
-          },
+          id: usuarios.id,
+          nombre: usuarios.nombre,
+          apellido: usuarios.apellido,
+          cedula: usuarios.cedula,
+          telefono: usuarios.telefono,
+          casillero: usuarios.casillero,
+          correo: usuarios.correo,
+          sucursalId: usuarios.sucursalId,
         },
-        trackings: true,
-      },
-      orderBy: desc(facturas.facturaId),
-    });
+      })
+      .from(facturas)
+      .leftJoin(usuarios, eq(facturas.clienteId, usuarios.id))
+      .where(and(...conditions))
+      .orderBy(desc(facturas.facturaId));
+
+    // Get trackings and cliente sucursales for all facturas
+    const facturaIds = results.map((f) => f.facturaId);
+    const [allTrackings, clienteSucursales] = await Promise.all([
+      facturaIds.length > 0
+        ? db
+            .select({
+              trackingId: trackings.trackingId,
+              facturaId: trackings.facturaId,
+              numeroTracking: trackings.numeroTracking,
+              peso: trackings.peso,
+              base: trackings.base,
+              precio: trackings.precio,
+              retirado: trackings.retirado,
+            })
+            .from(trackings)
+            .where(
+              sql`${trackings.facturaId} IN (${sql.join(facturaIds.map((id) => sql`${id}`), sql`, `)})`
+            )
+        : Promise.resolve([]),
+      db
+        .select({
+          sucursalId: sucursales.sucursalId,
+          sucursal: sucursales.sucursal,
+          direccion: sucursales.direccion,
+          telefono: sucursales.telefono,
+          correo: sucursales.correo,
+        })
+        .from(sucursales),
+    ]);
+
+    // Map trackings to facturas and add cliente sucursal
+    return results.map((factura) => ({
+      ...factura,
+      cliente: factura.cliente
+        ? {
+            ...factura.cliente,
+            sucursal:
+              clienteSucursales.find(
+                (s) => s.sucursalId === factura.cliente!.sucursalId
+              ) || null,
+          }
+        : null,
+      trackings: allTrackings.filter((t) => t.facturaId === factura.facturaId),
+    }));
   }
 
   /**
    * Get multiple facturas by IDs
    */
   async getByIds(facturaIds: number[], sucursalId?: number) {
+    if (facturaIds.length === 0) {
+      return [];
+    }
+
     const conditions = [
       sql`${facturas.facturaId} IN (${sql.join(facturaIds.map((id) => sql`${id}`), sql`, `)})`,
       eq(facturas.cancelada, false),
@@ -275,18 +446,87 @@ export class FacturasService {
       conditions.push(eq(facturas.sucursalId, sucursalId));
     }
 
-    return await db.query.facturas.findMany({
-      where: and(...conditions),
-      with: {
+    // Get facturas with cliente in a single query
+    const results = await db
+      .select({
+        facturaId: facturas.facturaId,
+        casillero: facturas.casillero,
+        fecha: facturas.fecha,
+        pagado: facturas.pagado,
+        clienteId: facturas.clienteId,
+        total: facturas.total,
+        metodoDePago: facturas.metodoDePago,
+        retirados: facturas.retirados,
+        enviado: facturas.enviado,
+        sucursalId: facturas.sucursalId,
         cliente: {
-          with: {
-            sucursal: true,
-          },
+          id: usuarios.id,
+          nombre: usuarios.nombre,
+          apellido: usuarios.apellido,
+          cedula: usuarios.cedula,
+          telefono: usuarios.telefono,
+          casillero: usuarios.casillero,
+          correo: usuarios.correo,
+          sucursalId: usuarios.sucursalId,
         },
-        trackings: true,
-        sucursal: true,
-      },
-    });
+      })
+      .from(facturas)
+      .leftJoin(usuarios, eq(facturas.clienteId, usuarios.id))
+      .where(and(...conditions));
+
+    // Get related data in parallel
+    const [allTrackings, allSucursales, clienteSucursales] = await Promise.all([
+      db
+        .select({
+          trackingId: trackings.trackingId,
+          facturaId: trackings.facturaId,
+          numeroTracking: trackings.numeroTracking,
+          peso: trackings.peso,
+          base: trackings.base,
+          precio: trackings.precio,
+          retirado: trackings.retirado,
+        })
+        .from(trackings)
+        .where(
+          sql`${trackings.facturaId} IN (${sql.join(facturaIds.map((id) => sql`${id}`), sql`, `)})`
+        ),
+      db
+        .select({
+          sucursalId: sucursales.sucursalId,
+          sucursal: sucursales.sucursal,
+          direccion: sucursales.direccion,
+          telefono: sucursales.telefono,
+          correo: sucursales.correo,
+          precio: sucursales.precio,
+        })
+        .from(sucursales),
+      db
+        .select({
+          sucursalId: sucursales.sucursalId,
+          sucursal: sucursales.sucursal,
+          direccion: sucursales.direccion,
+          telefono: sucursales.telefono,
+          correo: sucursales.correo,
+        })
+        .from(sucursales),
+    ]);
+
+    // Map relations to facturas
+    return results.map((factura) => ({
+      ...factura,
+      cliente: factura.cliente
+        ? {
+            ...factura.cliente,
+            sucursal:
+              clienteSucursales.find(
+                (s) => s.sucursalId === factura.cliente!.sucursalId
+              ) || null,
+          }
+        : null,
+      trackings: allTrackings.filter((t) => t.facturaId === factura.facturaId),
+      sucursal:
+        allSucursales.find((s) => s.sucursalId === factura.sucursalId) || null,
+    }));
   }
 
   /**

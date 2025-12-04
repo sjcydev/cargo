@@ -1,5 +1,5 @@
 import { db } from "$lib/server/db";
-import { reportes, facturas } from "$lib/server/db/schema";
+import { reportes, facturas, companies } from "$lib/server/db/schema";
 import { eq, between, and, inArray } from "drizzle-orm";
 import { error, type Action } from "@sveltejs/kit";
 import type { PageServerLoad, Actions } from "./$types";
@@ -12,25 +12,42 @@ export const load = (async ({ params }) => {
     throw error(400, "Invalid report ID");
   }
 
-  const report = await db.query.reportes.findFirst({
-    where: eq(reportes.reporteId, reportId),
-  });
+  const reportResult = await db
+    .select({
+      reporteId: reportes.reporteId,
+      fechaInicial: reportes.fechaInicial,
+      fechaFinal: reportes.fechaFinal,
+      facturas: reportes.facturas,
+      facturasIds: reportes.facturasIds,
+      total: reportes.total,
+      empleadoId: reportes.empleadoId,
+      sucursalId: reportes.sucursalId,
+      metodoDePago: reportes.metodoDePago,
+    })
+    .from(reportes)
+    .where(eq(reportes.reporteId, reportId))
+    .limit(1);
 
-  if (!report) {
+  if (reportResult.length === 0) {
     throw error(404, "Report not found");
   }
+
+  const report = reportResult[0];
 
   const facturasData = await db
     .select()
     .from(facturas)
     .where(inArray(facturas.facturaId, JSON.parse(report.facturasIds ?? "[]")));
 
-  const company = await db.query.companies.findFirst()!;
+  const companyResult = await db
+    .select({ logo: companies.logo })
+    .from(companies)
+    .limit(1);
 
   return {
     report,
     facturas: facturasData,
-    logo: getFriendlyUrl(company!.logo!),
+    logo: getFriendlyUrl(companyResult[0]?.logo!),
   };
 }) satisfies PageServerLoad;
 

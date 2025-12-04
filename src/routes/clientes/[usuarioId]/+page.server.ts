@@ -105,11 +105,13 @@ export const actions: Actions = {
       codificacion,
     } = form.data;
 
-    const cliente = await db.query.usuarios.findFirst({
-      where: eq(usuarios.casillero, Number(casillero)),
-    });
+    const clienteResult = await db
+      .select({ id: usuarios.id })
+      .from(usuarios)
+      .where(eq(usuarios.casillero, Number(casillero)))
+      .limit(1);
 
-    if (cliente && cliente.id !== Number(id)) {
+    if (clienteResult.length > 0 && clienteResult[0].id !== Number(id)) {
       return setError(
         form,
         "casillero",
@@ -120,11 +122,13 @@ export const actions: Actions = {
     const nombreCapital = capitaliseWord(nombre);
     const apellidoCapital = capitaliseWord(apellido);
 
-    const sucursal = await db.query.sucursales.findFirst({
-      where: eq(sucursales.sucursalId, Number(sucursalId)),
-    });
+    const sucursalResult = await db
+      .select({ precio: sucursales.precio })
+      .from(sucursales)
+      .where(eq(sucursales.sucursalId, Number(sucursalId)))
+      .limit(1);
 
-    let precio = sucursal?.precio;
+    let precio = sucursalResult[0]?.precio;
     if (currPrecio) {
       precio = Number(currPrecio.toFixed(2));
     }

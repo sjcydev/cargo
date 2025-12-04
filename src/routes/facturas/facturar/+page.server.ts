@@ -12,11 +12,18 @@ import { z } from "zod";
 import { logger } from "$lib/server/logger";
 
 export const load = (async ({ locals }) => {
-  const sucursalesData = await db.query.sucursales.findFirst({
-    where: eq(sucursales.sucursalId, Number(locals.user!.sucursalId ?? 1)),
-  });
+  const sucursalesData = await db
+    .select({
+      sucursalId: sucursales.sucursalId,
+      sucursal: sucursales.sucursal,
+      precio: sucursales.precio,
+      codificacion: sucursales.codificacion,
+    })
+    .from(sucursales)
+    .where(eq(sucursales.sucursalId, Number(locals.user!.sucursalId ?? 1)))
+    .limit(1);
 
-  return { sucursales: sucursalesData };
+  return { sucursales: sucursalesData[0] };
 }) satisfies PageServerLoad;
 
 const trackingSchema = z.object({

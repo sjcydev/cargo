@@ -28,14 +28,42 @@ export class UsuariosService {
       conditions.push(eq(usuarios.sucursalId, sucursalId));
     }
 
-    const result = await db.query.usuarios.findFirst({
-      where: and(...conditions),
-      with: {
-        sucursal: true,
-      },
-    });
+    const result = await db
+      .select({
+        id: usuarios.id,
+        nombre: usuarios.nombre,
+        apellido: usuarios.apellido,
+        cedula: usuarios.cedula,
+        telefono: usuarios.telefono,
+        casillero: usuarios.casillero,
+        correo: usuarios.correo,
+        nacimiento: usuarios.nacimiento,
+        sexo: usuarios.sexo,
+        tipo: usuarios.tipo,
+        precio: usuarios.precio,
+        codificacion: usuarios.codificacion,
+        sucursalId: usuarios.sucursalId,
+        archivado: usuarios.archivado,
+        archivadoAt: usuarios.archivadoAt,
+        sucursal: {
+          sucursalId: sucursales.sucursalId,
+          sucursal: sucursales.sucursal,
+          direccion: sucursales.direccion,
+          telefono: sucursales.telefono,
+          correo: sucursales.correo,
+          precio: sucursales.precio,
+        },
+      })
+      .from(usuarios)
+      .leftJoin(sucursales, eq(usuarios.sucursalId, sucursales.sucursalId))
+      .where(and(...conditions))
+      .limit(1);
 
-    return result;
+    if (result.length === 0) {
+      return undefined;
+    }
+
+    return result[0] as any;
   }
 
   /**
@@ -56,14 +84,42 @@ export class UsuariosService {
       conditions.push(eq(usuarios.sucursalId, sucursalId));
     }
 
-    const result = await db.query.usuarios.findFirst({
-      where: and(...conditions),
-      with: {
-        sucursal: true,
-      },
-    });
+    const result = await db
+      .select({
+        id: usuarios.id,
+        nombre: usuarios.nombre,
+        apellido: usuarios.apellido,
+        cedula: usuarios.cedula,
+        telefono: usuarios.telefono,
+        casillero: usuarios.casillero,
+        correo: usuarios.correo,
+        nacimiento: usuarios.nacimiento,
+        sexo: usuarios.sexo,
+        tipo: usuarios.tipo,
+        precio: usuarios.precio,
+        codificacion: usuarios.codificacion,
+        sucursalId: usuarios.sucursalId,
+        archivado: usuarios.archivado,
+        archivadoAt: usuarios.archivadoAt,
+        sucursal: {
+          sucursalId: sucursales.sucursalId,
+          sucursal: sucursales.sucursal,
+          direccion: sucursales.direccion,
+          telefono: sucursales.telefono,
+          correo: sucursales.correo,
+          precio: sucursales.precio,
+        },
+      })
+      .from(usuarios)
+      .leftJoin(sucursales, eq(usuarios.sucursalId, sucursales.sucursalId))
+      .where(and(...conditions))
+      .limit(1);
 
-    return result;
+    if (result.length === 0) {
+      return undefined;
+    }
+
+    return result[0] as any;
   }
 
   /**
@@ -71,12 +127,42 @@ export class UsuariosService {
    * @param id - The usuario ID
    */
   async findById(id: number): Promise<UsuariosWithSucursal | undefined> {
-    return await db.query.usuarios.findFirst({
-      where: and(eq(usuarios.id, id), eq(usuarios.archivado, false)),
-      with: {
-        sucursal: true,
-      },
-    });
+    const result = await db
+      .select({
+        id: usuarios.id,
+        nombre: usuarios.nombre,
+        apellido: usuarios.apellido,
+        cedula: usuarios.cedula,
+        telefono: usuarios.telefono,
+        casillero: usuarios.casillero,
+        correo: usuarios.correo,
+        nacimiento: usuarios.nacimiento,
+        sexo: usuarios.sexo,
+        tipo: usuarios.tipo,
+        precio: usuarios.precio,
+        codificacion: usuarios.codificacion,
+        sucursalId: usuarios.sucursalId,
+        archivado: usuarios.archivado,
+        archivadoAt: usuarios.archivadoAt,
+        sucursal: {
+          sucursalId: sucursales.sucursalId,
+          sucursal: sucursales.sucursal,
+          direccion: sucursales.direccion,
+          telefono: sucursales.telefono,
+          correo: sucursales.correo,
+          precio: sucursales.precio,
+        },
+      })
+      .from(usuarios)
+      .leftJoin(sucursales, eq(usuarios.sucursalId, sucursales.sucursalId))
+      .where(and(eq(usuarios.id, id), eq(usuarios.archivado, false)))
+      .limit(1);
+
+    if (result.length === 0) {
+      return undefined;
+    }
+
+    return result[0] as any;
   }
 
   /**
@@ -205,11 +291,13 @@ export class UsuariosService {
       conditions.push(sql`${usuarios.id} != ${excludeId}`);
     }
 
-    const result = await db.query.usuarios.findFirst({
-      where: and(...conditions),
-    });
+    const result = await db
+      .select({ id: usuarios.id })
+      .from(usuarios)
+      .where(and(...conditions))
+      .limit(1);
 
-    return !!result;
+    return result.length > 0;
   }
 
   /**
@@ -225,11 +313,13 @@ export class UsuariosService {
       conditions.push(sql`${usuarios.id} != ${excludeId}`);
     }
 
-    const result = await db.query.usuarios.findFirst({
-      where: and(...conditions),
-    });
+    const result = await db
+      .select({ id: usuarios.id })
+      .from(usuarios)
+      .where(and(...conditions))
+      .limit(1);
 
-    return !!result;
+    return result.length > 0;
   }
 }
 

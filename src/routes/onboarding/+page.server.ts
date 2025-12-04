@@ -15,11 +15,19 @@ import { uploadFile } from "$lib/server/s3";
 import { randomUUID as uuid } from "crypto";
 
 export const load: PageServerLoad = async ({ locals }) => {
-  const sucursales = await db.query.sucursales.findMany();
-  const users = await db.query.users.findMany();
+  // Only need to check if any records exist
+  const sucursalesData = await db
+    .select({ sucursalId: sucursales.sucursalId })
+    .from(sucursales)
+    .limit(1);
 
-  if (sucursales.length !== 0) {
-    if (users.length !== 0 && !locals.user) {
+  const usersData = await db
+    .select({ id: users.id })
+    .from(users)
+    .limit(1);
+
+  if (sucursalesData.length !== 0) {
+    if (usersData.length !== 0 && !locals.user) {
       throw redirect(302, "/login");
     }
 
