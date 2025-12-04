@@ -4,7 +4,7 @@
   import type { Sucursales } from "$lib/server/db/schema";
 
   type SucursalTabsProps<TData> = {
-    sucursales: Sucursales[];
+    sucursales: Partial<Sucursales>[];
     data: TData[];
     currentSucursal?: string;
     userRole?: string;
