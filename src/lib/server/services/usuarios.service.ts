@@ -175,7 +175,7 @@ export class UsuariosService {
     sucursalId?: number;
     searchTerm?: string;
   }) {
-    const { limit = 100, cursor, sucursalId, searchTerm } = options;
+    const { limit, cursor, sucursalId, searchTerm } = options;
 
     const conditions = [eq(usuarios.archivado, false)];
 
@@ -199,7 +199,7 @@ export class UsuariosService {
       );
     }
 
-    const results = await db
+    const query = db
       .select({
         id: usuarios.id,
         nombre: usuarios.nombre,
@@ -219,8 +219,15 @@ export class UsuariosService {
       .from(usuarios)
       .where(and(...conditions))
       .leftJoin(sucursales, eq(usuarios.sucursalId, sucursales.sucursalId))
-      .orderBy(desc(usuarios.casillero))
-      .limit(limit);
+      .orderBy(desc(usuarios.casillero));
+
+    let results;
+
+    if (limit) {
+      results = await query.limit(limit);
+    } else {
+      results = await query;
+    }
 
     return results;
   }

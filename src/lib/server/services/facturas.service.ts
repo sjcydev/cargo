@@ -5,7 +5,7 @@
  */
 
 import { db } from "$lib/server/db";
-import { facturas, trackings, usuarios, sucursales } from "$lib/server/db/schema";
+import { facturas, trackings, usuarios, sucursales, users } from "$lib/server/db/schema";
 import { eq, and, desc, lt, between, sql } from "drizzle-orm";
 import type {
   NewFacturas,
@@ -159,7 +159,7 @@ export class FacturasService {
     enviado?: boolean;
     pagado?: boolean;
   }) {
-    const { limit = 100, cursor, sucursalId, enviado, pagado } = options;
+    const { limit, cursor, sucursalId, enviado, pagado } = options;
 
     const conditions = [eq(facturas.cancelada, false)];
 
@@ -179,7 +179,7 @@ export class FacturasService {
       conditions.push(eq(facturas.pagado, pagado));
     }
 
-    const results = await db
+    const query = db
       .select({
         fecha: facturas.fecha,
         facturaId: facturas.facturaId,
@@ -203,7 +203,14 @@ export class FacturasService {
       .leftJoin(usuarios, eq(facturas.clienteId, usuarios.id))
       .leftJoin(sucursales, eq(facturas.sucursalId, sucursales.sucursalId))
       .orderBy(desc(facturas.facturaId))
-      .limit(limit);
+
+    let results;
+
+    if (limit) {
+      results = await query.limit(limit);
+    } else {
+      results = await query;
+    }
 
     return results;
   }
