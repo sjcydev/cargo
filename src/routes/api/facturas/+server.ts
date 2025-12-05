@@ -1,56 +1,37 @@
-import type { RequestEvent } from "../../$types";
-import {
-  facturas as facturasTable,
-  usuarios,
-  sucursales,
-} from "$lib/server/db/schema";
-import { lt, eq, and, desc } from "drizzle-orm";
-import { db } from "$lib/server/db";
+import { json } from "@sveltejs/kit";
+import { z } from "zod";
+import { apiHandler, requireAuth } from "$lib/server/api/handler";
+import { facturasService } from "$lib/server/services";
+import { logger } from "$lib/server/logger";
 
-export const POST = async ({ request }: RequestEvent) => {
-  const { cursor, sucursalId }: { cursor: number; sucursalId?: number } =
-    await request.json();
+const requestSchema = z.object({
+  cursor: z.number().int().positive(),
+  sucursalId: z.number().int().positive().optional(),
+});
 
-  const conditions = [
-    eq(facturasTable.enviado, true),
-    lt(facturasTable.facturaId, Number(cursor)),
-    eq(facturasTable.cancelada, false)
-  ];
+export const POST = apiHandler(async (event) => {
+  const user = requireAuth(event);
 
-  if (sucursalId) {
-    conditions.push(eq(facturasTable.sucursalId, Number(sucursalId)));
-  }
+  const body = await event.request.json();
+  const validatedData = requestSchema.parse(body);
 
-  const facturasData = await db
-    .select({
-      fecha: facturasTable.fecha,
-      facturaId: facturasTable.facturaId,
-      casillero: facturasTable.casillero,
-      total: facturasTable.total,
-      pagado: facturasTable.pagado,
-      retirados: facturasTable.retirados,
-      sucursalId: facturasTable.sucursalId,
-      cliente: {
-        nombre: usuarios.nombre,
-        apellido: usuarios.apellido,
-        cedula: usuarios.cedula,
-        telefono: usuarios.telefono,
-        sucursal: sucursales.sucursal,
-      },
-    })
-    .from(facturasTable)
-    .where(and(...conditions))
-    .leftJoin(usuarios, eq(facturasTable.clienteId, usuarios.id))
-    .leftJoin(sucursales, eq(facturasTable.sucursalId, sucursales.sucursalId))
-    .orderBy(desc(facturasTable.facturaId));
+  // If user is not ADMIN, force filtering by their sucursal
+  const sucursalId =
+    user.rol === "ADMIN" && validatedData.sucursalId
+      ? validatedData.sucursalId
+      : user.sucursalId!;
 
-  return new Response(
-    JSON.stringify({
-      facturas: facturasData,
-    }),
-    {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    },
-  );
-};
+  logger.info("Fetching facturas list", {
+    userId: user.id,
+    cursor: validatedData.cursor,
+    sucursalId,
+  });
+
+  const facturas = await facturasService.list({
+    cursor: validatedData.cursor,
+    sucursalId,
+    enviado: true,
+  });
+
+  return json({ facturas });
+});

@@ -3,11 +3,16 @@ import * as auth from "$lib/server/auth.js";
 import { redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { db } from "$lib/server/db";
+import { sucursales } from "$lib/server/db/schema";
 
 const onboardingHandle: Handle = async ({ event, resolve }) => {
-  const sucursales = await db.query.sucursales.findMany();
+  // Only need to check if any sucursales exist
+  const sucursalesData = await db
+    .select({ sucursalId: sucursales.sucursalId })
+    .from(sucursales)
+    .limit(1);
 
-  if (sucursales.length === 0 && event.url.pathname !== "/onboarding") {
+  if (sucursalesData.length === 0 && event.url.pathname !== "/onboarding") {
     throw redirect(302, "/onboarding");
   }
 

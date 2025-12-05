@@ -4,14 +4,29 @@ import { superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { sucursalesSchema } from "./schema";
 import { fail } from "@sveltejs/kit";
-import { sucursales } from "$lib/server/db/schema";
+import { sucursales, companies } from "$lib/server/db/schema";
 
 export const load = (async () => {
-  const sucursales = await db.query.sucursales.findMany();
-  const company = await db.query.companies.findFirst();
+  const sucursalesData = await db
+    .select({
+      sucursalId: sucursales.sucursalId,
+      sucursal: sucursales.sucursal,
+      direccion: sucursales.direccion,
+      telefono: sucursales.telefono,
+      correo: sucursales.correo,
+      precio: sucursales.precio,
+      codificacion: sucursales.codificacion,
+      maps: sucursales.maps,
+    })
+    .from(sucursales);
+
+  const companyData = await db
+    .select({ sucursalesLimit: companies.sucursalesLimit })
+    .from(companies)
+    .limit(1);
 
   const form = await superValidate(zod(sucursalesSchema));
-  return { sucursales, form, limite: company?.sucursalesLimit };
+  return { sucursales: sucursalesData, form, limite: companyData[0]?.sucursalesLimit };
 }) satisfies PageServerLoad;
 
 export const actions = {

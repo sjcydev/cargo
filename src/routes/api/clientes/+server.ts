@@ -1,39 +1,36 @@
-import type { RequestEvent } from "../../$types";
-import { db } from "$lib/server/db";
-import { usuarios, sucursales } from "$lib/server/db/schema";
-import { lt, eq, and, desc } from "drizzle-orm";
+import { json } from "@sveltejs/kit";
+import { z } from "zod";
+import { apiHandler, requireAuth } from "$lib/server/api/handler";
+import { usuariosService } from "$lib/server/services";
+import { logger } from "$lib/server/logger";
 
-export const POST = async ({ request }: RequestEvent) => {
-  const data: { last: number } = await request.json();
+const requestSchema = z.object({
+  last: z.number().int().positive(),
+  sucursalId: z.number().int().positive().optional().nullable(),
+});
 
-  const clientes = await db
-    .select({
-      id: usuarios.id,
-      nombre: usuarios.nombre,
-      apellido: usuarios.apellido,
-      correo: usuarios.correo,
-      casillero: usuarios.casillero,
-      cedula: usuarios.cedula,
-      telefono: usuarios.telefono,
-      nacimiento: usuarios.nacimiento,
-      sexo: usuarios.sexo,
-      sucursal: sucursales.sucursal,
-      sucursalId: sucursales.sucursalId,
-    })
-    .from(usuarios)
-    .where(
-      and(eq(usuarios.archivado, false), lt(usuarios.casillero, data.last)),
-    )
-    .leftJoin(sucursales, eq(usuarios.sucursalId, sucursales.sucursalId))
-    .orderBy(desc(usuarios.casillero));
+export const POST = apiHandler(async (event) => {
+  const user = requireAuth(event);
 
-  return new Response(
-    JSON.stringify({
-      clientes,
-    }),
-    {
-      headers: { "Content-Type": "application/json" },
-      status: 200,
-    },
-  );
-};
+  const body = await event.request.json();
+  const validatedData = requestSchema.parse(body);
+
+  // If user is not ADMIN, force filtering by their sucursal
+  const sucursalId =
+    user.rol === "ADMIN" && validatedData.sucursalId
+      ? validatedData.sucursalId
+      : user.sucursalId!;
+
+  logger.info("Fetching clientes list", {
+    userId: user.id,
+    cursor: validatedData.last,
+    sucursalId,
+  });
+
+  const clientes = await usuariosService.list({
+    cursor: validatedData.last,
+    sucursalId: sucursalId,
+  });
+
+  return json({ clientes });
+});

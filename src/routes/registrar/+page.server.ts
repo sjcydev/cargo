@@ -4,7 +4,7 @@ import { hash } from "@node-rs/argon2";
 import { db } from "$lib/server/db";
 
 import type { Actions } from "./$types";
-import { users } from "$lib/server/db/schema";
+import { users, sucursales } from "$lib/server/db/schema";
 import { capitaliseWord, generateUserId } from "$lib/utils";
 
 import type { PageServerLoad } from "./$types.js";
@@ -17,15 +17,20 @@ export const load: PageServerLoad = async ({ locals }) => {
     throw redirect(302, "/clientes");
   }
 
-  const sucursales = await db.query.sucursales.findMany();
+  const sucursalesData = await db
+    .select({
+      sucursalId: sucursales.sucursalId,
+      sucursal: sucursales.sucursal,
+    })
+    .from(sucursales);
 
-  if (sucursales.length === 0) {
+  if (sucursalesData.length === 0) {
     throw redirect(302, "/onboarding");
   }
 
   return {
     form: await superValidate(zod(userSignUpSchema)),
-    sucursales,
+    sucursales: sucursalesData,
   };
 };
 

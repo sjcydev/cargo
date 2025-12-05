@@ -6,6 +6,7 @@ import {
   trackings,
   sucursales,
   usuarios,
+  companies,
   type UsuariosWithSucursal,
 } from "$lib/server/db/schema";
 import { getFriendlyUrl } from "$lib/server/s3";
@@ -17,7 +18,19 @@ export const load = (async ({ params }) => {
 
   const facturaData = await db
     .select({
-      ...getTableColumns(facturas),
+      facturaId: facturas.facturaId,
+      casillero: facturas.casillero,
+      fecha: facturas.fecha,
+      pagado: facturas.pagado,
+      clienteId: facturas.clienteId,
+      total: facturas.total,
+      metodoDePago: facturas.metodoDePago,
+      pagadoAt: facturas.pagadoAt,
+      sucursalId: facturas.sucursalId,
+      empleadoId: facturas.empleadoId,
+      retirados: facturas.retirados,
+      enviado: facturas.enviado,
+      cancelada: facturas.cancelada,
     })
     .from(facturas)
     .where(eq(facturas.facturaId, Number(facturaId)))
@@ -33,15 +46,36 @@ export const load = (async ({ params }) => {
 
   const trackingsData = await db
     .select({
-      ...getTableColumns(trackings),
+      trackingId: trackings.trackingId,
+      facturaId: trackings.facturaId,
+      numeroTracking: trackings.numeroTracking,
+      peso: trackings.peso,
+      base: trackings.base,
+      precio: trackings.precio,
+      retirado: trackings.retirado,
+      retiradoAt: trackings.retiradoAt,
+      cancelada: trackings.cancelada,
     })
     .from(trackings)
     .where(eq(trackings.facturaId, Number(facturaId)));
 
   const clienteData = await db
     .select({
-      ...getTableColumns(usuarios),
-      sucursal: { ...getTableColumns(sucursales) },
+      id: usuarios.id,
+      nombre: usuarios.nombre,
+      apellido: usuarios.apellido,
+      cedula: usuarios.cedula,
+      telefono: usuarios.telefono,
+      casillero: usuarios.casillero,
+      correo: usuarios.correo,
+      sucursalId: usuarios.sucursalId,
+      sucursal: {
+        sucursalId: sucursales.sucursalId,
+        sucursal: sucursales.sucursal,
+        direccion: sucursales.direccion,
+        telefono: sucursales.telefono,
+        correo: sucursales.correo,
+      },
     })
     .from(usuarios)
     .leftJoin(sucursales, eq(usuarios.sucursalId, sucursales.sucursalId))
@@ -54,8 +88,16 @@ export const load = (async ({ params }) => {
     trackings: trackingsData,
   }))[0];
 
-  const company = await db.query.companies.findFirst()!;
-  const logo = getFriendlyUrl(company!.logo!);
+  const companyResult = await db
+    .select({
+      company: companies.company,
+      logo: companies.logo,
+    })
+    .from(companies)
+    .limit(1);
+
+  const company = companyResult[0];
+  const logo = getFriendlyUrl(company?.logo!);
 
   return { factura, company, logo };
 }) satisfies PageServerLoad;

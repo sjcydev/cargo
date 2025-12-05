@@ -14,14 +14,26 @@ export const load = (async ({ params }) => {
     throw error(404, "Sucursal not found");
   }
 
-  const sucursal = await db.query.sucursales.findFirst({
-    where: eq(sucursales.sucursalId, sucursalId),
-  });
+  const sucursalResult = await db
+    .select({
+      sucursalId: sucursales.sucursalId,
+      sucursal: sucursales.sucursal,
+      direccion: sucursales.direccion,
+      telefono: sucursales.telefono,
+      codificacion: sucursales.codificacion,
+      correo: sucursales.correo,
+      maps: sucursales.maps,
+      precio: sucursales.precio,
+    })
+    .from(sucursales)
+    .where(eq(sucursales.sucursalId, sucursalId))
+    .limit(1);
 
-  if (!sucursal) {
+  if (sucursalResult.length === 0) {
     throw error(404, "Sucursal not found");
   }
 
+  const sucursal = sucursalResult[0];
   const form = await superValidate(zod(sucursalesSchema));
 
   // Pre-fill the form with user data

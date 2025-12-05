@@ -11,7 +11,6 @@
   import { PlusIcon, PencilIcon, TrashIcon } from "lucide-svelte";
   import { Rainbow as Loader } from "svelte-loading-spinners";
   import type {
-    NewUsuarios,
     NewFacturas,
     NewTrackings,
     Users,
@@ -37,6 +36,8 @@
   let currentTracking = $state<number | null>(null);
   let especial = $state(false);
   let searching = $state(false);
+  let manifiesto = $state(false);
+  let casillero = $state("");
 
   const defaultClienteState = {
     id: 0,
@@ -49,6 +50,7 @@
     cedula: "",
     sucursalId: sucursales!.sucursalId,
     nacimiento: today("America/Panama").toDate("America/Panama"),
+    codificacion: null,
     sexo: null,
     createdAt: null,
     updatedAt: null,
@@ -59,7 +61,7 @@
   } as const;
 
   let cliente = $state<UsuariosWithSucursal>(
-    structuredClone(defaultClienteState)
+    structuredClone(defaultClienteState),
   );
 
   const defaultTrackingsState = {
@@ -72,7 +74,7 @@
   } as const;
 
   let infoTracking = $state<Tracking | NewTrackings>(
-    structuredClone(defaultTrackingsState)
+    structuredClone(defaultTrackingsState),
   );
 
   function resetTrackingInfo() {
@@ -82,7 +84,7 @@
   }
 
   let currPrecio = $derived(
-    Number(Number(infoTracking.base) * Number(infoTracking.peso)).toFixed(2)
+    Number(Number(infoTracking.base) * Number(infoTracking.peso)).toFixed(2),
   );
 
   let facturaInfo = $state<NewFacturas & { trackings: NewTrackings[] }>({
@@ -98,7 +100,7 @@
   $effect(() => {
     facturaInfo.total = facturaInfo.trackings.reduce(
       (sum, tracking) => sum + Number(tracking.precio),
-      0
+      0,
     );
   });
 
@@ -120,9 +122,141 @@
     open = false;
     editMode = false;
     currentTracking = null;
+    fileContent = [];
+    uploadingFile = false;
+  }
+
+  let fileContent = $state<string[]>([]);
+  let uploadingFile = $state(false);
+
+  function handleFileUpload(event: Event) {
+    const target = event.target as HTMLInputElement;
+    const file = target.files?.[0];
+
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['text/plain', 'text/csv', 'application/vnd.ms-excel'];
+    const validExtensions = ['.txt', '.csv'];
+    const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+
+    if (!validTypes.includes(file.type) && !validExtensions.includes(fileExtension)) {
+      toast({
+        message: 'Tipo de archivo inválido. Solo se permiten archivos .txt o .csv',
+        type: 'error',
+      });
+      target.value = ''; // Reset input
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      toast({
+        message: 'El archivo es demasiado grande. Tamaño máximo: 5MB',
+        type: 'error',
+      });
+      target.value = '';
+      return;
+    }
+
+    uploadingFile = true;
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result as string;
+
+        if (!text || text.trim().length === 0) {
+          throw new Error('El archivo está vacío');
+        }
+
+        // Parse content - handle both CSV and plain text
+        let trackingNumbers: string[];
+
+        if (fileExtension === '.csv') {
+          // Parse CSV - handle comma or semicolon separated values
+          trackingNumbers = text
+            .split(/\r?\n/)
+            .flatMap(line => line.split(/[,;]/))
+            .map(item => item.trim())
+            .filter(item => item.length > 0);
+        } else {
+          // Parse plain text - one tracking per line
+          trackingNumbers = text
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+        }
+
+        // Remove duplicates
+        trackingNumbers = [...new Set(trackingNumbers)];
+
+        if (trackingNumbers.length === 0) {
+          throw new Error('No se encontraron números de tracking válidos en el archivo');
+        }
+
+        // Validate we have weight to distribute
+        const peso = Number(infoTracking.peso);
+        if (!peso || peso <= 0) {
+          throw new Error('Debe ingresar un peso válido antes de cargar el archivo');
+        }
+
+        fileContent = trackingNumbers;
+
+        toast({
+          message: `${trackingNumbers.length} números de tracking cargados exitosamente`,
+          type: 'success',
+        });
+
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error al procesar el archivo';
+        toast({
+          message: errorMessage,
+          type: 'error',
+        });
+        fileContent = [];
+        target.value = '';
+      } finally {
+        uploadingFile = false;
+      }
+    };
+
+    reader.onerror = () => {
+      toast({
+        message: 'Error al leer el archivo. Por favor intente de nuevo.',
+        type: 'error',
+      });
+      uploadingFile = false;
+      target.value = '';
+    };
+
+    reader.readAsText(file);
   }
 
   function addTracking() {
+    if (fileContent.length !== 0) {
+      const n = fileContent.length;
+      const peso = (Number(infoTracking?.peso) / n).toFixed(4);
+      const precio = (Number(currPrecio) / n).toFixed(4);
+
+      fileContent.forEach((f: string) => {
+        const newTracking = {
+          ...infoTracking,
+          numeroTracking: f,
+          peso: Number(peso),
+          precio: Number(precio),
+        };
+
+        facturaInfo.trackings.push(newTracking as NewTrackings);
+      });
+
+      fileContent = [];
+      resetTrackingInfo();
+      open = false; // Close dialog after bulk add
+      return;
+    }
+
     const newTracking = {
       ...infoTracking,
       precio: Number(currPrecio),
@@ -135,6 +269,7 @@
       resetEditMode();
     } else {
       facturaInfo.trackings = [...facturaInfo.trackings, newTracking];
+      open = false; // Close dialog after single add
     }
 
     resetTrackingInfo();
@@ -146,11 +281,13 @@
 
   function processClienteData(
     data: { cliente?: UsuariosWithSucursal },
-    casillero: string
+    casillero: string,
   ) {
     if (data.cliente) {
       cliente = data.cliente;
+      facturaInfo.casillero = cliente.casillero;
       especial = cliente.precio !== precioBase;
+      facturaInfo.casillero = cliente.casillero;
       infoTracking.base = cliente.precio;
       infoTracking.precio = infoTracking.base;
     } else {
@@ -163,7 +300,6 @@
   }
 
   const handleCasilleroChange = debounce(async () => {
-    const casillero = String(facturaInfo.casillero);
     if (!casillero.length) {
       resetAll();
       searching = false;
@@ -171,7 +307,8 @@
     }
 
     try {
-      const endpoint = /\d/.test(casillero) ? "clientes" : "corporativo";
+      // Check if casillero is ONLY digits (numeric casillero) vs alphanumeric (codificacion)
+      const endpoint = /^\d+$/.test(casillero) ? "clientes" : "corporativo";
       const data = await fetchClienteData(endpoint, casillero, user as Users);
       processClienteData(data, String(casillero));
     } catch (error) {
@@ -185,8 +322,7 @@
   $effect(() => {
     if (page.url.searchParams.get("search")) {
       searching = true;
-      facturaInfo.casillero =
-        Number(page.url.searchParams.get("search")) || null;
+      casillero = page.url.searchParams.get("search") || "";
       handleCasilleroChange();
     }
   });
@@ -210,7 +346,7 @@
           <Input
             id="casillero"
             placeholder="Introduzca el Casillero del Cliente"
-            bind:value={facturaInfo.casillero}
+            bind:value={casillero}
             oninput={() => {
               searching = true;
               handleCasilleroChange();
@@ -288,14 +424,22 @@
           {#if cliente.id}
             <Card.Title class="text-lg">Tipo de Casillero</Card.Title>
             <RadioGroup.Root
-              value={especial ? "especial" : "regular"}
+              value={especial
+                ? manifiesto
+                  ? "manifiesto"
+                  : "especial"
+                : "regular"}
               onValueChange={(val) => {
-                especial = val === "especial";
-
-                if (val !== "especial") {
-                  infoTracking.base = precioBase;
-                } else {
+                if (val === "manifiesto") {
+                  especial = true;
+                  manifiesto = true;
+                } else if (val === "especial") {
+                  especial = true;
+                  manifiesto = false;
                   infoTracking.base = cliente.precio;
+                } else {
+                  especial = false;
+                  infoTracking.base = precioBase;
                 }
               }}
             >
@@ -307,6 +451,12 @@
                 <RadioGroup.Item value="especial" id="r2" />
                 <Label for="r2">Cliente Precio Especial</Label>
               </div>
+              {#if cliente.tipo == "CORPORATIVO"}
+                <div class="flex items-center space-x-2">
+                  <RadioGroup.Item value="manifiesto" id="r3" />
+                  <Label for="r3">Corporativo por Saco</Label>
+                </div>
+              {/if}
             </RadioGroup.Root>
 
             <Separator />
@@ -356,16 +506,19 @@
                             required
                           />
                         </div>
-                        <div class="space-y-2">
-                          <Label for="tracking-number">Numero de Tracking</Label
-                          >
-                          <Input
-                            id="tracking-number"
-                            placeholder="1Z999AA1"
-                            bind:value={infoTracking.numeroTracking}
-                            required
-                          />
-                        </div>
+                        {#if !manifiesto}
+                          <div class="space-y-2">
+                            <Label for="tracking-number"
+                              >Numero de Tracking</Label
+                            >
+                            <Input
+                              id="tracking-number"
+                              placeholder="1Z999AA1"
+                              bind:value={infoTracking.numeroTracking}
+                              required
+                            />
+                          </div>
+                        {/if}
                         <div class="space-y-2">
                           <Label for="precio">Precio</Label>
                           <Input
@@ -386,6 +539,28 @@
                             readonly
                           />
                         </div>
+                        {#if manifiesto}
+                          <div class="space-y-2">
+                            <Label for="trackings-file" class="flex gap-2 items-center">
+                              Trackings
+                              {#if uploadingFile}
+                                <Loader color="#2563eb" size="16" unit="px" />
+                              {/if}
+                            </Label>
+                            <Input
+                              id="trackings-file"
+                              type="file"
+                              accept=".txt,.csv"
+                              onchange={handleFileUpload}
+                              disabled={uploadingFile}
+                            />
+                            {#if fileContent.length > 0}
+                              <p class="text-sm text-muted-foreground">
+                                {fileContent.length} tracking{fileContent.length !== 1 ? 's' : ''} cargado{fileContent.length !== 1 ? 's' : ''}
+                              </p>
+                            {/if}
+                          </div>
+                        {/if}
                       </div>
                       <Dialog.Footer class="mt-3">
                         <Button class="w-full" type="submit"

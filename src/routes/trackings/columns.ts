@@ -21,7 +21,7 @@ export const columns: ColumnDef<Trackings>[] = [
     enableHiding: false,
     enableGlobalFilter: true,
     meta: {
-      globalFilterFn: (row, columnId, filterValue) => {
+      globalFilterFn: (row: any, columnId: string, filterValue: any) => {
         return String(row.getValue(columnId)).includes(String(filterValue));
       }
     }

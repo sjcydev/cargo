@@ -17,11 +17,17 @@ export const load: PageServerLoad = async ({ locals }) => {
     redirect(401, "/login");
   }
 
-  const sucursales = await db.query.sucursales.findMany();
+  const sucursalesData = await db
+    .select({
+      sucursalId: sucursales.sucursalId,
+      sucursal: sucursales.sucursal,
+      precio: sucursales.precio,
+    })
+    .from(sucursales);
 
   return {
     form: await superValidate(zod(clientesRegisterSchema)),
-    sucursales,
+    sucursales: sucursalesData,
   };
 };
 
@@ -49,11 +55,13 @@ export const actions: Actions = {
     const nombre = capitaliseWord(currNombre);
     const apellido = capitaliseWord(currApellido);
 
-    const sucursal = await db.query.sucursales.findFirst({
-      where: eq(sucursales.sucursalId, Number(sucursalId)),
-    });
+    const sucursalResult = await db
+      .select({ precio: sucursales.precio })
+      .from(sucursales)
+      .where(eq(sucursales.sucursalId, Number(sucursalId)))
+      .limit(1);
 
-    let precio = sucursal?.precio;
+    let precio = sucursalResult[0]?.precio;
     if (currPrecio) {
       precio = Number(currPrecio.toFixed(2));
     }
@@ -72,7 +80,7 @@ export const actions: Actions = {
           ? parseDate(nacimiento).toDate("America/Panama")
           : today("America/Panama").toDate("America/Panama"),
         precio,
-        tipo: sucursal!.precio === precio ? "REGULAR" : "ESPECIAL",
+        tipo: sucursalResult[0]!.precio === precio ? "REGULAR" : "ESPECIAL",
       })
       .$returningId();
 

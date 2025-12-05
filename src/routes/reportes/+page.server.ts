@@ -1,6 +1,6 @@
 import type { Actions, PageServerLoad } from "./$types";
 import { db } from "$lib/server/db";
-import { reportes, facturas } from "$lib/server/db/schema";
+import { reportes, facturas, sucursales } from "$lib/server/db/schema";
 import { desc, eq, and, between } from "drizzle-orm";
 import { redirect, fail } from "@sveltejs/kit";
 import { parseDateTime } from "@internationalized/date";
@@ -13,14 +13,28 @@ export const load = (async ({ locals }) => {
   }
 
   // Get all sucursales for tabs
-  const allSucursales = await db.query.sucursales.findMany();
+  const allSucursales = await db
+    .select({
+      sucursalId: sucursales.sucursalId,
+      sucursal: sucursales.sucursal,
+    })
+    .from(sucursales);
 
   // Get reports based on user role
   if (user.rol !== "ADMIN") {
-    const reportesData = await db.query.reportes.findMany({
-      where: eq(reportes.sucursalId, user.sucursalId!),
-      orderBy: [desc(reportes.createdAt)],
-    });
+    const reportesData = await db
+      .select({
+        reporteId: reportes.reporteId,
+        fechaInicial: reportes.fechaInicial,
+        fechaFinal: reportes.fechaFinal,
+        facturas: reportes.facturas,
+        total: reportes.total,
+        sucursalId: reportes.sucursalId,
+        createdAt: reportes.createdAt,
+      })
+      .from(reportes)
+      .where(eq(reportes.sucursalId, user.sucursalId!))
+      .orderBy(desc(reportes.createdAt));
 
     return {
       reportes: reportesData,
@@ -31,9 +45,18 @@ export const load = (async ({ locals }) => {
     };
   }
 
-  const reportesData = await db.query.reportes.findMany({
-    orderBy: [desc(reportes.createdAt)],
-  });
+  const reportesData = await db
+    .select({
+      reporteId: reportes.reporteId,
+      fechaInicial: reportes.fechaInicial,
+      fechaFinal: reportes.fechaFinal,
+      facturas: reportes.facturas,
+      total: reportes.total,
+      sucursalId: reportes.sucursalId,
+      createdAt: reportes.createdAt,
+    })
+    .from(reportes)
+    .orderBy(desc(reportes.createdAt));
 
   return {
     reportes: reportesData,
