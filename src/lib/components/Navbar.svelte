@@ -140,14 +140,14 @@
       </Sidebar.MenuItem>
     </Sidebar.Menu>
   </Sidebar.Header>
-  <Sidebar.Content class="justify-between">
+  <Sidebar.Content>
     <NavMain
       items={data.navMain}
       {protectedRoutes}
       currentRoute={page.url.pathname}
       rol={user.rol as "ADMIN" | "EMPLEADO" | "SECRETARIA" | undefined}
     />
-    <NavSecondary items={navSecondary} rol={user.rol} />
+    <NavSecondary items={navSecondary} rol={user.rol} class="mt-auto" />
   </Sidebar.Content>
   <Sidebar.Footer>
     <NavUser {user} />

@@ -7,21 +7,34 @@ import { users } from "$lib/server/db/schema";
 import { db } from "$lib/server/db";
 import { fail } from "@sveltejs/kit";
 import { verify, hash } from "@node-rs/argon2";
+import { logger } from "$lib/server/logger";
 
 export const load = (async ({ locals }) => {
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, locals.user!.id),
-  });
+  const userResult = await db
+    .select({
+      id: users.id,
+      nombre: users.nombre,
+      apellido: users.apellido,
+      correo: users.correo,
+      username: users.username,
+      rol: users.rol,
+      sucursalId: users.sucursalId,
+      companyId: users.companyId,
+    })
+    .from(users)
+    .where(eq(users.id, locals.user!.id))
+    .limit(1);
 
+  const user = userResult[0];
   const form = await superValidate(zod(accountSchema));
 
   // Pre-fill the form with user data
   form.data = {
-    id: user!.id,
-    nombre: user!.nombre!,
-    apellido: user!.apellido!,
-    correo: user!.correo!,
-    username: user!.username!,
+    id: user.id,
+    nombre: user.nombre!,
+    apellido: user.apellido!,
+    correo: user.correo,
+    username: user.username!,
   };
 
   return {
@@ -54,20 +67,29 @@ export const actions = {
     }
 
     try {
-      const existingUser = await db.query.users.findFirst({
-        where: eq(users.id, id),
-      });
+      const existingUserResult = await db
+        .select({
+          id: users.id,
+          passwordHash: users.passwordHash,
+        })
+        .from(users)
+        .where(eq(users.id, id))
+        .limit(1);
 
-      if (!existingUser) {
+      if (existingUserResult.length === 0) {
         return fail(400, { form });
       }
 
-      // Check if username is taken by another user
-      const userWithUsername = await db.query.users.findFirst({
-        where: eq(users.username, username),
-      });
+      const existingUser = existingUserResult[0];
 
-      if (userWithUsername && userWithUsername.id !== id) {
+      // Check if username is taken by another user
+      const userWithUsernameResult = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.username, username))
+        .limit(1);
+
+      if (userWithUsernameResult.length > 0 && userWithUsernameResult[0].id !== id) {
         return setError(form, "username", "Nombre de usuario ya existe");
       }
 
@@ -115,25 +137,41 @@ export const actions = {
       await db.update(users).set(updateData).where(eq(users.id, id));
 
       // Get the updated user data
-      const updatedUser = await db.query.users.findFirst({
-        where: eq(users.id, id),
-      });
+      const updatedUserResult = await db
+        .select({
+          id: users.id,
+          nombre: users.nombre,
+          apellido: users.apellido,
+          correo: users.correo,
+          username: users.username,
+          rol: users.rol,
+          sucursalId: users.sucursalId,
+          companyId: users.companyId,
+          passwordHash: users.passwordHash,
+          passwordUpdated: users.passwordUpdated,
+          archivado: users.archivado,
+        })
+        .from(users)
+        .where(eq(users.id, id))
+        .limit(1);
 
-      if (!updatedUser) {
+      if (updatedUserResult.length === 0) {
         return fail(500, { form });
       }
 
+      const updatedUser = updatedUserResult[0];
+
       // Update the session user data
-      locals.user = updatedUser;
+      locals.user = updatedUser as any;
 
       const updatedForm = await superValidate(zod(accountSchema));
 
       updatedForm.data = {
-        id: updatedUser!.id,
-        nombre: updatedUser!.nombre!,
-        apellido: updatedUser!.apellido!,
-        correo: updatedUser!.correo!,
-        username: updatedUser!.username!,
+        id: updatedUser.id,
+        nombre: updatedUser.nombre!,
+        apellido: updatedUser.apellido!,
+        correo: updatedUser.correo,
+        username: updatedUser.username!,
       };
 
       return {
@@ -141,7 +179,12 @@ export const actions = {
         user: updatedUser,
       };
     } catch (error) {
-      console.error("Error updating user:", error);
+      logger.error("Failed to update user profile", {
+        userId: id,
+        error,
+        context: "User was attempting to update their profile settings",
+      });
+      return fail(500, { form });
     }
   },
 } satisfies Actions;

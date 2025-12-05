@@ -2,7 +2,7 @@ import * as auth from "$lib/server/auth";
 import { redirect } from "@sveltejs/kit";
 import { db } from "$lib/server/db";
 import type { Actions, PageServerLoad } from "./$types";
-import { users } from "$lib/server/db/schema";
+import { users, companies } from "$lib/server/db/schema";
 import { superValidate, fail, message } from "sveltekit-superforms";
 import { userLoginSchema } from "./schema";
 import { zod } from "sveltekit-superforms/adapters";
@@ -15,8 +15,12 @@ export const load: PageServerLoad = async ({ locals }) => {
     throw redirect(302, "/");
   }
 
-  const company = await db.query.companies.findFirst()!;
-  const logo = getFriendlyUrl(company!.logo!);
+  const companyResult = await db
+    .select({ logo: companies.logo })
+    .from(companies)
+    .limit(1);
+
+  const logo = getFriendlyUrl(companyResult[0]?.logo!);
 
   return {
     form: await superValidate(zod(userLoginSchema)),

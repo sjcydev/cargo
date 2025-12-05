@@ -42,7 +42,6 @@
         method="POST"
         {action}
         use:enhance={() => {
-          console.log("form");
           return async ({ result }) => {
             if (result.type === "success") {
               open = false;
