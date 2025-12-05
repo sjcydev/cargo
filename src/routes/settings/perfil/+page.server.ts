@@ -7,6 +7,7 @@ import { users } from "$lib/server/db/schema";
 import { db } from "$lib/server/db";
 import { fail } from "@sveltejs/kit";
 import { verify, hash } from "@node-rs/argon2";
+import { logger } from "$lib/server/logger";
 
 export const load = (async ({ locals }) => {
   const userResult = await db
@@ -178,7 +179,12 @@ export const actions = {
         user: updatedUser,
       };
     } catch (error) {
-      console.error("Error updating user:", error);
+      logger.error("Failed to update user profile", {
+        userId: id,
+        error,
+        context: "User was attempting to update their profile settings",
+      });
+      return fail(500, { form });
     }
   },
 } satisfies Actions;

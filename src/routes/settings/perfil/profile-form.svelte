@@ -1,8 +1,6 @@
 <script lang="ts">
   import { Button } from "$lib/components/ui/button";
   import { Input } from "$lib/components/ui/input";
-  import { Label } from "$lib/components/ui/label";
-  import * as Select from "$lib/components/ui/select";
   import { accountSchema, type accountType } from "./schema";
   import {
     superForm,
@@ -20,7 +18,7 @@
   let {
     data,
     user,
-  }: { data: SuperValidated<Infer<accountType>>; user: Users } = $props();
+  }: { data: SuperValidated<Infer<accountType>>; user: Partial<Users> } = $props();
 
   const form = superForm(data, {
     validators: zodClient(accountSchema),

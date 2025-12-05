@@ -3,6 +3,8 @@
  * Provides consistent log formatting across the application
  */
 
+import { dev } from "$app/environment";
+
 type LogLevel = "info" | "warn" | "error" | "debug";
 
 interface LogContext {
@@ -22,7 +24,17 @@ class Logger {
     return JSON.stringify(entry);
   }
 
+  private shouldLog(level: LogLevel): boolean {
+    // In development: log everything
+    if (dev) return true;
+
+    // In production: only log errors (change this to return false to disable all logs)
+    return level === "error";
+  }
+
   info(message: string, context?: LogContext): void {
+    if (!this.shouldLog("info")) return;
+
     const entry: LogEntry = {
       level: "info",
       message,
@@ -33,6 +45,8 @@ class Logger {
   }
 
   warn(message: string, context?: LogContext): void {
+    if (!this.shouldLog("warn")) return;
+
     const entry: LogEntry = {
       level: "warn",
       message,
@@ -43,6 +57,8 @@ class Logger {
   }
 
   error(message: string, context?: LogContext): void {
+    if (!this.shouldLog("error")) return;
+
     const entry: LogEntry = {
       level: "error",
       message,
@@ -54,6 +70,8 @@ class Logger {
   }
 
   debug(message: string, context?: LogContext): void {
+    if (!this.shouldLog("debug")) return;
+
     const entry: LogEntry = {
       level: "debug",
       message,

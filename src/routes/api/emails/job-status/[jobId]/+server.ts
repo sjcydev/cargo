@@ -1,6 +1,7 @@
 import type { RequestHandler } from "./$types";
 import { API_BASE_URL, API_KEY } from "$env/static/private";
 import { json } from "@sveltejs/kit";
+import { logger } from "$lib/server/logger";
 
 export const GET: RequestHandler = async ({ params }) => {
   const jobId = params.jobId;
@@ -19,7 +20,12 @@ export const GET: RequestHandler = async ({ params }) => {
 
     return json(res);
   } catch (error) {
-    console.error("Error processing request:", error);
-    return json({ error: "Failed to process facturas" }, { status: 500 });
+    logger.error("Failed to fetch email job status", {
+      jobId,
+      error,
+      apiUrl: `${API_BASE_URL}/emails/status/${jobId}`,
+      context: "Error occurred while checking email job status from external API",
+    });
+    return json({ error: "Failed to fetch job status" }, { status: 500 });
   }
 };
