@@ -6,6 +6,7 @@ import { renderComponent, renderSnippet } from "$lib/components/ui/data-table";
 import DataTableActions from "$lib/facturacion/data-table-actions.svelte";
 import Estado from "$lib/facturacion/facturas/estado.svelte";
 import Checkbox from "$lib/components/data-table-checkbox.svelte";
+import { accentInsensitiveFilter } from "$lib/components/ui/data-table/filters";
 
 const columnHelper = createColumnHelper<FacturasWithCliente>();
 
@@ -145,11 +146,13 @@ export const columns = (
     enableGlobalFilter: false,
   }),
   {
-    accessorFn: (row) => row.cliente?.codificacion,
-    accessorKey: "codificacion",
+    accessorFn: (row) => `${row.cliente?.codificacion}`,
     id: "codificacion",
     header: () => null,
     cell: () => null,
+    meta: {
+      globalFilterFn: accentInsensitiveFilter,
+    },
     enableGlobalFilter: true,
   },
   {

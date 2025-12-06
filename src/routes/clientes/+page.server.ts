@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { redirect } from "@sveltejs/kit";
 import { usuariosService } from "$lib/server/services";
 
-export const load = (async ({ locals }) => {
+export const load = (async ({ locals, url }) => {
   const { user } = locals;
 
   if (!user) {

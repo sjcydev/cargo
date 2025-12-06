@@ -69,6 +69,8 @@ export const load = (async ({ params }) => {
       casillero: usuarios.casillero,
       correo: usuarios.correo,
       sucursalId: usuarios.sucursalId,
+      tipo: usuarios.tipo,
+      codificacion: usuarios.codificacion,
       sucursal: {
         sucursalId: sucursales.sucursalId,
         sucursal: sucursales.sucursal,

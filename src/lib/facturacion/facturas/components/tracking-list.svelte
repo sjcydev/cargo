@@ -13,7 +13,7 @@
     trackings,
   }: {
     facturaIds: number | number[];
-    trackings: Trackings[];
+    trackings: Partial<Trackings>[];
   } = $props();
 
   let selectedTrackings = $state<number[]>([]);

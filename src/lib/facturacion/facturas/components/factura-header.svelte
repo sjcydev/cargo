@@ -4,7 +4,7 @@
   import { Progress } from "$lib/components/ui/progress";
   import { Calendar, DollarSign, Package } from "lucide-svelte";
 
-  let { factura }: { factura: Facturas } = $props();
+  let { factura }: { factura: Partial<Facturas> } = $props();
 
   const formatter = new Intl.NumberFormat("es-PA", {
     style: "currency",

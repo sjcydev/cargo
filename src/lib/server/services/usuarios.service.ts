@@ -173,9 +173,8 @@ export class UsuariosService {
     limit?: number;
     cursor?: number;
     sucursalId?: number;
-    searchTerm?: string;
   }) {
-    const { limit, cursor, sucursalId, searchTerm } = options;
+    const { limit, cursor, sucursalId } = options;
 
     const conditions = [eq(usuarios.archivado, false)];
 
@@ -187,17 +186,18 @@ export class UsuariosService {
       conditions.push(eq(usuarios.sucursalId, sucursalId));
     }
 
-    if (searchTerm) {
-      const searchPattern = `%${searchTerm}%`;
-      conditions.push(
-        or(
-          like(usuarios.nombre, searchPattern),
-          like(usuarios.apellido, searchPattern),
-          like(usuarios.cedula, searchPattern),
-          sql`CAST(${usuarios.casillero} AS CHAR) LIKE ${searchPattern}`
-        )!
-      );
-    }
+    // if (searchTerm) {
+    //   const searchPattern = `%${searchTerm}%`;
+    //   conditions.push(
+    //     or(
+    //       like(usuarios.nombre, searchPattern),
+    //       like(usuarios.apellido, searchPattern),
+    //       like(usuarios.cedula, searchPattern),
+    //       sql`CAST(${usuarios.casillero} AS CHAR) LIKE ${searchPattern}`,
+    //       like(usuarios.codificacion, searchPattern)
+    //     )!
+    //   );
+    // }
 
     const query = db
       .select({

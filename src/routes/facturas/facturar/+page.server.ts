@@ -78,7 +78,7 @@ export const actions = {
         const [newFactura] = await tx
           .insert(facturas)
           .values({
-            casillero: facturaInfo.casillero,
+            casillero: Number(facturaInfo.casillero),
             sucursalId: cliente.sucursalId,
             total: facturaInfo.total,
             empleadoId: locals.user!.id,

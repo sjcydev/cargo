@@ -1,23 +1,9 @@
-import type { ColumnDef, FilterFn } from "@tanstack/table-core";
+import type { ColumnDef } from "@tanstack/table-core";
 import type { UsuariosWithSucursal, Sucursales } from "$lib/server/db/schema";
 import { createRawSnippet } from "svelte";
 import { renderComponent, renderSnippet } from "$lib/components/ui/data-table";
 import DataTableActions from "./data-table-actions.svelte";
-import { normalizeString } from "$lib/utils";
-
-export const accentInsensitiveFilter: FilterFn<any> = (
-  row,
-  columnId,
-  filterValue,
-) => {
-  const value = row.getValue(columnId);
-  if (value == null) return false;
-
-  const valueNormalized = normalizeString(String(value));
-  const filterNormalized = normalizeString(String(filterValue));
-
-  return valueNormalized.includes(filterNormalized);
-};
+import { accentInsensitiveFilter } from "$lib/components/ui/data-table/filters";
 
 export const columns: ColumnDef<UsuariosWithSucursal>[] = [
   {
@@ -106,12 +92,14 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
     enableGlobalFilter: false,
   },
   {
-    accessorFn: (row) => row.codificacion,
-    accessorKey: "codificacion",
+    accessorFn: (row) => `${row.codificacion}`,
     id: "codificacion",
     header: () => null,
     cell: () => null,
     enableGlobalFilter: true,
+    meta: {
+      globalFilterFn: accentInsensitiveFilter,
+    },
   },
   {
     id: "actions",

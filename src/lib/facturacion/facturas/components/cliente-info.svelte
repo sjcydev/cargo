@@ -37,7 +37,7 @@
     </div>
     <div>
       <p class="text-sm font-medium text-muted-foreground">Tipo de Cliente</p>
-      <p class="text-base font-semibold">{cliente.tipo}</p>
+      <p class="text-base font-semibold">{cliente.tipo} {cliente.codificacion ? `- ${cliente.codificacion}` : ""}</p>
     </div>
   </div>
 </div>

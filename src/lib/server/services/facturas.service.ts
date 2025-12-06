@@ -195,7 +195,7 @@ export class FacturasService {
           cedula: usuarios.cedula,
           telefono: usuarios.telefono,
           sucursal: sucursales.sucursal,
-          codificacion: usuarios.codificacion
+          codificacion: usuarios.codificacion,
         },
       })
       .from(facturas)

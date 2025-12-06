@@ -128,6 +128,8 @@ export const actions: Actions = {
       .where(eq(sucursales.sucursalId, Number(sucursalId)))
       .limit(1);
 
+    console.log(sucursalResult[0].precio)
+
     let precio = sucursalResult[0]?.precio;
     if (currPrecio) {
       precio = Number(currPrecio.toFixed(2));
@@ -145,7 +147,7 @@ export const actions: Actions = {
         sexo,
         sucursalId: Number(sucursalId),
         precio,
-        tipo: tipo !== "CORPORATIVO" ? sucursal!.precio === precio ? "REGULAR" : "ESPECIAL" : tipo,
+        tipo: tipo !== "CORPORATIVO" ? sucursalResult[0]!.precio === precio ? "REGULAR" : "ESPECIAL" : tipo,
         codificacion: tipo === "CORPORATIVO" ? codificacion?.toUpperCase() : null
       })
       .where(eq(usuarios.id, Number(id)));
