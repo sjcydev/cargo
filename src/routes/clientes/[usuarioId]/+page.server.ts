@@ -128,8 +128,6 @@ export const actions: Actions = {
       .where(eq(sucursales.sucursalId, Number(sucursalId)))
       .limit(1);
 
-    console.log(sucursalResult[0].precio)
-
     let precio = sucursalResult[0]?.precio;
     if (currPrecio) {
       precio = Number(currPrecio.toFixed(2));

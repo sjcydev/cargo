@@ -115,6 +115,7 @@
       clienteId: 0,
       fecha: "",
     });
+    casillero = "";
     resetTrackingInfo();
   }
 
@@ -269,7 +270,6 @@
       resetEditMode();
     } else {
       facturaInfo.trackings = [...facturaInfo.trackings, newTracking];
-      open = false; // Close dialog after single add
     }
 
     resetTrackingInfo();
@@ -307,6 +307,7 @@
     }
 
     try {
+      facturaInfo.trackings = [];
       // Check if casillero is ONLY digits (numeric casillero) vs alphanumeric (codificacion)
       const endpoint = /^\d+$/.test(casillero) ? "clientes" : "corporativo";
       const data = await fetchClienteData(endpoint, casillero, user as Users);
@@ -352,7 +353,7 @@
               handleCasilleroChange();
             }}
           />
-          <Button>
+          <Button onclick={() => handleCasilleroChange()}>
             {#if searching}
               <div class="px-1">
                 <Loader color="white" size="30" unit="px" />
