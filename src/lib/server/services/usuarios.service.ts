@@ -198,7 +198,7 @@ export class UsuariosService {
     //     )!
     //   );
     // }
-
+    
     const query = db
       .select({
         id: usuarios.id,
