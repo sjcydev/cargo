@@ -19,7 +19,7 @@ export const POST = apiHandler(async (event) => {
   const sucursalId =
     user.rol === "ADMIN" && validatedData.sucursalId
       ? validatedData.sucursalId
-      : user.sucursalId!;
+      : undefined;
 
   logger.info("Fetching facturas list", {
     userId: user.id,
