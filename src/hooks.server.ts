@@ -1,9 +1,20 @@
 import type { Handle } from "@sveltejs/kit";
 import * as auth from "$lib/server/auth.js";
-import { redirect } from "@sveltejs/kit";
+import { redirect, error } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { db } from "$lib/server/db";
-import { sucursales } from "$lib/server/db/schema";
+import { sucursales, companies} from "$lib/server/db/schema";
+
+const suspendHandle: Handle = async ({ event, resolve }) => {
+  const [companiesData] = await db.select({suspended: companies.suspended}).from(companies).limit(1);
+
+  if (companiesData && companiesData.suspended) {
+    throw error(403, "Suspendida");
+  }
+
+  return await resolve(event);
+
+}
 
 const onboardingHandle: Handle = async ({ event, resolve }) => {
   // Only need to check if any sucursales exist
@@ -67,6 +78,7 @@ const luciaHandle: Handle = async ({ event, resolve }) => {
 
 export const handle: Handle = sequence(
   luciaHandle,
+  suspendHandle,
   onboardingHandle,
   authHandle
 );
