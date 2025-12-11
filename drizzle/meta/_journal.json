@@ -253,6 +253,13 @@
       "when": 1762932119678,
       "tag": "0035_add_codificacion_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "5",
+      "when": 1765481474700,
+      "tag": "0036_add_suspended_to_companies",
+      "breakpoints": true
     }
   ]
 }

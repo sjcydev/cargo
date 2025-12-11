@@ -26,6 +26,7 @@ export const companies = mysqlTable("companies", {
   }).notNull(),
   sucursalesLimit: int("sucursalesLimit").default(1),
   allowCorporativos: boolean("allowCorporativos").default(false),
+  suspended: boolean("suspended").default(false),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
 });

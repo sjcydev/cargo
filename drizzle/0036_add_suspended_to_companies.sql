@@ -1,0 +1,1 @@
+ALTER TABLE `companies` ADD `suspended` boolean DEFAULT false;
