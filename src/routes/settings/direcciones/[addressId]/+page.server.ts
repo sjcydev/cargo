@@ -8,6 +8,19 @@ import { addresses } from "$lib/server/db/schema";
 import { error } from "@sveltejs/kit";
 import { eq } from "drizzle-orm";
 
+function capitalizeWords(text: string): string {
+  return text
+    .split(/(\s+|\(|\))/) // Split by spaces and parentheses while keeping them
+    .map((part) => {
+      // Only capitalize parts that are actual words (not spaces or parentheses)
+      if (part.trim().length === 0 || part === '(' || part === ')') {
+        return part;
+      }
+      return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+    })
+    .join('');
+}
+
 export const load = (async ({ params }) => {
   const addressId = parseInt(params.addressId);
   if (isNaN(addressId)) {
@@ -71,7 +84,7 @@ export const actions = {
       await db
         .update(addresses)
         .set({
-          name,
+          name: capitalizeWords(name),
           address1,
           address2: address2 || null,
           zipcode,

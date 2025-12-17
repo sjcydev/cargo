@@ -6,6 +6,19 @@ import { addressesSchema } from "./schema";
 import { fail } from "@sveltejs/kit";
 import { addresses } from "$lib/server/db/schema";
 
+function capitalizeWords(text: string): string {
+  return text
+    .split(/(\s+|\(|\))/) // Split by spaces and parentheses while keeping them
+    .map((part) => {
+      // Only capitalize parts that are actual words (not spaces or parentheses)
+      if (part.trim().length === 0 || part === '(' || part === ')') {
+        return part;
+      }
+      return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+    })
+    .join('');
+}
+
 export const load = (async () => {
   const addressesData = await db
     .select({
@@ -36,7 +49,7 @@ export const actions = {
 
     try {
       await db.insert(addresses).values({
-        name,
+        name: capitalizeWords(name),
         address1,
         address2: address2 || null,
         zipcode,
