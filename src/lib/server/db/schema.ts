@@ -8,10 +8,41 @@ import {
   boolean,
   longtext,
   index,
+  primaryKey,
 } from "drizzle-orm/mysql-core";
 
 import { relations } from "drizzle-orm";
 import type { InferResultType } from "./extras";
+
+export const addresses = mysqlTable("addresses", {
+  addressId: int("addressId").autoincrement().primaryKey(),
+  name: varchar("name", {length: 100}).notNull(),
+  address1: varchar("address1", { length: 500 }).notNull(),
+  address2: varchar("address2", { length: 500 }),
+  zipcode: varchar("zipcode", { length: 15 }).notNull(),
+  city: varchar("city", { length: 100 }).notNull(),
+  country: varchar("country", { length: 60 }).notNull(),
+  tel: varchar("tel", { length: 100 }).notNull(),
+});
+
+export const sucursalToAddress = mysqlTable(
+  "sucursalToAddress",
+  {
+    sucursalId: int("sucursalId")
+      .notNull()
+      .references(() => sucursales.sucursalId, { onDelete: "cascade" }),
+    addressId: int("addressId")
+      .notNull()
+      .references(() => addresses.addressId, { onDelete: "cascade" }),
+  },
+  (t) => ({
+    pk: primaryKey({
+      columns: [t.sucursalId, t.addressId],
+    }),
+    sucursalIdx: index("sucursal_address_sucursal_idx").on(t.sucursalId),
+    addressIdx: index("sucursal_address_address_idx").on(t.addressId),
+  }),
+);
 
 export const companies = mysqlTable("companies", {
   companyId: int("companyId").autoincrement().primaryKey(),
@@ -87,7 +118,7 @@ export const session = mysqlTable("session", {
     length: 255,
   })
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade"}),
   expiresAt: datetime("expires_at").notNull(),
 });
 
@@ -221,7 +252,7 @@ export const trackings = mysqlTable(
   "trackings",
   {
     trackingId: int("trackingId").autoincrement().primaryKey(),
-    facturaId: int("facturaId").references(() => facturas.facturaId),
+    facturaId: int("facturaId").references(() => facturas.facturaId, { onDelete: "cascade"}),
     numeroTracking: varchar("numeroTracking", { length: 255 }),
     peso: int("peso"),
     base: float("base"),
@@ -295,7 +326,26 @@ export const sucursalesRelations = relations(sucursales, ({ many, one }) => ({
     references: [companies.companyId],
   }),
   trackings: many(trackings),
+  sucursalToAddress: many(sucursalToAddress),
 }));
+
+export const addressesRelations = relations(addresses, ({ many }) => ({
+  sucursalToAddress: many(sucursalToAddress),
+}));
+
+export const sucursalToAddressRelations = relations(
+  sucursalToAddress,
+  ({ one }) => ({
+    sucursal: one(sucursales, {
+      fields: [sucursalToAddress.sucursalId],
+      references: [sucursales.sucursalId],
+    }),
+    address: one(addresses, {
+      fields: [sucursalToAddress.addressId],
+      references: [addresses.addressId],
+    }),
+  }),
+);
 
 export const reportesRelations = relations(reportes, ({ one }) => ({
   empleado: one(users, {
@@ -324,6 +374,8 @@ export type NewFacturas = typeof facturas.$inferInsert;
 export type Trackings = typeof trackings.$inferSelect;
 export type NewTrackings = typeof trackings.$inferInsert;
 export type Reportes = typeof reportes.$inferSelect;
+export type Addresses = typeof addresses.$inferSelect;
+export type NewAddresses = typeof addresses.$inferInsert;
 export type NewReportes = typeof reportes.$inferInsert;
 
 export type UsuariosWithSucursal = InferResultType<

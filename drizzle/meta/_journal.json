@@ -260,6 +260,27 @@
       "when": 1765481474700,
       "tag": "0036_add_suspended_to_companies",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "5",
+      "when": 1765946800329,
+      "tag": "0037_add_multiple_addresses",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "5",
+      "when": 1765947429026,
+      "tag": "0038_add_ondelete_cascade",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "5",
+      "when": 1765956029298,
+      "tag": "0039_add_name_to_addresses",
+      "breakpoints": true
     }
   ]
 }

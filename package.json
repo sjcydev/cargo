@@ -70,6 +70,7 @@
     "luxon": "^3.5.0",
     "mysql2": "^3.11.0",
     "svelte-droplet": "^1.1.0",
-    "svelte-email-tailwind": "^2.0.1"
+    "svelte-email-tailwind": "^2.0.1",
+    "world-countries": "^5.1.0"
   }
 }
