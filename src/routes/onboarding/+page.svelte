@@ -8,6 +8,7 @@
   import {
     userSignUpSchema,
     sucursalesSchema,
+    addressesSchema,
     type userSignUpType,
     companiesSchema,
   } from "./schema";
@@ -21,6 +22,7 @@
   import { zod } from "sveltekit-superforms/adapters";
 
   import { FileDrop as Dropzone } from "svelte-droplet";
+  import CountrySelector from "../settings/direcciones/country-selector.svelte";
 
   let {
     data,
@@ -33,8 +35,13 @@
   const steps = [
     { schema: companiesSchema, title: "Información de la Organización" },
     { schema: sucursalesSchema, title: "Información de la Sucursal" },
+    { schema: addressesSchema, title: "Dirección de Envío" },
     { schema: userSignUpSchema, title: "Información del Usuario" },
   ];
+
+  function handleCountryChange(callingCode: string) {
+    $formData.tel = callingCode + " ";
+  }
 
   const form = superForm(data, {
     dataType: "json",
@@ -256,6 +263,100 @@
             <Form.FieldErrors />
           </Form.Field>
         {:else if currentStep === 2}
+          <Form.Field {form} name="addressName">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Nombre de la Dirección</Form.Label>
+                <Input
+                  {...props}
+                  bind:value={$formData.addressName}
+                  placeholder="Oficina Principal, Almacén, etc."
+                />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
+
+          <div class="space-y-2">
+            <label
+              for="country"
+              class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >País</label
+            >
+            <CountrySelector
+              bind:value={$formData.country}
+              onCountryChange={handleCountryChange}
+            />
+          </div>
+
+          <Form.Field {form} name="address1">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Dirección Principal</Form.Label>
+                <Input
+                  {...props}
+                  bind:value={$formData.address1}
+                  placeholder="Calle Principal #123"
+                />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
+
+          <Form.Field {form} name="address2">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Dirección Secundaria (Opcional)</Form.Label>
+                <Input
+                  {...props}
+                  bind:value={$formData.address2}
+                  placeholder="Apartamento, Suite, etc."
+                />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
+
+          <div class="grid grid-cols-2 gap-4">
+            <Form.Field {form} name="city">
+              <Form.Control>
+                {#snippet children({ props })}
+                  <Form.Label>Ciudad</Form.Label>
+                  <Input {...props} bind:value={$formData.city} placeholder="Panamá" />
+                {/snippet}
+              </Form.Control>
+              <Form.FieldErrors />
+            </Form.Field>
+
+            <Form.Field {form} name="zipcode">
+              <Form.Control>
+                {#snippet children({ props })}
+                  <Form.Label>Código Postal</Form.Label>
+                  <Input
+                    {...props}
+                    bind:value={$formData.zipcode}
+                    placeholder="00000"
+                  />
+                {/snippet}
+              </Form.Control>
+              <Form.FieldErrors />
+            </Form.Field>
+          </div>
+
+          <Form.Field {form} name="tel">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Teléfono</Form.Label>
+                <Input
+                  {...props}
+                  bind:value={$formData.tel}
+                  placeholder="+507 1234-5678"
+                />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
+        {:else if currentStep === 3}
           <div class="grid grid-cols-2 gap-4">
             <Form.Field {form} name="nombre">
               <Form.Control>

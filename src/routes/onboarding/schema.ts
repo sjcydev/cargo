@@ -37,8 +37,21 @@ export const sucursalesSchema = z.intersection(
   })
 );
 
-export const userSignUpSchema = z.intersection(
+export const addressesSchema = z.intersection(
   sucursalesSchema,
+  z.object({
+    addressName: z.string({ required_error: "Nombre de la dirección es requerido" }),
+    address1: z.string({ required_error: "Dirección principal es requerida" }),
+    address2: z.string().optional().nullish(),
+    zipcode: z.string({ required_error: "Código postal es requerido" }),
+    city: z.string({ required_error: "Ciudad es requerida" }),
+    country: z.string({ required_error: "País es requerido" }),
+    tel: z.string({ required_error: "Teléfono es requerido" }),
+  })
+);
+
+export const userSignUpSchema = z.intersection(
+  addressesSchema,
   z
     .object({
       nombre: z
