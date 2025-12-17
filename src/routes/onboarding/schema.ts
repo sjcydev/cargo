@@ -6,7 +6,35 @@ export const companiesSchema = z.object({
   }),
   logo: z
     .instanceof(File, { message: "Debes subir un logo." })
-    .refine((f) => f.size < 20_000_000, "Logo debe ser menor a 20MB."),
+    .refine((f) => f.size < 20_000_000, "Logo debe ser menor a 20MB.")
+    .refine(
+      async (file) => {
+        if (!file.type.startsWith("image/")) return false;
+
+        return new Promise<boolean>((resolve) => {
+          const img = new Image();
+          const url = URL.createObjectURL(file);
+
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            const aspectRatio = img.width / img.height;
+            // Accept if image is horizontal/rectangular (width > height)
+            resolve(aspectRatio > 1);
+          };
+
+          img.onerror = () => {
+            URL.revokeObjectURL(url);
+            resolve(false);
+          };
+
+          img.src = url;
+        });
+      },
+      {
+        message:
+          "El logo debe ser horizontal o rectangular (ancho mayor que alto). Resoluciones sugeridas: 800x400, 1200x600, 1600x800, o 2000x1000 píxeles.",
+      }
+    ),
   dominio: z.string({ required_error: "Dominio es requerido" }),
 });
 

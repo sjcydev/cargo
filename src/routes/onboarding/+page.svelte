@@ -156,9 +156,11 @@
                 {/if}
               {/snippet}
             </Form.Control>
-            <Form.Description
-              >Sube un archivo de imagen (PNG, JPG, GIF)</Form.Description
-            >
+            <Form.Description>
+              Sube un logo horizontal o rectangular (ancho mayor que alto).
+              <br />
+              Resoluciones sugeridas: 800x400, 1200x600, 1600x800, o 2000x1000 píxeles.
+            </Form.Description>
             <Form.FieldErrors />
           </Form.Field>
         {:else if currentStep === 1}
