@@ -59,7 +59,7 @@ export const actions = {
         country: country.toUpperCase(),
         state: state.toUpperCase(),
         tel,
-        suffix,
+        suffix: suffix?.toUpperCase(),
       });
 
       return { success: true, form };

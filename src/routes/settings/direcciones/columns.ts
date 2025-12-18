@@ -5,13 +5,6 @@ import DataTableActions from "./data-table-actions.svelte";
 
 export const columns: ColumnDef<Addresses>[] = [
   {
-    accessorFn: (row) => row.addressId,
-    accessorKey: "addressId",
-    id: "addressId",
-    header: () => "ID",
-    cell: ({ row }) => row.getValue("addressId"),
-  },
-  {
     accessorFn: (row) => row.name,
     accessorKey: "name",
     id: "name",
