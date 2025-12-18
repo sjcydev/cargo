@@ -57,6 +57,21 @@
       <Form.FieldErrors />
     </Form.Field>
 
+    <div class="space-y-2">
+      <label
+        for="country"
+        class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >País</label
+      >
+      <CountrySelector
+        bind:value={$formData.country}
+        onCountryChange={handleCountryChange}
+      />
+      {#if $errors.country}
+        <p class="text-destructive text-sm font-medium">{$errors.country}</p>
+      {/if}
+    </div>
+
     <Form.Field {form} name="address1">
       <Form.Control>
         {#snippet children({ props })}
@@ -90,7 +105,11 @@
         <Form.Control>
           {#snippet children({ props })}
             <Form.Label>Ciudad</Form.Label>
-            <Input {...props} bind:value={$formData.city} placeholder="Panamá" />
+            <Input
+              {...props}
+              bind:value={$formData.city}
+              placeholder="Panamá"
+            />
           {/snippet}
         </Form.Control>
         <Form.FieldErrors />
@@ -111,16 +130,19 @@
       </Form.Field>
     </div>
 
-    <div class="space-y-2">
-      <label for="country" class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">País</label>
-      <CountrySelector
-        bind:value={$formData.country}
-        onCountryChange={handleCountryChange}
-      />
-      {#if $errors.country}
-        <p class="text-destructive text-sm font-medium">{$errors.country}</p>
-      {/if}
-    </div>
+    <Form.Field {form} name="state">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Estado</Form.Label>
+          <Input
+            {...props}
+            bind:value={$formData.state}
+            placeholder="Panama"
+          />
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
 
     <Form.Field {form} name="tel">
       <Form.Control>

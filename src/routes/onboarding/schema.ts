@@ -74,6 +74,7 @@ export const addressesSchema = z.intersection(
     zipcode: z.string({ required_error: "Código postal es requerido" }),
     city: z.string({ required_error: "Ciudad es requerida" }),
     country: z.string({ required_error: "País es requerido" }),
+    state: z.string({ required_error: "Estado es requerido" }),
     tel: z.string({ required_error: "Teléfono es requerido" }),
   })
 );

@@ -19,6 +19,7 @@ export const addresses = mysqlTable("addresses", {
   name: varchar("name", {length: 100}).notNull(),
   address1: varchar("address1", { length: 500 }).notNull(),
   address2: varchar("address2", { length: 500 }),
+  state: varchar("state", {length: 100}).notNull(),
   zipcode: varchar("zipcode", { length: 15 }).notNull(),
   city: varchar("city", { length: 100 }).notNull(),
   country: varchar("country", { length: 60 }).notNull(),

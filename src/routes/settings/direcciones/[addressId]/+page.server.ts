@@ -37,6 +37,7 @@ export const load = (async ({ params }) => {
       city: addresses.city,
       country: addresses.country,
       tel: addresses.tel,
+      state: addresses.state
     })
     .from(addresses)
     .where(eq(addresses.addressId, addressId))
@@ -59,6 +60,7 @@ export const load = (async ({ params }) => {
     city: address.city!,
     country: address.country!,
     tel: address.tel!,
+    state: address.state!,
   };
 
   return {
@@ -75,22 +77,21 @@ export const actions = {
       return fail(400, { form });
     }
 
-    const { name, addressId, address1, address2, zipcode, city, country, tel } =
+    const { name, addressId, address1, address2, zipcode, city, country, tel, state } =
       form.data;
-
-    console.log(country)
 
     try {
       await db
         .update(addresses)
         .set({
           name: capitalizeWords(name),
-          address1,
-          address2: address2 || null,
-          zipcode,
-          city,
-          country,
+          address1: address1.toUpperCase(),
+          address2: address2 ? address2.toUpperCase() : null,
+          zipcode: zipcode.toUpperCase(),
+          city: city.toUpperCase(),
+          country: country.toUpperCase(),
           tel,
+          state: state.toUpperCase(),
         })
         .where(eq(addresses.addressId, Number(addressId!)));
 
@@ -99,12 +100,13 @@ export const actions = {
       updatedForm.data = {
         name,
         addressId,
-        address1,
-        address2,
-        zipcode,
-        city,
-        country,
+        address1: address1.toUpperCase(),
+        address2: address2 ? address2.toUpperCase() : null,
+        zipcode: zipcode.toUpperCase(),
+        city: city.toUpperCase(),
+        country: country.toUpperCase(),
         tel,
+        state: state.toUpperCase()
       };
 
       return {

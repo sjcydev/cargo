@@ -44,7 +44,7 @@ export const load: PageServerLoad = async ({ locals }) => {
       throw redirect(302, "/login");
     }
 
-    // throw redirect(302, "/registrar");
+    throw redirect(302, "/registrar");
   }
 
   return {
@@ -81,6 +81,7 @@ export const actions: Actions = {
       address1,
       address2,
       zipcode,
+      state,
       city,
       country,
       tel,
@@ -136,11 +137,12 @@ export const actions: Actions = {
       .insert(addresses)
       .values({
         name: capitalizeWords(addressName),
-        address1,
-        address2: address2 || null,
-        zipcode,
-        city,
-        country,
+        address1: address1.toUpperCase(),
+        address2: address2 ? address2.toUpperCase() : null,
+        zipcode: zipcode.toUpperCase(),
+        city: city.toUpperCase(),
+        country: country.toUpperCase(),
+        state: state.toUpperCase(),
         tel,
       })
       .$returningId();

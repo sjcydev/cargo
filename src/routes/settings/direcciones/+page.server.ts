@@ -30,6 +30,7 @@ export const load = (async () => {
       city: addresses.city,
       country: addresses.country,
       tel: addresses.tel,
+      state: addresses.state,
     })
     .from(addresses);
 
@@ -45,16 +46,17 @@ export const actions = {
       return fail(400, { form });
     }
 
-    const { name, address1, address2, zipcode, city, country, tel } = form.data;
+    const { name, address1, address2, state, zipcode, city, country, tel } = form.data;
 
     try {
       await db.insert(addresses).values({
         name: capitalizeWords(name),
-        address1,
-        address2: address2 || null,
-        zipcode,
-        city,
-        country,
+        address1: address1.toUpperCase(),
+        address2: address2 ? address2.toUpperCase() : null,
+        zipcode: zipcode.toUpperCase(),
+        city: city.toUpperCase(),
+        country: country.toUpperCase(),
+        state: state.toUpperCase(),
         tel,
       });
 

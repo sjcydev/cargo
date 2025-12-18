@@ -324,7 +324,11 @@
               <Form.Control>
                 {#snippet children({ props })}
                   <Form.Label>Ciudad</Form.Label>
-                  <Input {...props} bind:value={$formData.city} placeholder="Panamá" />
+                  <Input
+                    {...props}
+                    bind:value={$formData.city}
+                    placeholder="Panamá"
+                  />
                 {/snippet}
               </Form.Control>
               <Form.FieldErrors />
@@ -344,6 +348,20 @@
               <Form.FieldErrors />
             </Form.Field>
           </div>
+
+          <Form.Field {form} name="state">
+            <Form.Control>
+              {#snippet children({ props })}
+                <Form.Label>Estado</Form.Label>
+                <Input
+                  {...props}
+                  bind:value={$formData.state}
+                  placeholder="Estado"
+                />
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
 
           <Form.Field {form} name="tel">
             <Form.Control>
