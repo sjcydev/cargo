@@ -4,9 +4,9 @@ import { superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { sucursalesSchema } from "../schema";
 import { fail } from "@sveltejs/kit";
-import { sucursales } from "$lib/server/db/schema";
+import { sucursales, addresses, sucursalToAddress } from "$lib/server/db/schema";
 import { error } from "@sveltejs/kit";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export const load = (async ({ params }) => {
   const sucursalId = parseInt(params.sucursalId);
@@ -48,14 +48,43 @@ export const load = (async ({ params }) => {
     precio: sucursal.precio,
   };
 
+  // Fetch assigned addresses for this sucursal
+  const assignedAddresses = await db
+    .select({
+      addressId: addresses.addressId,
+      name: addresses.name,
+      address1: addresses.address1,
+      address2: addresses.address2,
+      city: addresses.city,
+      country: addresses.country,
+      zipcode: addresses.zipcode,
+      tel: addresses.tel,
+    })
+    .from(sucursalToAddress)
+    .innerJoin(addresses, eq(sucursalToAddress.addressId, addresses.addressId))
+    .where(eq(sucursalToAddress.sucursalId, sucursalId));
+
+  // Fetch all available addresses
+  const allAddresses = await db
+    .select({
+      addressId: addresses.addressId,
+      name: addresses.name,
+      address1: addresses.address1,
+      city: addresses.city,
+      country: addresses.country,
+    })
+    .from(addresses);
+
   return {
     form,
     sucursal,
+    assignedAddresses,
+    allAddresses,
   };
 }) satisfies PageServerLoad;
 
 export const actions = {
-  default: async ({ request }) => {
+  updateSucursal: async ({ request }) => {
     const form = await superValidate(request, zod(sucursalesSchema));
 
     if (!form.valid) {
@@ -107,6 +136,54 @@ export const actions = {
       };
     } catch (e) {
       console.log(e);
+    }
+  },
+
+  assignAddress: async ({ request }) => {
+    const formData = await request.formData();
+    const sucursalId = Number(formData.get("sucursalId"));
+    const addressId = Number(formData.get("addressId"));
+
+    if (!sucursalId || !addressId) {
+      return fail(400, { error: "Missing required fields" });
+    }
+
+    try {
+      await db.insert(sucursalToAddress).values({
+        sucursalId,
+        addressId,
+      });
+
+      return { success: true };
+    } catch (e) {
+      console.error(e);
+      return fail(500, { error: "Failed to assign address" });
+    }
+  },
+
+  unassignAddress: async ({ request }) => {
+    const formData = await request.formData();
+    const sucursalId = Number(formData.get("sucursalId"));
+    const addressId = Number(formData.get("addressId"));
+
+    if (!sucursalId || !addressId) {
+      return fail(400, { error: "Missing required fields" });
+    }
+
+    try {
+      await db
+        .delete(sucursalToAddress)
+        .where(
+          and(
+            eq(sucursalToAddress.sucursalId, sucursalId),
+            eq(sucursalToAddress.addressId, addressId)
+          )
+        );
+
+      return { success: true };
+    } catch (e) {
+      console.error(e);
+      return fail(500, { error: "Failed to unassign address" });
     }
   },
 } satisfies Actions;

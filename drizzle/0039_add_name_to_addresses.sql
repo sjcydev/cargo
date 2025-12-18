@@ -1,0 +1,1 @@
+ALTER TABLE `addresses` ADD `name` varchar(100) NOT NULL;

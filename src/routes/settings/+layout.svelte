@@ -4,7 +4,7 @@
   import SidebarNav from "$lib/components/settings-navbar.svelte";
   import { Separator } from "$lib/components/ui/separator";
   import InnerLayout from "$lib/components/inner-layout.svelte";
-  import { Hotel, House, ScrollText, User, Users } from "lucide-svelte";
+  import { Hotel, House, ScrollText, User, Users, MapPinHouse } from "lucide-svelte";
 
   let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
@@ -12,6 +12,7 @@
     { href: "/settings/perfil", title: "Perfil", icon: User },
     { href: "/settings/empresa", title: "Empresa", icon: Hotel },
     { href: "/settings/sucursales", title: "Sucursales", icon: House },
+    { href: "/settings/direcciones", title: "Direcciones", icon: MapPinHouse },
     { href: "/settings/usuarios", title: "Usuarios", icon: Users },
     { href: "/settings/facturas", title: "Factura", icon: ScrollText },
   ];

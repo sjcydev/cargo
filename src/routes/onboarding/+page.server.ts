@@ -4,7 +4,7 @@ import { hash } from "@node-rs/argon2";
 import { db } from "$lib/server/db";
 
 import type { Actions } from "./$types";
-import { users, sucursales, companies } from "$lib/server/db/schema";
+import { users, sucursales, companies, addresses, sucursalToAddress } from "$lib/server/db/schema";
 import { capitaliseWord, generateUserId } from "$lib/utils";
 
 import type { PageServerLoad } from "./$types.js";
@@ -13,6 +13,19 @@ import { userSignUpSchema } from "./schema";
 import { zod } from "sveltekit-superforms/adapters";
 import { uploadFile } from "$lib/server/s3";
 import { randomUUID as uuid } from "crypto";
+
+function capitalizeWords(text: string): string {
+  return text
+    .split(/(\s+|\(|\))/) // Split by spaces and parentheses while keeping them
+    .map((part) => {
+      // Only capitalize parts that are actual words (not spaces or parentheses)
+      if (part.trim().length === 0 || part === '(' || part === ')') {
+        return part;
+      }
+      return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+    })
+    .join('');
+}
 
 export const load: PageServerLoad = async ({ locals }) => {
   // Only need to check if any records exist
@@ -64,6 +77,14 @@ export const actions: Actions = {
       apellido: currApellido,
       logo: logoArchivo,
       dominio,
+      addressName,
+      address1,
+      address2,
+      zipcode,
+      state,
+      city,
+      country,
+      tel,
     } = form.data;
 
     const company = capitaliseWord(currCompany);
@@ -110,6 +131,27 @@ export const actions: Actions = {
         maps,
       })
       .$returningId();
+
+    // Create shipping address
+    const newAddress = await db
+      .insert(addresses)
+      .values({
+        name: capitalizeWords(addressName),
+        address1: address1.toUpperCase(),
+        address2: address2 ? address2.toUpperCase() : null,
+        zipcode: zipcode.toUpperCase(),
+        city: city.toUpperCase(),
+        country: country.toUpperCase(),
+        state: state.toUpperCase(),
+        tel,
+      })
+      .$returningId();
+
+    // Link address to sucursal
+    await db.insert(sucursalToAddress).values({
+      sucursalId: newSucursal[0].sucursalId,
+      addressId: newAddress[0].addressId,
+    });
 
     const userId = generateUserId();
     const passwordHash = await hash(password, {

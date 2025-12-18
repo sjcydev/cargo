@@ -6,7 +6,35 @@ export const companiesSchema = z.object({
   }),
   logo: z
     .instanceof(File, { message: "Debes subir un logo." })
-    .refine((f) => f.size < 20_000_000, "Logo debe ser menor a 20MB."),
+    .refine((f) => f.size < 20_000_000, "Logo debe ser menor a 20MB.")
+    .refine(
+      async (file) => {
+        if (!file.type.startsWith("image/")) return false;
+
+        return new Promise<boolean>((resolve) => {
+          const img = new Image();
+          const url = URL.createObjectURL(file);
+
+          img.onload = () => {
+            URL.revokeObjectURL(url);
+            const aspectRatio = img.width / img.height;
+            // Accept if image is horizontal/rectangular (width > height)
+            resolve(aspectRatio > 1);
+          };
+
+          img.onerror = () => {
+            URL.revokeObjectURL(url);
+            resolve(false);
+          };
+
+          img.src = url;
+        });
+      },
+      {
+        message:
+          "El logo debe ser horizontal o rectangular (ancho mayor que alto). Resoluciones sugeridas: 800x400, 1200x600, 1600x800, o 2000x1000 píxeles.",
+      }
+    ),
   dominio: z.string({ required_error: "Dominio es requerido" }),
 });
 
@@ -37,8 +65,22 @@ export const sucursalesSchema = z.intersection(
   })
 );
 
-export const userSignUpSchema = z.intersection(
+export const addressesSchema = z.intersection(
   sucursalesSchema,
+  z.object({
+    addressName: z.string({ required_error: "Nombre de la dirección es requerido" }),
+    address1: z.string({ required_error: "Dirección principal es requerida" }),
+    address2: z.string().optional().nullish(),
+    zipcode: z.string({ required_error: "Código postal es requerido" }),
+    city: z.string({ required_error: "Ciudad es requerida" }),
+    country: z.string({ required_error: "País es requerido" }),
+    state: z.string({ required_error: "Estado es requerido" }),
+    tel: z.string({ required_error: "Teléfono es requerido" }),
+  })
+);
+
+export const userSignUpSchema = z.intersection(
+  addressesSchema,
   z
     .object({
       nombre: z

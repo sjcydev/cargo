@@ -36,7 +36,7 @@
   const { form: formData, enhance, errors, submitting } = form;
 </script>
 
-<form method="POST" use:enhance class="space-y-6">
+<form method="POST" action="?/updateSucursal" use:enhance class="space-y-6">
   <input type="hidden" name="sucursalId" value={$formData.sucursalId} />
   <div class="mb-11">
     <div class="grid grid-cols-2 gap-4">
