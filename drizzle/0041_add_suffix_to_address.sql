@@ -1,0 +1,1 @@
+ALTER TABLE `addresses` ADD `suffix` varchar(50);

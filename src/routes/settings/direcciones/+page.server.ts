@@ -31,6 +31,7 @@ export const load = (async () => {
       country: addresses.country,
       tel: addresses.tel,
       state: addresses.state,
+      suffix: addresses.suffix,
     })
     .from(addresses);
 
@@ -46,7 +47,7 @@ export const actions = {
       return fail(400, { form });
     }
 
-    const { name, address1, address2, state, zipcode, city, country, tel } = form.data;
+    const { name, address1, address2, state, zipcode, city, country, tel, suffix } = form.data;
 
     try {
       await db.insert(addresses).values({
@@ -58,6 +59,7 @@ export const actions = {
         country: country.toUpperCase(),
         state: state.toUpperCase(),
         tel,
+        suffix: suffix?.toUpperCase(),
       });
 
       return { success: true, form };

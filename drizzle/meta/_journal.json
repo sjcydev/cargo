@@ -288,6 +288,13 @@
       "when": 1766014272015,
       "tag": "0040_add_state_to_addresses",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "5",
+      "when": 1766073589108,
+      "tag": "0041_add_suffix_to_address",
+      "breakpoints": true
     }
   ]
 }

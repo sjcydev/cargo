@@ -10,10 +10,11 @@
   import { zodClient } from "sveltekit-superforms/adapters";
   import * as Form from "$lib/components/ui/form";
   import type { Addresses } from "$lib/server/db/schema";
-  import { Loader2 } from "lucide-svelte";
+  import { Loader2, Info } from "lucide-svelte";
   import { toast } from "svelte-sonner";
   import { invalidateAll } from "$app/navigation";
   import CountrySelector from "../country-selector.svelte";
+  import * as Tooltip from "$lib/components/ui/tooltip";
 
   let {
     data,
@@ -115,6 +116,18 @@
         <Form.FieldErrors />
       </Form.Field>
 
+      <Form.Field {form} name="state">
+        <Form.Control>
+          {#snippet children({ props })}
+            <Form.Label>Estado</Form.Label>
+            <Input {...props} bind:value={$formData.state} placeholder="Panama" />
+          {/snippet}
+        </Form.Control>
+        <Form.FieldErrors />
+      </Form.Field>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
       <Form.Field {form} name="zipcode">
         <Form.Control>
           {#snippet children({ props })}
@@ -128,30 +141,43 @@
         </Form.Control>
         <Form.FieldErrors />
       </Form.Field>
+
+      <Form.Field {form} name="tel">
+        <Form.Control>
+          {#snippet children({ props })}
+            <Form.Label>Teléfono</Form.Label>
+            <Input
+              {...props}
+              bind:value={$formData.tel}
+              placeholder="+507 1234-5678"
+            />
+          {/snippet}
+        </Form.Control>
+        <Form.FieldErrors />
+      </Form.Field>
     </div>
 
-    <Form.Field {form} name="state">
+    <Form.Field {form} name="suffix">
       <Form.Control>
         {#snippet children({ props })}
-          <Form.Label>Estado</Form.Label>
+          <div class="flex items-center gap-2">
+            <Form.Label>Sufijo (Opcional)</Form.Label>
+            <Tooltip.Root>
+              <Tooltip.Trigger>
+                <Info class="h-4 w-4 text-muted-foreground" />
+              </Tooltip.Trigger>
+              <Tooltip.Content>
+                <p class="max-w-xs">
+                  El sufijo aparecerá después del nombre y en la dirección
+                  secundaria.
+                </p>
+              </Tooltip.Content>
+            </Tooltip.Root>
+          </div>
           <Input
             {...props}
-            bind:value={$formData.state}
-            placeholder="Panama"
-          />
-        {/snippet}
-      </Form.Control>
-      <Form.FieldErrors />
-    </Form.Field>
-
-    <Form.Field {form} name="tel">
-      <Form.Control>
-        {#snippet children({ props })}
-          <Form.Label>Teléfono</Form.Label>
-          <Input
-            {...props}
-            bind:value={$formData.tel}
-            placeholder="+507 1234-5678"
+            bind:value={$formData.suffix}
+            placeholder="ej. OCEAN"
           />
         {/snippet}
       </Form.Control>

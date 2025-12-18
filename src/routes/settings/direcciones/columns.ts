@@ -1,19 +1,9 @@
 import type { ColumnDef } from "@tanstack/table-core";
-import { createColumnHelper } from "@tanstack/table-core";
 import type { Addresses } from "$lib/server/db/schema";
 import { renderComponent } from "$lib/components/ui/data-table";
 import DataTableActions from "./data-table-actions.svelte";
 
-const columnHelper = createColumnHelper<Addresses>();
-
 export const columns: ColumnDef<Addresses>[] = [
-  {
-    accessorFn: (row) => row.addressId,
-    accessorKey: "addressId",
-    id: "addressId",
-    header: () => "ID",
-    cell: ({ row }) => row.getValue("addressId"),
-  },
   {
     accessorFn: (row) => row.name,
     accessorKey: "name",
@@ -36,11 +26,25 @@ export const columns: ColumnDef<Addresses>[] = [
     cell: ({ row }) => row.getValue("city"),
   },
   {
+  accessorFn: (row) => row.state,
+  accessorKey: "state",
+  id: "state",
+  header: () => "Estado",
+  cell: ({ row }) => row.getValue("state"),
+  },
+  {
     accessorFn: (row) => row.country,
     accessorKey: "country",
     id: "country",
     header: () => "País",
     cell: ({ row }) => row.getValue("country"),
+  },
+  {
+  accessorFn: (row) => row.suffix,
+  accessorKey: "suffix",
+  id: "suffix",
+  header: () => "Sufijo",
+  cell: ({ row }) => row.getValue("suffix")
   },
   {
     id: "actions",
