@@ -24,6 +24,7 @@ export const addresses = mysqlTable("addresses", {
   city: varchar("city", { length: 100 }).notNull(),
   country: varchar("country", { length: 60 }).notNull(),
   tel: varchar("tel", { length: 100 }).notNull(),
+  suffix: varchar("suffix", { length: 50 })
 });
 
 export const sucursalToAddress = mysqlTable(

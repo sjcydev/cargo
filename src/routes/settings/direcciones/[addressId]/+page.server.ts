@@ -37,7 +37,8 @@ export const load = (async ({ params }) => {
       city: addresses.city,
       country: addresses.country,
       tel: addresses.tel,
-      state: addresses.state
+      state: addresses.state,
+      suffix: addresses.suffix,
     })
     .from(addresses)
     .where(eq(addresses.addressId, addressId))
@@ -61,6 +62,7 @@ export const load = (async ({ params }) => {
     country: address.country!,
     tel: address.tel!,
     state: address.state!,
+    suffix: address.suffix,
   };
 
   return {
@@ -77,14 +79,16 @@ export const actions = {
       return fail(400, { form });
     }
 
-    const { name, addressId, address1, address2, zipcode, city, country, tel, state } =
+    const { name, addressId, address1, address2, zipcode, city, country, tel, state, suffix } =
       form.data;
+
+    const capName = capitalizeWords(name);
 
     try {
       await db
         .update(addresses)
         .set({
-          name: capitalizeWords(name),
+          name: capName,
           address1: address1.toUpperCase(),
           address2: address2 ? address2.toUpperCase() : null,
           zipcode: zipcode.toUpperCase(),
@@ -92,13 +96,14 @@ export const actions = {
           country: country.toUpperCase(),
           tel,
           state: state.toUpperCase(),
+          suffix: suffix?.toUpperCase(),
         })
         .where(eq(addresses.addressId, Number(addressId!)));
 
       const updatedForm = await superValidate(zod(addressesSchema));
 
       updatedForm.data = {
-        name,
+        name: capName,
         addressId,
         address1: address1.toUpperCase(),
         address2: address2 ? address2.toUpperCase() : null,
@@ -106,7 +111,8 @@ export const actions = {
         city: city.toUpperCase(),
         country: country.toUpperCase(),
         tel,
-        state: state.toUpperCase()
+        state: state.toUpperCase(),
+        suffix: suffix?.toUpperCase()
       };
 
       return {

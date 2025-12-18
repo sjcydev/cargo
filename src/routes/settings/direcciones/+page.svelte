@@ -8,7 +8,6 @@
   import * as Dialog from "$lib/components/ui/dialog";
   import * as Form from "$lib/components/ui/form";
   import { Input } from "$lib/components/ui/input";
-  import type { Infer, SuperValidated } from "sveltekit-superforms";
   import { type addressesType, addressesSchema } from "./schema";
   import { toast } from "svelte-sonner";
   import { goto, invalidateAll } from "$app/navigation";
@@ -153,6 +152,20 @@
               {...props}
               bind:value={$formData.tel}
               placeholder="+507 1234-5678"
+            />
+          {/snippet}
+        </Form.Control>
+        <Form.FieldErrors />
+      </Form.Field>
+
+      <Form.Field {form} name="suffix">
+        <Form.Control>
+          {#snippet children({ props })}
+            <Form.Label>Sufijo (Opcional)</Form.Label>
+            <Input
+              {...props}
+              bind:value={$formData.suffix}
+              placeholder="ej. OCEAN"
             />
           {/snippet}
         </Form.Control>

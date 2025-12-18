@@ -134,11 +134,7 @@
       <Form.Control>
         {#snippet children({ props })}
           <Form.Label>Estado</Form.Label>
-          <Input
-            {...props}
-            bind:value={$formData.state}
-            placeholder="Panama"
-          />
+          <Input {...props} bind:value={$formData.state} placeholder="Panama" />
         {/snippet}
       </Form.Control>
       <Form.FieldErrors />
@@ -152,6 +148,20 @@
             {...props}
             bind:value={$formData.tel}
             placeholder="+507 1234-5678"
+          />
+        {/snippet}
+      </Form.Control>
+      <Form.FieldErrors />
+    </Form.Field>
+
+    <Form.Field {form} name="suffix">
+      <Form.Control>
+        {#snippet children({ props })}
+          <Form.Label>Sufijo (Opcional)</Form.Label>
+          <Input
+            {...props}
+            bind:value={$formData.suffix}
+            placeholder="ej. OCEAN"
           />
         {/snippet}
       </Form.Control>
