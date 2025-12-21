@@ -3,32 +3,34 @@ import * as auth from "$lib/server/auth.js";
 import { redirect, error } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { db } from "$lib/server/db";
-import { sucursales, companies} from "$lib/server/db/schema";
+import { sucursales, companies } from "$lib/server/db/schema";
 
 const BLOCKED_PATHS = [
   /\.php$/i,
   /^\/wp-/i,
   /^\/admin\.php$/i,
-  /^\/class\d+\.php$/i
+  /^\/class\d+\.php$/i,
 ];
 
 const suspendHandle: Handle = async ({ event, resolve }) => {
-  const [companiesData] = await db.select({suspended: companies.suspended}).from(companies).limit(1);
+  const [companiesData] = await db
+    .select({ suspended: companies.suspended })
+    .from(companies)
+    .limit(1);
 
   if (companiesData && companiesData.suspended) {
     throw error(403, "Suspendida");
   }
 
   return await resolve(event);
-
-}
+};
 
 export const blockedHandle: Handle = async ({ event, resolve }) => {
   const { pathname } = event.url;
 
   for (const pattern of BLOCKED_PATHS) {
     if (pattern.test(pathname)) {
-      return new Response('Not Found', { status: 404 });
+      return new Response("Not Found", { status: 404 });
     }
   }
 
@@ -42,7 +44,10 @@ const onboardingHandle: Handle = async ({ event, resolve }) => {
     .from(sucursales)
     .limit(1);
 
-  if (sucursalesData.length === 0 && event.url.pathname !== "/admin/onboarding") {
+  if (
+    sucursalesData.length === 0 &&
+    event.url.pathname !== "/admin/onboarding"
+  ) {
     throw redirect(302, "/admin/onboarding");
   }
 
@@ -73,9 +78,20 @@ const authHandle: Handle = async ({ event, resolve }) => {
   return await resolve(event);
 };
 
-const luciaHandle: Handle = async ({ event, resolve }) => {
+// Admin session validation - only runs for /admin/* routes
+const adminAuthHandle: Handle = async ({ event, resolve }) => {
+  const isAdminRoute = event.url.pathname.startsWith("/admin");
+
+  if (!isAdminRoute) {
+    // Skip admin auth for non-admin routes
+    return resolve(event);
+  }
+
   const sessionToken = event.cookies.get(auth.sessionCookieName);
   if (!sessionToken) {
+    event.locals.adminUser = null;
+    event.locals.adminSession = null;
+    // Maintain backward compatibility
     event.locals.user = null;
     event.locals.session = null;
     return resolve(event);
@@ -89,16 +105,39 @@ const luciaHandle: Handle = async ({ event, resolve }) => {
     auth.deleteSessionTokenCookie(event);
   }
 
+  event.locals.adminUser = user;
+  event.locals.adminSession = session;
+  // Maintain backward compatibility
   event.locals.user = user;
   event.locals.session = session;
 
   return await resolve(event);
 };
 
+// Client session validation placeholder - will be implemented in magic link task
+const clientAuthHandle: Handle = async ({ event, resolve }) => {
+  const isClientRoute =
+    !event.url.pathname.startsWith("/admin") &&
+    !event.url.pathname.startsWith("/api");
+
+  if (!isClientRoute) {
+    // Skip client auth for non-client routes
+    return resolve(event);
+  }
+
+  // TODO: Implement client session validation with magic links
+  // For now, just set to null
+  event.locals.clientUser = null;
+  event.locals.clientSession = null;
+
+  return await resolve(event);
+};
+
 export const handle: Handle = sequence(
   blockedHandle,
-  luciaHandle,
-  suspendHandle,
-  onboardingHandle,
-  authHandle
+  suspendHandle, // Company suspension check (admin only)
+  onboardingHandle, // Onboarding check (admin only)
+  adminAuthHandle, // Admin session validation (only /admin/*)
+  clientAuthHandle, // Client session validation placeholder (only non-admin/non-api)
+  authHandle, // Route-level authorization
 );

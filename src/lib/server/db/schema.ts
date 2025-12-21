@@ -7,6 +7,7 @@ import {
   float,
   boolean,
   longtext,
+  text,
   index,
   primaryKey,
 } from "drizzle-orm/mysql-core";
@@ -123,6 +124,46 @@ export const session = mysqlTable("session", {
     .references(() => users.id, { onDelete: "cascade"}),
   expiresAt: datetime("expires_at").notNull(),
 });
+
+// Magic link tokens for passwordless authentication
+export const clientAuthTokens = mysqlTable(
+  "client_auth_tokens",
+  {
+    id: int("id").autoincrement().primaryKey(),
+    clientEmail: varchar("client_email", { length: 255 }).notNull(),
+    token: varchar("token", { length: 255 }).notNull().unique(),
+    expiresAt: timestamp("expires_at").notNull(),
+    used: boolean("used").default(false).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    // Index for fast token lookup during verification
+    tokenIdx: index("client_auth_tokens_token_idx").on(table.token),
+    // Index for email lookup during token generation
+    emailIdx: index("client_auth_tokens_email_idx").on(table.clientEmail),
+  })
+);
+
+// Persistent client sessions for mobile devices
+export const clientDeviceSessions = mysqlTable(
+  "client_device_sessions",
+  {
+    id: varchar("id", { length: 255 }).primaryKey(), // Session ID (random bytes, base64url encoded)
+    clientId: int("client_id")
+      .notNull()
+      .references(() => usuarios.id, { onDelete: "cascade" }),
+    userAgent: text("user_agent"),
+    lastActive: timestamp("last_active").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    // Index for client lookup (to list all sessions for a client)
+    clientIdx: index("client_sessions_client_idx").on(table.clientId),
+    // Index for cleanup queries (find expired sessions)
+    expiryIdx: index("client_sessions_expiry_idx").on(table.expiresAt),
+  })
+);
 
 export const usuarios = mysqlTable(
   "usuarios",
@@ -290,6 +331,7 @@ export const usuariosRelations = relations(usuarios, ({ many, one }) => ({
     fields: [usuarios.sucursalId],
     references: [sucursales.sucursalId],
   }),
+  clientSessions: many(clientDeviceSessions),
 }));
 
 export const facturasRelations = relations(facturas, ({ one, many }) => ({
@@ -365,6 +407,13 @@ export const companiesRelations = relations(companies, ({ many }) => ({
   users: many(users),
 }));
 
+export const clientDeviceSessionsRelations = relations(clientDeviceSessions, ({ one }) => ({
+  client: one(usuarios, {
+    fields: [clientDeviceSessions.clientId],
+    references: [usuarios.id],
+  }),
+}));
+
 export type Companies = typeof companies.$inferSelect;
 export type NewCompanies = typeof companies.$inferInsert;
 export type Sucursales = typeof sucursales.$inferSelect;
@@ -402,3 +451,8 @@ export type TrackingsWithSucursal = InferResultType<
 
 export type Session = typeof session.$inferSelect;
 export type Users = typeof users.$inferSelect;
+
+export type ClientAuthToken = typeof clientAuthTokens.$inferSelect;
+export type NewClientAuthToken = typeof clientAuthTokens.$inferInsert;
+export type ClientDeviceSession = typeof clientDeviceSessions.$inferSelect;
+export type NewClientDeviceSession = typeof clientDeviceSessions.$inferInsert;
