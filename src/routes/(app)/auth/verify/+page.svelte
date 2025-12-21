@@ -26,7 +26,7 @@
         <h1 class="text-2xl font-bold text-gray-900 mb-2">Verification Failed</h1>
         <p class="text-gray-600 mb-6">{data.error}</p>
         <a
-          href="/"
+          href="/login"
           class="inline-block bg-black text-white px-6 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity"
         >
           Request New Link
