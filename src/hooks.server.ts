@@ -3,7 +3,9 @@ import * as auth from "$lib/server/auth.js";
 import { redirect, error } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { db } from "$lib/server/db";
-import { sucursales, companies } from "$lib/server/db/schema";
+import { sucursales, companies, clientDeviceSessions } from "$lib/server/db/schema";
+import { clientAuthService } from "$lib/server/services/clientAuth.service";
+import { eq } from "drizzle-orm";
 
 const BLOCKED_PATHS = [
   /\.php$/i,
@@ -114,23 +116,73 @@ const adminAuthHandle: Handle = async ({ event, resolve }) => {
   return await resolve(event);
 };
 
-// Client session validation placeholder - will be implemented in magic link task
+/**
+ * Client authentication middleware
+ * Validates client sessions for non-admin routes
+ */
 const clientAuthHandle: Handle = async ({ event, resolve }) => {
-  const isClientRoute =
-    !event.url.pathname.startsWith("/admin") &&
-    !event.url.pathname.startsWith("/api");
+  const path = event.url.pathname;
 
-  if (!isClientRoute) {
-    // Skip client auth for non-client routes
+  // Only process non-admin routes
+  const isAdminRoute = path.startsWith("/admin");
+  const isApiRoute = path.startsWith("/api");
+
+  if (isAdminRoute || isApiRoute) {
     return resolve(event);
   }
 
-  // TODO: Implement client session validation with magic links
-  // For now, just set to null
-  event.locals.clientUser = null;
-  event.locals.clientSession = null;
+  // Public routes that don't require auth
+  const publicRoutes = ["/login", "/auth/verify"];
+  const isPublicRoute = publicRoutes.includes(path);
 
-  return await resolve(event);
+  // Get session cookie
+  const sessionId = event.cookies.get("client-session");
+
+  if (sessionId) {
+    // Validate session and attach client data
+    const sessionData = await clientAuthService.validateClientSession(sessionId);
+
+    if (sessionData) {
+      event.locals.clientUser = sessionData.client;
+      event.locals.clientSession = {
+        id: sessionData.session.id,
+        clientId: sessionData.session.clientId,
+        userAgent: sessionData.session.userAgent,
+        lastActive: sessionData.session.lastActive,
+        expiresAt: sessionData.session.expiresAt,
+        createdAt: sessionData.session.createdAt
+      };
+
+      // Check if session needs renewal (< 15 days remaining)
+      const fifteenDaysFromNow = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+      if (sessionData.session.expiresAt < fifteenDaysFromNow) {
+        // Renew session
+        const newExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+        await db.update(clientDeviceSessions)
+          .set({ expiresAt: newExpiresAt })
+          .where(eq(clientDeviceSessions.id, sessionId));
+
+        // Update cookie
+        event.cookies.set("client-session", sessionId, {
+          path: "/",
+          httpOnly: true,
+          sameSite: "lax",
+          secure: process.env.NODE_ENV === "production",
+          maxAge: 60 * 60 * 24 * 30 // 30 days
+        });
+      }
+    } else {
+      // Invalid or expired session - clear cookie
+      event.cookies.delete("client-session", { path: "/" });
+    }
+  }
+
+  // Protect non-public routes
+  if (!isPublicRoute && !event.locals.clientUser) {
+    throw redirect(303, "/login");
+  }
+
+  return resolve(event);
 };
 
 export const handle: Handle = sequence(

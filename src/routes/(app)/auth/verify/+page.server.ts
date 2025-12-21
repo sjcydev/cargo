@@ -40,5 +40,5 @@ export const load: PageServerLoad = async ({ url, cookies, request }) => {
   logger.info('Client logged in via magic link', { clientId });
 
   // 5. Redirect to dashboard
-  throw redirect(303, '/dashboard');
+  throw redirect(303, '/');
 };

@@ -10,7 +10,7 @@
   onMount(() => {
     if (!data.error) {
       // If we're still here, something went wrong with redirect
-      window.location.href = '/dashboard';
+      window.location.href = '/';
     }
   });
 </script>

@@ -1,7 +1,10 @@
-import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
-  // Redirect to the client login page
-  throw redirect(302, '/login');
+export const load: PageServerLoad = async ({ locals }) => {
+  // Client data is attached by middleware
+  const client = locals.clientUser;
+
+  return {
+    client
+  };
 };
