@@ -36,7 +36,7 @@ export const load = (async ({ params }) => {
     .limit(1);
 
   if (!clienteData[0]) {
-    throw redirect(302, "/clientes");
+    throw redirect(302, "/admin/clientes");
   }
 
   const facturasConditions = [

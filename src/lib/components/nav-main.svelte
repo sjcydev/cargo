@@ -35,7 +35,7 @@
   <Sidebar.GroupLabel>Sistema</Sidebar.GroupLabel>
   <Sidebar.Menu>
     {#each items as mainItem (mainItem.title)}
-      {#if (!protectedRoutes.has(mainItem.url) && (rol === "ADMIN" || !mainItem.admin)) || (mainItem.url === "/reportes" && rol === "SECRETARIA")}
+      {#if (!protectedRoutes.has(mainItem.url) && (rol === "ADMIN" || !mainItem.admin)) || (mainItem.url === "/admin/reportes" && rol === "SECRETARIA")}
         <Collapsible.Root open={mainItem.isActive}>
           {#snippet child({ props })}
             <Sidebar.MenuItem {...props}>
@@ -50,7 +50,7 @@
                     class={cn(
                       props.class as ClassValue,
                       "hover:text-primary",
-                      `${(currentRoute.startsWith(mainItem.url) && mainItem.url !== "/") || currentRoute === mainItem.url ? "bg-muted text-primary" : ""}`
+                      `${(currentRoute.startsWith(mainItem.url) && mainItem.url !== "/admin") || currentRoute === mainItem.url ? "bg-muted text-primary" : ""}`
                     )}
                   >
                     <mainItem.icon />
@@ -79,7 +79,7 @@
                             href={subItem.url}
                             class={cn(
                               "hover:text-primary",
-                              `${(currentRoute.startsWith(subItem.url) && subItem.url !== "/facturas") || currentRoute === subItem.url || (subItem.url === "/facturas" && /^\/facturas\/\d+/.test(currentRoute)) ? "bg-muted text-primary" : ""}`
+                              `${(currentRoute.startsWith(subItem.url) && subItem.url !== "/admin/facturas") || currentRoute === subItem.url || (subItem.url === "/admin/facturas" && /^\/admin\/facturas\/\d+/.test(currentRoute)) ? "bg-muted text-primary" : ""}`
                             )}
                           >
                             <span>{subItem.title}</span>

@@ -9,7 +9,7 @@ export const load = (async ({ locals }) => {
   const { user } = locals;
 
   if (!user) {
-    throw redirect(302, "/login");
+    throw redirect(302, "/admin/login");
   }
 
   // Get all sucursales for tabs
@@ -68,7 +68,7 @@ export const load = (async ({ locals }) => {
 export const actions = {
   generate: async ({ request, locals }) => {
     const { user } = locals;
-    if (!user) throw redirect(302, "/login");
+    if (!user) throw redirect(302, "/admin/login");
 
     const data = await request.formData();
 

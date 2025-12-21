@@ -14,7 +14,7 @@ import { redirect } from "@sveltejs/kit";
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (!locals.user) {
-    redirect(401, "/login");
+    redirect(401, "/admin/login");
   }
 
   const sucursalesData = await db

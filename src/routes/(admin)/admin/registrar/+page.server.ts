@@ -14,7 +14,7 @@ import { zod } from "sveltekit-superforms/adapters";
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (locals.user && locals.user.rol !== "ADMIN") {
-    throw redirect(302, "/clientes");
+    throw redirect(302, "/admin/clientes");
   }
 
   const sucursalesData = await db
@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     .from(sucursales);
 
   if (sucursalesData.length === 0) {
-    throw redirect(302, "/onboarding");
+    throw redirect(302, "/admin/onboarding");
   }
 
   return {
@@ -85,6 +85,6 @@ export const actions: Actions = {
       auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
     }
 
-    redirect(302, "/");
+    redirect(302, "/admin");
   },
 };

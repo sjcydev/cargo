@@ -13,6 +13,6 @@ export const actions: Actions = {
     auth.deleteSessionTokenCookie(event);
     locals.user = null;
 
-    return redirect(302, "/login");
+    return redirect(302, "/admin/login");
   },
 };

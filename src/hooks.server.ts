@@ -42,8 +42,8 @@ const onboardingHandle: Handle = async ({ event, resolve }) => {
     .from(sucursales)
     .limit(1);
 
-  if (sucursalesData.length === 0 && event.url.pathname !== "/onboarding") {
-    throw redirect(302, "/onboarding");
+  if (sucursalesData.length === 0 && event.url.pathname !== "/admin/onboarding") {
+    throw redirect(302, "/admin/onboarding");
   }
 
   return await resolve(event);
@@ -51,23 +51,23 @@ const onboardingHandle: Handle = async ({ event, resolve }) => {
 
 const authHandle: Handle = async ({ event, resolve }) => {
   const protected_urls =
-    event.route.id === "/" ||
-    event.url.pathname.startsWith("/facturas") ||
-    event.url.pathname.startsWith("/tracking") ||
-    event.url.pathname.startsWith("/registrar_cliente") ||
-    event.url.pathname.startsWith("/clientes") ||
-    event.url.pathname.startsWith("/registrar");
+    event.route.id === "/(admin)/admin" ||
+    event.url.pathname.startsWith("/admin/facturas") ||
+    event.url.pathname.startsWith("/admin/tracking") ||
+    event.url.pathname.startsWith("/admin/registrar_cliente") ||
+    event.url.pathname.startsWith("/admin/clientes") ||
+    event.url.pathname.startsWith("/admin/registrar");
 
   const user = event.locals.user;
 
-  if (event.url.pathname.startsWith("/reportes") && user) {
+  if (event.url.pathname.startsWith("/admin/reportes") && user) {
     if (user?.rol === "EMPLEADO") {
-      throw redirect(303, "/");
+      throw redirect(303, "/admin");
     }
   }
 
   if (protected_urls && !user) {
-    throw redirect(302, "/login");
+    throw redirect(302, "/admin/login");
   }
 
   return await resolve(event);

@@ -41,10 +41,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 
   if (sucursalesData.length !== 0) {
     if (usersData.length !== 0 && !locals.user) {
-      throw redirect(302, "/login");
+      throw redirect(302, "/admin/login");
     }
 
-    throw redirect(302, "/registrar");
+    throw redirect(302, "/admin/registrar");
   }
 
   return {
@@ -181,6 +181,6 @@ export const actions: Actions = {
 
     auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
 
-    redirect(302, "/");
+    redirect(302, "/admin");
   },
 };

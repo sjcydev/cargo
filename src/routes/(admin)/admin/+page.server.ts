@@ -48,7 +48,7 @@ type CustomerStats = {
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (!locals.user || locals.user.rol !== "ADMIN") {
-    throw redirect(302, "/clientes");
+    throw redirect(302, "/admin/clientes");
   }
 
   const now = today("America/Panama");

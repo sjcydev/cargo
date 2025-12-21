@@ -76,7 +76,7 @@
         </DropdownMenu.Label>
         <DropdownMenu.Separator />
         <DropdownMenu.Group>
-          <a href="/settings">
+          <a href="/admin/settings">
             <DropdownMenu.Item>
               <Settings />
               Configuración
@@ -84,7 +84,7 @@
           </a>
         </DropdownMenu.Group>
         <DropdownMenu.Separator />
-        <form method="post" action="/logout" class="w-full" use:enhance>
+        <form method="post" action="/admin/logout" class="w-full" use:enhance>
           <button class="w-full">
             <DropdownMenu.Item>
               <LogOut />

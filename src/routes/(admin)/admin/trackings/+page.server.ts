@@ -8,7 +8,7 @@ export const load = (async ({ locals }) => {
   const { user } = locals;
 
   if (!user) {
-    throw redirect(302, "/login");
+    throw redirect(302, "/admin/login");
   }
 
   // Get trackings based on user role

@@ -15,37 +15,37 @@
     navMain: [
       {
         icon: Home,
-        url: "/",
+        url: "/admin",
         title: "Dashboard",
         admin: true,
       },
       {
         icon: Users,
-        url: "/clientes",
+        url: "/admin/clientes",
         title: "Clientes",
         admin: false,
       },
       {
         title: "Facturación",
-        url: "/facturas",
+        url: "/admin/facturas",
         icon: Package,
         isActive: true,
         admin: false,
         items: [
           {
             icon: Package,
-            url: "/facturas",
+            url: "/admin/facturas",
             title: "Facturas",
             admin: false,
           },
           {
             icon: ReceiptText,
-            url: "/facturas/facturar",
+            url: "/admin/facturas/facturar",
             title: "Facturar Cliente",
             admin: false,
           },
           {
-            url: "/facturas/no_enviadas",
+            url: "/admin/facturas/no_enviadas",
             title: "No Enviadas",
             admin: false,
           },
@@ -53,13 +53,13 @@
       },
       {
         icon: FileSearch,
-        url: "/trackings",
+        url: "/admin/trackings",
         title: "Trackings",
         admin: false,
       },
       {
         icon: BookText,
-        url: "/reportes",
+        url: "/admin/reportes",
         title: "Reportes",
         admin: true,
       },
@@ -69,19 +69,19 @@
   const navSecondary = [
     {
       title: "Crear Usuario",
-      url: "/registrar",
+      url: "/admin/registrar",
       icon: UserPlus,
       admin: true,
     },
     {
       title: "Configuración",
-      url: "/settings",
+      url: "/admin/settings",
       icon: Settings,
       admin: false,
     },
   ];
 
-  let protectedRoutes = new Set(["/registrar"]);
+  let protectedRoutes = new Set(["/admin/registrar"]);
 </script>
 
 <script lang="ts">
@@ -119,7 +119,7 @@
       <Sidebar.MenuItem>
         <Sidebar.MenuButton size="lg">
           {#snippet child({ props })}
-            <a href="/" {...props}>
+            <a href="/admin" {...props}>
               {#if !logo}
                 <div
                   class={`bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg`}

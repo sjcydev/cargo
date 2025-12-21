@@ -12,7 +12,7 @@ import { getFriendlyUrl } from "$lib/server/s3";
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (locals.user) {
-    throw redirect(302, "/");
+    throw redirect(302, "/admin");
   }
 
   const companyResult = await db
@@ -70,6 +70,6 @@ export const actions: Actions = {
 
     auth.setSessionTokenCookie(event, sessionToken, session.expiresAt);
 
-    throw redirect(302, "/");
+    throw redirect(302, "/admin");
   },
 };

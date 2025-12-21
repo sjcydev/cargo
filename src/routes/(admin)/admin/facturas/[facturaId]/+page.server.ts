@@ -41,7 +41,7 @@ export const load = (async ({ params }) => {
   }
 
   if (facturaData[0].cancelada) {
-    throw redirect(301, "/facturas");
+    throw redirect(301, "/admin/facturas");
   }
 
   const trackingsData = await db

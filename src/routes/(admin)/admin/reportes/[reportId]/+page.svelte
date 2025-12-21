@@ -53,9 +53,9 @@
   bind:open={deleteDialogOpen}
   title="Eliminar Reporte"
   description={`¿Estás seguro que deseas eliminar el reporte N° ${data.report.reporteId}? Esta acción no se puede deshacer.`}
-  action="/reportes?/delete"
+  action="/admin/reportes?/delete"
   itemId={data.report.reporteId}
-  onSuccess={() => goto("/reportes")}
+  onSuccess={() => goto("/admin/reportes")}
 />
 
 {#snippet actions()}

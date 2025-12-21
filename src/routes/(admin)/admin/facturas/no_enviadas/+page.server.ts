@@ -13,7 +13,7 @@ export const load = (async ({ locals }) => {
   const { user } = locals;
 
   if (!user) {
-    throw redirect(302, "/login");
+    throw redirect(302, "/admin/login");
   }
 
   const conditions = [eq(facturas.enviado, false), eq(facturas.cancelada, false)];
