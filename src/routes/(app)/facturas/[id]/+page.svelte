@@ -197,7 +197,7 @@
       <div class="pt-3 border-t border-gray-100">
         <div class="font-medium text-gray-900 mb-1">Yappy</div>
         <div class="text-gray-600">
-          Enviar pago a [Número de Yappy] con referencia "Factura #{data.invoice.id}"
+          Enviar pago a [Número de Yappy] con referencia "Factura #{data.invoice.id}". Adicionalmente, nos envia el comprobante por Whatsapp.
         </div>
       </div>
 

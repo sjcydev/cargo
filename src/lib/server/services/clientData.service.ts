@@ -229,8 +229,8 @@ class ClientDataService {
       pickedUpAt: tracking.retiradoAt,
       createdAt: tracking.createdAt,
       updatedAt: tracking.updatedAt,
-      facturaId: tracking.factura.facturaId,
-      invoiceDate: tracking.factura.fecha
+      facturaId: tracking.factura!.facturaId,
+      invoiceDate: tracking.factura!.fecha
     };
   }
 
@@ -261,9 +261,9 @@ class ClientDataService {
 
       return {
         id: factura.facturaId,
-        date: factura.fecha,
+        date: factura.createdAt!,
         total: Number(total.toFixed(2)),
-        paid: factura.metodoDePago !== 'no_pagado',
+        paid: factura.pagado!,
         paymentMethod: factura.metodoDePago,
         pickedUp: allPickedUp,
         packageCount: factura.trackings.length,

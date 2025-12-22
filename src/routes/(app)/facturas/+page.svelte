@@ -10,7 +10,7 @@
   }
 
   // Format date
-  function formatDate(dateStr: string): string {
+  function formatDate(dateStr: string | Date): string {
     const date = new Date(dateStr);
     return date.toLocaleDateString('es-PA', {
       year: 'numeric',
