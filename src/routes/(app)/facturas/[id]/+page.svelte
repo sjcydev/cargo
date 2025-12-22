@@ -1,8 +1,14 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
+  import { browser } from '$app/environment';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
+
+  function handleBack() {
+    if (browser) {
+      window.history.back();
+    }
+  }
 
   function getStatusBadge(paid: boolean) {
     return paid
@@ -38,13 +44,13 @@
 <!-- Header with Back Button -->
 <div class="mb-6">
   <button
-    onclick={() => goto('/invoices')}
+    onclick={handleBack}
     class="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
   >
     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
     </svg>
-    Volver a Facturas
+    Volver
   </button>
 
   <div class="flex items-start justify-between mb-2">
