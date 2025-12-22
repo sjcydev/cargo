@@ -51,54 +51,52 @@
 
 <!-- Summary Cards -->
 {#if data.summary}
-  <div class="grid grid-cols-2 gap-3 mb-8">
+  <div class="grid grid-cols-2 gap-4 mb-8">
     <!-- Total Packages -->
-    <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
-      <div class="flex items-center gap-2 mb-2">
-        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-          </svg>
-        </div>
-      </div>
-      <div class="text-3xl font-bold text-gray-900 mb-1">
-        {data.summary.totalPackages}
-      </div>
-      <div class="text-sm text-gray-500">
-        Total Paquetes
-      </div>
-    </div>
-
-    <!-- Picked Up -->
-    <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm">
-      <div class="flex items-center gap-2 mb-2">
-        <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
-          <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-      </div>
-      <div class="text-3xl font-bold text-gray-900 mb-1">
-        {data.summary.pickedUpPackages}
-      </div>
-      <div class="text-sm text-gray-500">
-        Retirados
-      </div>
-    </div>
-
-    <!-- Available for Pickup -->
-    <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl p-4 shadow-sm text-white col-span-2">
-      <div class="flex items-center justify-between mb-2">
-        <div class="text-sm font-medium opacity-90">Listos para Retirar</div>
+    <div class="bg-gradient-to-br from-slate-700 to-slate-800 rounded-3xl p-5 shadow-lg text-white">
+      <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mb-3">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
         </svg>
       </div>
       <div class="text-4xl font-bold mb-1">
+        {data.summary.totalPackages}
+      </div>
+      <div class="text-sm opacity-90">
+        Total Paquetes
+      </div>
+    </div>
+
+    <!-- Picked Up -->
+    <div class="bg-gradient-to-br from-slate-600 to-slate-700 rounded-3xl p-5 shadow-lg text-white">
+      <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center mb-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <div class="text-4xl font-bold mb-1">
+        {data.summary.pickedUpPackages}
+      </div>
+      <div class="text-sm opacity-90">
+        Retirados
+      </div>
+    </div>
+
+    <!-- Available for Pickup -->
+    <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-6 shadow-lg text-white col-span-2 border border-gray-700">
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-base font-semibold">Listos para Retirar</div>
+        <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </div>
+      </div>
+      <div class="text-5xl font-bold mb-1">
         {data.summary.availablePackages}
       </div>
       <div class="text-sm opacity-90">
-        {data.summary.availablePackages === 1 ? 'Paquete' : 'Paquetes'}
+        {data.summary.availablePackages === 1 ? 'Paquete Disponible' : 'Paquetes Disponibles'}
       </div>
     </div>
 
