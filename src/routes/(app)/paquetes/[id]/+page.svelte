@@ -33,33 +33,77 @@
   }
 
   // Timeline steps based on package status
-  // Since there's no "estado" field in the schema, we simplify to 3 steps:
-  // 1. Recibido (always completed - createdAt)
-  // 2. En Bodega (completed but not picked up)
-  // 3. Retirado (completed when retirado = true)
+  // If linked to an invoice (facturaId exists), show full 5-step timeline:
+  // 1. En Miami (always completed if has facturaId)
+  // 2. En Tránsito (always completed if has facturaId)
+  // 3. Paquete Recibido (always completed - createdAt)
+  // 4. En Bodega Panamá (always completed)
+  // 5. Listo para Retirar / Retirado (based on pickedUp status)
   let timeline = $derived.by(() => {
     const pkg = data.package;
-    return [
-      {
-        label: 'Paquete Recibido',
-        date: pkg.createdAt,
-        completed: true,
-        icon: 'check'
-      },
-      {
-        label: 'En Bodega Panamá',
-        date: !pkg.pickedUp ? pkg.updatedAt : pkg.createdAt,
-        completed: true,
-        active: !pkg.pickedUp,
-        icon: 'warehouse'
-      },
-      {
-        label: 'Retirado',
-        date: pkg.pickedUp ? pkg.pickedUpAt : null,
-        completed: pkg.pickedUp,
-        icon: 'check-circle'
-      }
-    ];
+    const hasInvoice = !!pkg.facturaId;
+
+    if (hasInvoice) {
+      // Full 5-step timeline for packages with invoice
+      return [
+        {
+          label: 'En Miami',
+          date: null,
+          completed: true,
+          icon: 'check'
+        },
+        {
+          label: 'En Tránsito',
+          date: null,
+          completed: true,
+          icon: 'check'
+        },
+        {
+          label: 'Paquete Recibido',
+          date: pkg.createdAt,
+          completed: true,
+          icon: 'check'
+        },
+        {
+          label: 'En Bodega Panamá',
+          date: pkg.updatedAt,
+          completed: true,
+          active: !pkg.pickedUp,
+          icon: 'warehouse'
+        },
+        {
+          label: pkg.pickedUp ? 'Retirado' : 'Listo para Retirar',
+          date: pkg.pickedUp ? pkg.pickedUpAt : null,
+          completed: pkg.pickedUp,
+          active: !pkg.pickedUp,
+          icon: 'check-circle'
+        }
+      ];
+    } else {
+      // Simplified 3-step timeline for packages without invoice
+      return [
+        {
+          label: 'Paquete Recibido',
+          date: pkg.createdAt,
+          completed: true,
+          icon: 'check'
+        },
+        {
+          label: 'En Bodega Panamá',
+          date: !pkg.pickedUp ? pkg.updatedAt : pkg.createdAt,
+          completed: true,
+          active: !pkg.pickedUp,
+          icon: 'warehouse'
+        },
+        {
+          label: pkg.pickedUp ? 'Retirado' : 'Listo para Retirar',
+          date: pkg.pickedUp ? pkg.pickedUpAt : null,
+          completed: pkg.pickedUp,
+          active: !pkg.pickedUp,
+          icon: 'check-circle'
+        }
+      ];
+    }
   });
 </script>
 
@@ -70,7 +114,7 @@
 <!-- Header with Back Button -->
 <div class="mb-6">
   <button
-    onclick={() => goto('/packages')}
+    onclick={() => goto('/paquetes')}
     class="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
   >
     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,10 +180,6 @@
             <div class="text-xs text-gray-400">
               {formatRelativeTime(step.date)}
             </div>
-          {:else if step.active}
-            <div class="text-sm text-blue-600 mt-1">En Progreso</div>
-          {:else}
-            <div class="text-sm text-gray-400 mt-1">Pendiente</div>
           {/if}
         </div>
       </div>
@@ -185,7 +225,7 @@
 <!-- Invoice Link -->
 {#if data.package.facturaId}
   <a
-    href="/invoices/{data.package.facturaId}"
+    href="/facturas/{data.package.facturaId}"
     class="block bg-white border border-gray-100 rounded-2xl p-4 shadow-sm
            hover:shadow-md transition-all"
   >

@@ -19,9 +19,9 @@
 
   // Navigation items
   const navItems = [
-    { label: 'Home', path: '/', icon: 'home' },
-    { label: 'Packages', path: '/packages', icon: 'package' },
-    { label: 'Invoices', path: '/invoices', icon: 'receipt' },
+    { label: 'Inicio', path: '/', icon: 'home' },
+    { label: 'Paquetes', path: '/paquetes', icon: 'package' },
+    { label: 'Facturas', path: '/facturas', icon: 'receipt' },
   ];
 
   // Reactive state
@@ -29,9 +29,9 @@
   let isAuthenticated = $derived(!!data.client);
   let pageTitle = $derived.by(() => {
     if ($page.url.pathname === '/') return 'My Cargo';
-    if ($page.url.pathname === '/packages') return 'Packages';
-    if ($page.url.pathname === '/invoices') return 'Invoices';
-    if ($page.url.pathname === '/profile') return 'Profile';
+    if ($page.url.pathname === '/paquetes') return 'Paquetes';
+    if ($page.url.pathname === '/facturas') return 'Facturas';
+    if ($page.url.pathname === '/perfil') return 'Perfil';
     return 'Cargo Portal';
   });
 </script>
@@ -53,7 +53,7 @@
                  flex items-center justify-center
                  hover:opacity-90 transition-opacity"
         >
-          {getInitials(data.client.nombre, data.client.apellido)}
+          {getInitials(data.client!.nombre, data.client!.apellido)}
         </button>
       </div>
     </header>

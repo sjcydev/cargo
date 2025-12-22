@@ -17,7 +17,7 @@
 
   // Tab navigation
   function setFilter(filter: 'active' | 'history') {
-    goto(`/packages?filter=${filter}`);
+    goto(`/paquetes?filter=${filter}`);
   }
 
   // Truncate tracking number for mobile
@@ -84,7 +84,7 @@
   <div class="space-y-3">
     {#each filteredPackages as pkg}
       <a
-        href="/packages/{pkg.id}"
+        href="/paquetes/{pkg.id}"
         class="block bg-white border border-gray-100 rounded-2xl p-4 shadow-sm
                hover:shadow-md transition-all"
       >

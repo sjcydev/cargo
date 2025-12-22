@@ -302,8 +302,8 @@ class ClientDataService {
 
     return {
       id: factura.facturaId,
-      date: factura.fecha,
-      paid: factura.metodoDePago !== 'no_pagado',
+      date: factura.createdAt!,
+      paid: factura.pagado!,
       paymentMethod: factura.metodoDePago,
       paidAt: factura.pagadoAt,
       total: Number(total.toFixed(2)),
