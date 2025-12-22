@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { navigating } from '$app/stores';
+  import InvoiceListSkeleton from '$lib/components/skeletons/InvoiceListSkeleton.svelte';
+  import { fade } from 'svelte/transition';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
@@ -24,6 +27,10 @@
   <title>Facturas - Portal de Carga</title>
 </svelte:head>
 
+{#if $navigating}
+  <InvoiceListSkeleton />
+{:else}
+<div in:fade={{ duration: 200 }}>
 <!-- Outstanding Balance Banner -->
 {#if data.totalOutstanding > 0}
   <div class="bg-gradient-to-r from-red-500 to-rose-600 rounded-2xl p-6 mb-6 text-white shadow-lg">
@@ -115,4 +122,6 @@
     <h3 class="text-lg font-medium text-gray-900 mb-1">No tienes facturas todavía</h3>
     <p class="text-gray-500">Tus facturas aparecerán aquí</p>
   </div>
+{/if}
+</div>
 {/if}

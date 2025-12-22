@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { navigating } from '$app/stores';
+  import DashboardSkeleton from '$lib/components/skeletons/DashboardSkeleton.svelte';
+  import { fade } from 'svelte/transition';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
@@ -32,6 +35,10 @@
   <title>Dashboard - Portal de Carga</title>
 </svelte:head>
 
+{#if $navigating}
+  <DashboardSkeleton />
+{:else}
+<div in:fade={{ duration: 200 }}>
 <!-- Greeting Section -->
 <div class="mb-6">
   <h2 class="text-2xl font-bold text-gray-900 mb-1">
@@ -194,4 +201,6 @@
     <p class="text-gray-500 mb-2">No tienes paquetes todavía</p>
     <p class="text-sm text-gray-400">Tus paquetes aparecerán aquí cuando lleguen</p>
   </div>
+{/if}
+</div>
 {/if}

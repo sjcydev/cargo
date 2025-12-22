@@ -208,7 +208,7 @@ class ClientDataService {
       }
     });
 
-    if (!tracking) {
+    if (!tracking || !tracking.factura) {
       logger.warn('Package not found', { packageId });
       return null;
     }

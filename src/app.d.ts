@@ -17,7 +17,7 @@ declare global {
             nombre: string;
             apellido: string;
             correo: string;
-            casillero: string;
+            casillero: number | null;
             codificacion: string | null;
             tipo: 'REGULAR' | 'ESPECIAL' | 'CORPORATIVO';
             sucursalId: number;

@@ -83,19 +83,19 @@
     }
   });
 
-  export const globalFilterFn = (row, columnId, filterValue) => {
+  export const globalFilterFn = (row: any, columnId: string, filterValue: any, addMeta: (meta: any) => void) => {
   const column = row
     .getAllCells()
-    .find((cell) => cell.column.id === columnId)?.column;
+    .find((cell: any) => cell.column.id === columnId)?.column;
 
   const customFn = column?.columnDef.meta?.globalFilterFn;
 
   if (typeof customFn === 'function') {
-    return customFn(row, columnId, filterValue);
+    return customFn(row, columnId, filterValue, addMeta);
   }
 
-  // fallback to built-in equalsString
-  return filterFns.equalsString(row, columnId, filterValue);
+  // fallback to built-in includesString
+  return filterFns.includesString(row, columnId, filterValue, addMeta);
 };
 
   const table = createSvelteTable({
@@ -177,7 +177,7 @@
   });
   $effect(() => {
     const search = page.url.searchParams.get("search");
-    table.setGlobalFilter(page.state.search ?? search);
+    table.setGlobalFilter(search);
   });
 
   const handleRowClick = (row: any, event: MouseEvent) => {

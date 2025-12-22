@@ -52,7 +52,7 @@
 
 {#if isAuthenticated}
   <!-- Authenticated Layout -->
-  <div class="min-h-screen bg-gray-50 pb-20 md:pb-0">
+  <div class="min-h-screen bg-gray-50 pb-24 md:pb-0">
     <!-- Top Bar (Mobile & Desktop) -->
     <header class="sticky top-0 bg-white border-b border-gray-100 z-10">
       <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -65,7 +65,7 @@
           <button
             onclick={toggleDropdown}
             class="w-10 h-10 rounded-full bg-gray-900 text-white font-medium
-                   flex items-center justify-center
+                   flex items-center justify-center touch-target
                    hover:opacity-90 transition-opacity"
           >
             {getInitials(data.client!.nombre, data.client!.apellido)}
@@ -114,12 +114,12 @@
     </main>
 
     <!-- Bottom Navigation (Mobile Only) -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-20">
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 md:hidden z-20 safe-bottom">
       <div class="grid grid-cols-3 gap-1 p-2">
         {#each navItems as item}
           <a
             href={item.path}
-            class="flex flex-col items-center gap-1 py-2 px-3 rounded-lg transition-colors
+            class="flex flex-col items-center gap-1 py-3 px-3 rounded-lg transition-colors touch-target
                    {isActive(item.path)
                      ? 'bg-gray-900 text-white'
                      : 'text-gray-600 hover:bg-gray-50'}"

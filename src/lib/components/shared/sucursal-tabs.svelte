@@ -47,9 +47,11 @@
         <Tabs.Trigger value="todos">Todos</Tabs.Trigger>
       {/if}
       {#each sucursales as sucursal}
-        <Tabs.Trigger value={sucursal.sucursal}>
-          {sucursal.sucursal}
-        </Tabs.Trigger>
+        {#if sucursal.sucursal}
+          <Tabs.Trigger value={sucursal.sucursal}>
+            {sucursal.sucursal}
+          </Tabs.Trigger>
+        {/if}
       {/each}
     </Tabs.List>
   {/if}
@@ -61,8 +63,10 @@
   {/if}
 
   {#each sucursales as sucursal}
-    <Tabs.Content value={sucursal.sucursal}>
-      {@render content({ data: getFilteredData(sucursal), sucursal })}
-    </Tabs.Content>
+    {#if sucursal.sucursal}
+      <Tabs.Content value={sucursal.sucursal}>
+        {@render content({ data: getFilteredData(sucursal as Sucursales), sucursal: sucursal as import('$lib/server/db').Sucursales })}
+      </Tabs.Content>
+    {/if}
   {/each}
 </Tabs.Root>

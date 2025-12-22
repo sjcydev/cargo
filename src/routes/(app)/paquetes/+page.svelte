@@ -1,5 +1,8 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
+  import { navigating } from '$app/stores';
+  import PackageListSkeleton from '$lib/components/skeletons/PackageListSkeleton.svelte';
+  import { fade } from 'svelte/transition';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
@@ -31,6 +34,10 @@
   <title>Mis Paquetes - Portal de Carga</title>
 </svelte:head>
 
+{#if $navigating}
+  <PackageListSkeleton />
+{:else}
+<div in:fade={{ duration: 200 }}>
 <!-- Search Bar -->
 <div class="mb-4">
   <div class="relative">
@@ -44,7 +51,7 @@
       bind:value={searchQuery}
       placeholder="Buscar por número de tracking"
       class="w-full pl-12 pr-4 py-3 rounded-xl bg-white border border-gray-200
-             text-gray-900 placeholder-gray-400
+             text-gray-900 placeholder-gray-400 text-base
              focus:ring-2 focus:ring-blue-500 focus:border-transparent
              transition-all outline-none"
     />
@@ -173,4 +180,6 @@
           : 'Tu historial de paquetes aparecerá aquí'}
     </p>
   </div>
+{/if}
+</div>
 {/if}
