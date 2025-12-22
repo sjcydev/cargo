@@ -3,18 +3,30 @@
 <script lang="ts">
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
+  import { enhance } from '$app/forms';
   import type { LayoutData } from './$types';
 
   let { data, children }: { data: LayoutData; children: any } = $props();
+
+  // Dropdown state
+  let isDropdownOpen = $state(false);
 
   // Get client initials for avatar
   function getInitials(name: string, apellido: string): string {
     return `${name.charAt(0)}${apellido.charAt(0)}`.toUpperCase();
   }
 
-  async function handleLogout() {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    goto('/login');
+  // Toggle dropdown
+  function toggleDropdown() {
+    isDropdownOpen = !isDropdownOpen;
+  }
+
+  // Close dropdown when clicking outside
+  function handleClickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown-container')) {
+      isDropdownOpen = false;
+    }
   }
 
   // Navigation items
@@ -36,6 +48,8 @@
   });
 </script>
 
+<svelte:window onclick={handleClickOutside} />
+
 {#if isAuthenticated}
   <!-- Authenticated Layout -->
   <div class="min-h-screen bg-gray-50 pb-20 md:pb-0">
@@ -46,15 +60,51 @@
           {pageTitle}
         </h1>
 
-        <!-- Profile Avatar -->
-        <button
-          onclick={() => goto('/profile')}
-          class="w-10 h-10 rounded-full bg-gray-900 text-white font-medium
-                 flex items-center justify-center
-                 hover:opacity-90 transition-opacity"
-        >
-          {getInitials(data.client!.nombre, data.client!.apellido)}
-        </button>
+        <!-- Profile Avatar Dropdown -->
+        <div class="relative dropdown-container">
+          <button
+            onclick={toggleDropdown}
+            class="w-10 h-10 rounded-full bg-gray-900 text-white font-medium
+                   flex items-center justify-center
+                   hover:opacity-90 transition-opacity"
+          >
+            {getInitials(data.client!.nombre, data.client!.apellido)}
+          </button>
+
+          {#if isDropdownOpen}
+            <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+              <!-- Profile Link -->
+              <a
+                href="/perfil"
+                onclick={() => isDropdownOpen = false}
+                class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Perfil
+              </a>
+
+              <!-- Divider -->
+              <div class="border-t border-gray-100 my-1"></div>
+
+              <!-- Logout Form -->
+              <form method="POST" action="/logout" use:enhance>
+                <button
+                  type="submit"
+                  class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors text-left"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Cerrar Sesión
+                </button>
+              </form>
+            </div>
+          {/if}
+        </div>
       </div>
     </header>
 
