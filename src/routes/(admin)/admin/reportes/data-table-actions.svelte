@@ -38,7 +38,7 @@
   </DropdownMenu.Trigger>
   <DropdownMenu.Content>
     <DropdownMenu.Item>
-      <a href="/reportes/{reporte.reporteId}" class="flex gap-2">
+      <a href="/admin/reportes/{reporte.reporteId}" class="flex gap-2">
         <FileText /> Ver Detalles
       </a>
     </DropdownMenu.Item>

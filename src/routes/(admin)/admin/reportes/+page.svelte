@@ -63,7 +63,7 @@
 
   function handleRowClick(row: any) {
     if (row.reporteId) {
-      goto(`/reportes/${row.reporteId}`);
+      goto(`/admin/reportes/${row.reporteId}`);
     }
   }
 

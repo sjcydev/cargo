@@ -6,6 +6,7 @@
   import { enhance } from "$app/forms";
   import DeleteDialog from "$lib/components/delete-dialog.svelte";
   import { goto, invalidate, invalidateAll } from "$app/navigation";
+  import { page } from "$app/stores";
 
   let {
     id,
@@ -13,6 +14,9 @@
   }: { id: string; rol: "ADMIN" | "EMPLEADO" | "SECRETARIA" | undefined } =
     $props();
   let showCancelDialog = $state(false);
+
+  // Determine if we're in admin context
+  let isAdmin = $derived($page.url.pathname.startsWith('/admin'));
 </script>
 
 <DropdownMenu.Root>
@@ -31,7 +35,7 @@
   </DropdownMenu.Trigger>
   <DropdownMenu.Content>
     <DropdownMenu.Item>
-      <a href="/facturas/{id}" class="flex gap-2">
+      <a href="{isAdmin ? '/admin' : ''}/facturas/{id}" class="flex gap-2">
         <Receipt /> Ver Factura
       </a>
     </DropdownMenu.Item>

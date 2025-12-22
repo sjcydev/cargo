@@ -35,13 +35,13 @@
   </DropdownMenu.Trigger>
   <DropdownMenu.Content>
     <DropdownMenu.Item>
-      <a href="/facturas/facturar/?search={id}" class="flex gap-2">
+      <a href="/admin/facturas/facturar/?search={id}" class="flex gap-2">
         <Receipt /> Facturar
       </a>
     </DropdownMenu.Item>
     <DropdownMenu.Separator />
     <DropdownMenu.Item>
-      <a href="/clientes/{id}" class="flex gap-2">
+      <a href="/admin/clientes/{id}" class="flex gap-2">
         <UserPen /> Perfil
       </a>
     </DropdownMenu.Item>

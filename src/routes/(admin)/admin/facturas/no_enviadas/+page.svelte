@@ -75,7 +75,7 @@
     >
       Enviar Facturas ({selectedFacturas.length})
     </Button>
-    <Button href="/facturas/facturar">Facturar</Button>
+    <Button href="/admin/facturas/facturar">Facturar</Button>
   </div>
 {/snippet}
 

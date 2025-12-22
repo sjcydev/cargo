@@ -24,7 +24,7 @@
   </DropdownMenu.Trigger>
   <DropdownMenu.Content>
     <DropdownMenu.Item>
-      <a href="/facturas/{id}" class="flex gap-2">
+      <a href="/admin/facturas/{id}" class="flex gap-2">
         <Receipt /> Ver Factura
       </a>
     </DropdownMenu.Item>

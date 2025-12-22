@@ -10,7 +10,7 @@
 
   function handleRowClick(row: any) {
     if (row.facturaId) {
-      goto(`/facturas/${row.facturaId}`);
+      goto(`/admin/facturas/${row.facturaId}`);
     }
   }
 </script>

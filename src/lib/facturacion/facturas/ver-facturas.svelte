@@ -3,6 +3,7 @@
   import type { Snippet } from "svelte";
   import type { FacturasWithCliente, Facturas } from "$lib/server/db/schema";
   import { goto } from "$app/navigation";
+  import { page } from "$app/stores";
 
   let {
     columns,
@@ -20,9 +21,13 @@
     loading?: boolean;
   } = $props();
 
+  // Determine if we're in admin context
+  let isAdmin = $derived($page.url.pathname.startsWith('/admin'));
+
   function handleRowClick(row: any) {
     if (row.facturaId) {
-      goto(`/facturas/${row.facturaId}`);
+      const prefix = isAdmin ? '/admin' : '';
+      goto(`${prefix}/facturas/${row.facturaId}`);
     }
   }
 </script>

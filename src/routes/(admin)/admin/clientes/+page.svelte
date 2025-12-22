@@ -36,7 +36,7 @@
 
   function handleRowClick(row: any) {
     if (row.casillero) {
-      goto(`/clientes/${row.casillero}`);
+      goto(`/admin/clientes/${row.casillero}`);
     }
   }
 </script>
@@ -46,7 +46,7 @@
 </svelte:head>
 
 {#snippet actions()}
-  <Button href="/clientes/registrar">
+  <Button href="/admin/clientes/registrar">
     <UserRoundPlus class="w-4 h-4" /> Crear cliente
   </Button>
 {/snippet}

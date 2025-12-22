@@ -23,9 +23,9 @@
 
   function procesarMultiples() {
     if (selectedFacturas.length === 1) {
-      goto(`/facturas/${selectedFacturas[0]}`);
+      goto(`/admin/facturas/${selectedFacturas[0]}`);
     } else if (selectedFacturas.length > 1) {
-      goto(`/facturas/multiples?facturas=${selectedFacturas.join(",")}`);
+      goto(`/admin/facturas/multiples?facturas=${selectedFacturas.join(",")}`);
     }
   }
 
@@ -58,7 +58,7 @@
       ? "s"
       : ""}
   </Button>
-  <Button href="/facturas/facturar">
+  <Button href="/admin/facturas/facturar">
     <ReceiptText class="w-4 h-4" /> Facturar
   </Button>
 {/snippet}
