@@ -59,17 +59,10 @@
           icon: 'check'
         },
         {
-          label: 'Paquete Recibido',
+          label: 'En Bodega Panamá',
           date: pkg.createdAt,
           completed: true,
           icon: 'check'
-        },
-        {
-          label: 'En Bodega Panamá',
-          date: pkg.updatedAt,
-          completed: true,
-          active: !pkg.pickedUp,
-          icon: 'warehouse'
         },
         {
           label: pkg.pickedUp ? 'Retirado' : 'Listo para Retirar',
