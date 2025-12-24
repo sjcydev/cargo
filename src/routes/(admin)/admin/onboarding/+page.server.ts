@@ -27,6 +27,19 @@ function capitalizeWords(text: string): string {
     .join('');
 }
 
+function formatPhoneNumber(phone: string): string {
+  // Split by first space to separate country code from phone number
+  const parts = phone.trim().split(/\s+/);
+  if (parts.length >= 2 && parts[0].startsWith("+")) {
+    // Keep country code, remove all spaces/hyphens from phone number part
+    const countryCode = parts[0];
+    const phoneNum = parts.slice(1).join("").replace(/[-\s]/g, "");
+    return `${countryCode} ${phoneNum}`;
+  }
+  // Fallback: just remove hyphens but keep spaces
+  return phone.replace(/-/g, "");
+}
+
 export const load: PageServerLoad = async ({ locals }) => {
   // Only need to check if any records exist
   const sucursalesData = await db
@@ -123,7 +136,7 @@ export const actions: Actions = {
       .values({
         sucursal: capitaliseWord(sucursal),
         direccion: capitaliseWord(direccion),
-        telefono,
+        telefono: formatPhoneNumber(telefono),
         precio: Number(precio),
         codificacion,
         correo: correoSucursal,
@@ -143,7 +156,7 @@ export const actions: Actions = {
         city: city.toUpperCase(),
         country: country.toUpperCase(),
         state: state.toUpperCase(),
-        tel,
+        tel: formatPhoneNumber(tel),
       })
       .$returningId();
 

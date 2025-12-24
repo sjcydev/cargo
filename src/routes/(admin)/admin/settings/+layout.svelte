@@ -9,12 +9,12 @@
   let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
   const navbarItems = [
-    { href: "/settings/perfil", title: "Perfil", icon: User },
-    { href: "/settings/empresa", title: "Empresa", icon: Hotel },
-    { href: "/settings/sucursales", title: "Sucursales", icon: House },
-    { href: "/settings/direcciones", title: "Direcciones", icon: MapPinHouse },
-    { href: "/settings/usuarios", title: "Usuarios", icon: Users },
-    { href: "/settings/facturas", title: "Factura", icon: ScrollText },
+    { href: "/admin/settings/perfil", title: "Perfil", icon: User },
+    { href: "/admin/settings/empresa", title: "Empresa", icon: Hotel },
+    { href: "/admin/settings/sucursales", title: "Sucursales", icon: House },
+    { href: "/admin/settings/direcciones", title: "Direcciones", icon: MapPinHouse },
+    { href: "/admin/settings/usuarios", title: "Usuarios", icon: Users },
+    { href: "/admin/settings/facturas", title: "Factura", icon: ScrollText },
   ];
 </script>
 

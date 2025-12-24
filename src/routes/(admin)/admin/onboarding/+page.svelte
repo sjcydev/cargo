@@ -23,6 +23,7 @@
 
   import { FileDrop as Dropzone } from "svelte-droplet";
   import CountrySelector from "../settings/direcciones/country-selector.svelte";
+  import CountryCodeSelector from "$lib/components/country-code-selector.svelte";
 
   let {
     data,
@@ -38,6 +39,16 @@
     { schema: addressesSchema, title: "Dirección de Envío" },
     { schema: userSignUpSchema, title: "Información del Usuario" },
   ];
+
+  // Phone number state management
+  let countryCode = $state("+507"); // Default to Panama
+  let phoneNumber = $state("");
+
+  // Update formData.telefono when country code or phone number changes
+  // Add space between country code and phone number
+  $effect(() => {
+    $formData.telefono = countryCode + " " + phoneNumber;
+  });
 
   function handleCountryChange(callingCode: string) {
     $formData.tel = callingCode + " ";
@@ -210,11 +221,15 @@
             <Form.Control>
               {#snippet children({ props })}
                 <Form.Label>Teléfono</Form.Label>
-                <Input
-                  {...props}
-                  bind:value={$formData.telefono}
-                  placeholder="+1234567890"
-                />
+                <div class="flex gap-2">
+                  <CountryCodeSelector bind:value={countryCode} />
+                  <Input
+                    bind:value={phoneNumber}
+                    placeholder="6123-4567"
+                    class="flex-1"
+                  />
+                </div>
+                <input type="hidden" bind:value={$formData.telefono} />
               {/snippet}
             </Form.Control>
             <Form.FieldErrors />

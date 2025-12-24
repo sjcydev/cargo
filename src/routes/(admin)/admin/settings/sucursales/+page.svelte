@@ -42,7 +42,7 @@
   let open = $state(false);
 
   function handleRowClick(row: Sucursales) {
-    goto(`/settings/sucursales/${row.sucursalId}`);
+    goto(`/admin/settings/sucursales/${row.sucursalId}`);
   }
 </script>
 
