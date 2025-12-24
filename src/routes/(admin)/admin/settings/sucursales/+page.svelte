@@ -15,6 +15,7 @@
   import { superForm } from "sveltekit-superforms/client";
   import { zodClient } from "sveltekit-superforms/adapters";
   import type { Sucursales } from "$lib/server/db/schema";
+  import CountryCodeSelector from "$lib/components/country-code-selector.svelte";
 
   let {
     data,
@@ -40,6 +41,16 @@
   const { form: formData, enhance, errors, submitting } = form;
 
   let open = $state(false);
+
+  // Phone number state management
+  let countryCode = $state("+507"); // Default to Panama
+  let phoneNumber = $state("");
+
+  // Update formData.telefono when country code or phone number changes
+  // Add space between country code and phone number
+  $effect(() => {
+    $formData.telefono = countryCode + " " + phoneNumber;
+  });
 
   function handleRowClick(row: Sucursales) {
     goto(`/admin/settings/sucursales/${row.sucursalId}`);
@@ -107,11 +118,15 @@
         <Form.Control>
           {#snippet children({ props })}
             <Form.Label>Teléfono</Form.Label>
-            <Input
-              {...props}
-              bind:value={$formData.telefono}
-              placeholder="+1234567890"
-            />
+            <div class="flex gap-2">
+              <CountryCodeSelector bind:value={countryCode} />
+              <Input
+                bind:value={phoneNumber}
+                placeholder="6123-4567"
+                class="flex-1"
+              />
+            </div>
+            <input type="hidden" bind:value={$formData.telefono} />
           {/snippet}
         </Form.Control>
         <Form.FieldErrors />

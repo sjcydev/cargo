@@ -5,6 +5,13 @@ import { companies, sucursales } from '$lib/server/db/schema';
 import { getFriendlyUrl } from '$lib/server/s3';
 import { eq } from 'drizzle-orm';
 
+function formatWhatsAppNumber(phone: string | null): string {
+  if (!phone) return '';
+
+  // Remove all spaces, hyphens, and non-digit characters except the leading +
+  return phone.replace(/(?!^\+)\D/g, '');
+}
+
 export const load: LayoutServerLoad = async ({ locals, url }) => {
   // Public routes that don't require auth
   const publicPaths = ['/login', '/auth/verify'];
@@ -30,7 +37,7 @@ export const load: LayoutServerLoad = async ({ locals, url }) => {
 
     const logo = companyResult[0]?.logo ? getFriendlyUrl(companyResult[0].logo) : null;
     const companyName = companyResult[0]?.company || 'Cargo Portal';
-    const whatsappNumber = sucursalResult[0]?.telefono || '';
+    const whatsappNumber = formatWhatsAppNumber(sucursalResult[0]?.telefono || '');
 
     // Return client data to all authenticated pages
     return {
