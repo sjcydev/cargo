@@ -44,13 +44,30 @@
   <h2 class="text-2xl font-bold text-gray-900 mb-1">
     {getGreeting()}, {data.client.nombre}
   </h2>
-  <p class="text-gray-500">
-    Casillero #{data.client.casillero}
-  </p>
 </div>
 
 <!-- Summary Cards -->
 {#if data.summary}
+  <!-- Casillero Card - Prominent -->
+  <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-5 shadow-lg text-white mb-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="text-sm opacity-90 mb-1">Tu Casillero</div>
+        <div class="text-3xl font-bold font-mono tracking-tight">
+          {data.sucursalCode}{data.client.casillero}
+        </div>
+      </div>
+      <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+        </svg>
+      </div>
+    </div>
+    <div class="text-xs opacity-75 mt-2">
+      Usa este número para todas tus compras en línea
+    </div>
+  </div>
+
   <div class="space-y-4 mb-8">
     <!-- Available for Pickup - Primary Card -->
     <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-6 shadow-lg text-white border border-gray-700">

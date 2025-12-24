@@ -19,32 +19,17 @@
   <title>Perfil - Portal de Carga</title>
 </svelte:head>
 
-<!-- Header -->
-<div class="mb-6">
-  <button
-    onclick={handleBack}
-    class="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4 transition-colors"
-  >
-    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-    </svg>
-    Volver
-  </button>
-
-  <h1 class="text-2xl font-bold text-gray-900">Perfil</h1>
-</div>
-
 <!-- Profile Avatar -->
 <div class="flex justify-center mb-6">
-  <div class="w-24 h-24 rounded-full bg-gray-900 text-white text-3xl font-medium
-              flex items-center justify-center shadow-lg">
+  <div class="w-28 h-28 rounded-full bg-gradient-to-br from-gray-900 to-gray-700 text-white text-4xl font-bold
+              flex items-center justify-center shadow-xl border-4 border-white">
     {getInitials(data.client.nombre, data.client.apellido)}
   </div>
 </div>
 
 <!-- Client Information -->
-<div class="bg-white border border-gray-100 rounded-2xl p-6 mb-6 shadow-sm">
-  <h2 class="text-lg font-semibold text-gray-900 mb-4">Información de Cuenta</h2>
+<div class="bg-white border border-gray-100 rounded-3xl p-6 mb-6 shadow-sm">
+  <h2 class="text-base font-semibold text-gray-900 mb-4">Información de Cuenta</h2>
 
   <div class="space-y-4">
     <div>
@@ -63,8 +48,8 @@
 
     <div>
       <div class="text-sm text-gray-500 mb-1">Número de Casillero</div>
-      <div class="font-medium text-gray-900 text-2xl font-mono">
-        #{data.client.casillero}
+      <div class="font-bold text-gray-900 text-3xl font-mono">
+        {data.sucursalCode}{data.client.casillero}
       </div>
     </div>
 
