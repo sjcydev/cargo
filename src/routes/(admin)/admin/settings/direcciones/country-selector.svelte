@@ -61,7 +61,7 @@
 </script>
 
 <Popover.Root bind:open>
-  <Popover.Trigger asChild>
+  <Popover.Trigger>
     {#snippet child({ props })}
       <Button
         {...props}
