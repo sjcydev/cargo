@@ -142,30 +142,40 @@ class ClientAuthService {
    * @returns Client data if valid, null otherwise
    */
   async validateClientSession(sessionId: string) {
-    const session = await db.query.clientDeviceSessions.findFirst({
-      where: eq(clientDeviceSessions.id, sessionId),
-      with: {
-        client: {
-          columns: {
-            id: true,
-            nombre: true,
-            apellido: true,
-            correo: true,
-            casillero: true,
-            codificacion: true,
-            tipo: true,
-            sucursalId: true
-          }
+    // Use manual join instead of 'with' to avoid LATERAL join (not supported in MariaDB)
+    const sessionResult = await db
+      .select({
+        id: clientDeviceSessions.id,
+        clientId: clientDeviceSessions.clientId,
+        userAgent: clientDeviceSessions.userAgent,
+        lastActive: clientDeviceSessions.lastActive,
+        expiresAt: clientDeviceSessions.expiresAt,
+        createdAt: clientDeviceSessions.createdAt,
+        // Client data
+        clientData: {
+          id: usuarios.id,
+          nombre: usuarios.nombre,
+          apellido: usuarios.apellido,
+          correo: usuarios.correo,
+          casillero: usuarios.casillero,
+          codificacion: usuarios.codificacion,
+          tipo: usuarios.tipo,
+          sucursalId: usuarios.sucursalId
         }
-      }
-    });
+      })
+      .from(clientDeviceSessions)
+      .leftJoin(usuarios, eq(clientDeviceSessions.clientId, usuarios.id))
+      .where(eq(clientDeviceSessions.id, sessionId))
+      .limit(1);
 
-    if (!session) {
+    if (!sessionResult.length || !sessionResult[0]) {
       return null;
     }
 
+    const result = sessionResult[0];
+
     // Check expiry
-    if (session.expiresAt < new Date()) {
+    if (result.expiresAt < new Date()) {
       logger.info('Client session expired', { sessionId });
       return null;
     }
@@ -176,8 +186,15 @@ class ClientAuthService {
       .where(eq(clientDeviceSessions.id, sessionId));
 
     return {
-      session,
-      client: session.client
+      session: {
+        id: result.id,
+        clientId: result.clientId,
+        userAgent: result.userAgent,
+        lastActive: result.lastActive,
+        expiresAt: result.expiresAt,
+        createdAt: result.createdAt
+      },
+      client: result.clientData
     };
   }
 
