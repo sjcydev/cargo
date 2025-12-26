@@ -46,6 +46,9 @@ export const apiHandler = <T = any>(
         path: event.url.pathname,
         method: event.request.method,
         userId: event.locals.user?.id,
+        adminUserId: event.locals.adminUser?.id,
+        hasUser: !!event.locals.user,
+        hasAdminUser: !!event.locals.adminUser,
         error: err instanceof Error ? err.message : String(err),
         stack: err instanceof Error ? err.stack : undefined,
       });
