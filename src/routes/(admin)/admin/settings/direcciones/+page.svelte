@@ -36,7 +36,7 @@
   let open = $state(false);
 
   function handleRowClick(row: Addresses) {
-    goto(`/settings/direcciones/${row.addressId}`);
+    goto(`/admin/settings/direcciones/${row.addressId}`);
   }
 
   function handleCountryChange(callingCode: string) {

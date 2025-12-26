@@ -13,7 +13,7 @@
   let open = $state(false);
 
   function handleRowClick(row: any) {
-    goto(`/settings/usuarios/${row.id}`);
+    goto(`/admin/settings/usuarios/${row.id}`);
   }
 </script>
 

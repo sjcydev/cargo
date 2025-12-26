@@ -39,6 +39,35 @@ export const blockedHandle: Handle = async ({ event, resolve }) => {
   return resolve(event);
 };
 
+/**
+ * Client portal access control
+ * Redirects to admin if clientsPortal is disabled
+ */
+const clientsPortalHandle: Handle = async ({ event, resolve }) => {
+  const path = event.url.pathname;
+
+  // Only check for non-admin routes (client portal routes)
+  const isAdminRoute = path.startsWith("/admin");
+  const isApiRoute = path.startsWith("/api");
+
+  if (isAdminRoute || isApiRoute) {
+    return resolve(event);
+  }
+
+  // Check if clients portal is enabled
+  const [companiesData] = await db
+    .select({ clientsPortal: companies.clientsPortal })
+    .from(companies)
+    .limit(1);
+
+  // If clients portal is disabled, redirect all client routes to admin
+  if (companiesData && companiesData.clientsPortal === false) {
+    throw redirect(302, "/admin");
+  }
+
+  return await resolve(event);
+};
+
 const onboardingHandle: Handle = async ({ event, resolve }) => {
   // Only need to check if any sucursales exist
   const sucursalesData = await db
@@ -187,9 +216,10 @@ const clientAuthHandle: Handle = async ({ event, resolve }) => {
 
 export const handle: Handle = sequence(
   blockedHandle,
-  suspendHandle, // Company suspension check (admin only)
+  suspendHandle, // Company suspension check
+  adminAuthHandle, // Admin session validation (only /admin/*) - MUST run early to populate locals.user
   onboardingHandle, // Onboarding check (admin only)
-  adminAuthHandle, // Admin session validation (only /admin/*)
-  clientAuthHandle, // Client session validation placeholder (only non-admin/non-api)
+  clientsPortalHandle, // Client portal access control
+  clientAuthHandle, // Client session validation (only non-admin/non-api)
   authHandle, // Route-level authorization
 );

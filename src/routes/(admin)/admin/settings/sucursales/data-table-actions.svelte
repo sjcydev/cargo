@@ -26,7 +26,7 @@
   </DropdownMenu.Trigger>
   <DropdownMenu.Content>
     <DropdownMenu.Item>
-      <a href="/settings/sucursales/{id}" class="flex gap-2">
+      <a href="/admin/settings/sucursales/{id}" class="flex gap-2">
         <Pen /> Editar
       </a>
     </DropdownMenu.Item>

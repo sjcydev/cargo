@@ -14,18 +14,19 @@ import {
 
 import { relations } from "drizzle-orm";
 import type { InferResultType } from "./extras";
+import { randomUUID } from "crypto";
 
 export const addresses = mysqlTable("addresses", {
   addressId: int("addressId").autoincrement().primaryKey(),
-  name: varchar("name", {length: 100}).notNull(),
+  name: varchar("name", { length: 100 }).notNull(),
   address1: varchar("address1", { length: 500 }).notNull(),
   address2: varchar("address2", { length: 500 }),
-  state: varchar("state", {length: 100}).notNull(),
+  state: varchar("state", { length: 100 }).notNull(),
   zipcode: varchar("zipcode", { length: 15 }).notNull(),
   city: varchar("city", { length: 100 }).notNull(),
   country: varchar("country", { length: 60 }).notNull(),
   tel: varchar("tel", { length: 100 }).notNull(),
-  suffix: varchar("suffix", { length: 50 })
+  suffix: varchar("suffix", { length: 50 }),
 });
 
 export const sucursalToAddress = mysqlTable(
@@ -60,6 +61,7 @@ export const companies = mysqlTable("companies", {
   }).notNull(),
   sucursalesLimit: int("sucursalesLimit").default(1),
   allowCorporativos: boolean("allowCorporativos").default(false),
+  clientsPortal: boolean("clientsPortal").default(false),
   suspended: boolean("suspended").default(false),
   createdAt: timestamp("createdAt").defaultNow(),
   updatedAt: timestamp("updatedAt").onUpdateNow(),
@@ -121,7 +123,7 @@ export const session = mysqlTable("session", {
     length: 255,
   })
     .notNull()
-    .references(() => users.id, { onDelete: "cascade"}),
+    .references(() => users.id, { onDelete: "cascade" }),
   expiresAt: datetime("expires_at").notNull(),
 });
 
@@ -141,7 +143,7 @@ export const clientAuthTokens = mysqlTable(
     tokenIdx: index("client_auth_tokens_token_idx").on(table.token),
     // Index for email lookup during token generation
     emailIdx: index("client_auth_tokens_email_idx").on(table.clientEmail),
-  })
+  }),
 );
 
 // Persistent client sessions for mobile devices
@@ -162,7 +164,7 @@ export const clientDeviceSessions = mysqlTable(
     clientIdx: index("client_sessions_client_idx").on(table.clientId),
     // Index for cleanup queries (find expired sessions)
     expiryIdx: index("client_sessions_expiry_idx").on(table.expiresAt),
-  })
+  }),
 );
 
 export const usuarios = mysqlTable(
@@ -295,7 +297,9 @@ export const trackings = mysqlTable(
   "trackings",
   {
     trackingId: int("trackingId").autoincrement().primaryKey(),
-    facturaId: int("facturaId").references(() => facturas.facturaId, { onDelete: "cascade"}),
+    facturaId: int("facturaId").references(() => facturas.facturaId, {
+      onDelete: "cascade",
+    }),
     numeroTracking: varchar("numeroTracking", { length: 255 }),
     peso: int("peso"),
     base: float("base"),
@@ -407,12 +411,15 @@ export const companiesRelations = relations(companies, ({ many }) => ({
   users: many(users),
 }));
 
-export const clientDeviceSessionsRelations = relations(clientDeviceSessions, ({ one }) => ({
-  client: one(usuarios, {
-    fields: [clientDeviceSessions.clientId],
-    references: [usuarios.id],
+export const clientDeviceSessionsRelations = relations(
+  clientDeviceSessions,
+  ({ one }) => ({
+    client: one(usuarios, {
+      fields: [clientDeviceSessions.clientId],
+      references: [usuarios.id],
+    }),
   }),
-}));
+);
 
 export type Companies = typeof companies.$inferSelect;
 export type NewCompanies = typeof companies.$inferInsert;

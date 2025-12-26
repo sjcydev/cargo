@@ -23,7 +23,7 @@
   </DropdownMenu.Trigger>
   <DropdownMenu.Content>
     <DropdownMenu.Item>
-      <a href="/settings/direcciones/{id}" class="flex gap-2">
+      <a href="/admin/settings/direcciones/{id}" class="flex gap-2">
         <Pen /> Editar
       </a>
     </DropdownMenu.Item>

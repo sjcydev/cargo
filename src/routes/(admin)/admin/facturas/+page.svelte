@@ -29,18 +29,25 @@
     }
   }
 
-  onMount(async () => {
-    loadingMore = true;
-    const newFacturas = await fetch("/api/facturas", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cursor: data.last }),
-    }).then((res) => {
-      loadingMore = false;
-      return res.json();
+    if (data.facturas.length >= 100) {
+    onMount(async () => {
+      loadingMore = true;
+
+      const newData = await fetch("/api/facturas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          last: data.last,
+          sucursalId: data.user?.rol !== "ADMIN" ? data.user?.sucursalId : null,
+        }),
+      }).then((res) => {
+        loadingMore = false;
+        return res.json();
+      });
+
+      facturas = [...facturas, ...newData.facturas];
     });
-    facturas = [...facturas, ...newFacturas.facturas];
-  });
+  }
 </script>
 
 <svelte:head>
