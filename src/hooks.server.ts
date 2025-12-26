@@ -109,12 +109,13 @@ const authHandle: Handle = async ({ event, resolve }) => {
   return await resolve(event);
 };
 
-// Admin session validation - only runs for /admin/* routes
+// Admin session validation - runs for /admin/* and /api/* routes
 const adminAuthHandle: Handle = async ({ event, resolve }) => {
   const isAdminRoute = event.url.pathname.startsWith("/admin");
+  const isApiRoute = event.url.pathname.startsWith("/api");
 
-  if (!isAdminRoute) {
-    // Skip admin auth for non-admin routes
+  if (!isAdminRoute && !isApiRoute) {
+    // Skip admin auth for non-admin, non-API routes
     return resolve(event);
   }
 
@@ -217,7 +218,7 @@ const clientAuthHandle: Handle = async ({ event, resolve }) => {
 export const handle: Handle = sequence(
   blockedHandle,
   suspendHandle, // Company suspension check
-  adminAuthHandle, // Admin session validation (only /admin/*) - MUST run early to populate locals.user
+  adminAuthHandle, // Admin session validation (/admin/* and /api/*) - MUST run early to populate locals.user
   onboardingHandle, // Onboarding check (admin only)
   clientsPortalHandle, // Client portal access control
   clientAuthHandle, // Client session validation (only non-admin/non-api)
