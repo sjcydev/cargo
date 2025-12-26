@@ -36,7 +36,7 @@ class ClientDataService {
     }
 
     // Get all trackings for these facturas
-    const [allTrackings, unpaidFacturas] = await Promise.all([
+    const [allTrackings, unpaidFacturas, unpaidTrackings] = await Promise.all([
       // Get all trackings
       db.query.trackings.findMany({
         where: and(
@@ -46,20 +46,32 @@ class ClientDataService {
         columns: { retirado: true }
       }),
 
-      // Get unpaid facturas with their trackings for balance calculation
+      // Get unpaid facturas
       db.query.facturas.findMany({
         where: and(
           eq(facturas.clienteId, clientId),
           eq(facturas.cancelada, false),
           eq(facturas.metodoDePago, 'no_pagado')
         ),
-        with: {
-          trackings: {
-            where: eq(trackings.cancelada, false),
-            columns: { precio: true }
-          }
-        }
-      })
+        columns: { facturaId: true }
+      }),
+
+      // Get trackings for unpaid facturas
+      db
+        .select({
+          facturaId: trackings.facturaId,
+          precio: trackings.precio
+        })
+        .from(trackings)
+        .innerJoin(facturas, eq(trackings.facturaId, facturas.facturaId))
+        .where(
+          and(
+            eq(facturas.clienteId, clientId),
+            eq(facturas.cancelada, false),
+            eq(facturas.metodoDePago, 'no_pagado'),
+            eq(trackings.cancelada, false)
+          )
+        )
     ]);
 
     // Count packages
@@ -67,11 +79,8 @@ class ClientDataService {
     const pickedUpPackages = allTrackings.filter(t => t.retirado).length;
     const availablePackages = totalPackages - pickedUpPackages;
 
-    // Calculate outstanding balance from unpaid facturas
-    const totalDue = unpaidFacturas.reduce((sum, factura) => {
-      const facturaTotal = factura.trackings.reduce((s, t) => s + Number(t.precio || 0), 0);
-      return sum + facturaTotal;
-    }, 0);
+    // Calculate outstanding balance from unpaid trackings
+    const totalDue = unpaidTrackings.reduce((sum, t) => sum + Number(t.precio || 0), 0);
 
     return {
       totalPackages,
@@ -198,23 +207,38 @@ class ClientDataService {
    * Get package detail by ID (with authorization check)
    */
   async getPackageDetail(packageId: number, clientId: number) {
-    // Get tracking with factura to verify ownership
-    const tracking = await db.query.trackings.findFirst({
-      where: eq(trackings.trackingId, packageId),
-      with: {
-        factura: {
-          columns: { clienteId: true, facturaId: true, fecha: true }
+    // Get tracking with factura to verify ownership - use manual join for MariaDB compatibility
+    const result = await db
+      .select({
+        trackingId: trackings.trackingId,
+        numeroTracking: trackings.numeroTracking,
+        peso: trackings.peso,
+        base: trackings.base,
+        precio: trackings.precio,
+        retirado: trackings.retirado,
+        retiradoAt: trackings.retiradoAt,
+        createdAt: trackings.createdAt,
+        updatedAt: trackings.updatedAt,
+        facturaData: {
+          clienteId: facturas.clienteId,
+          facturaId: facturas.facturaId,
+          fecha: facturas.fecha
         }
-      }
-    });
+      })
+      .from(trackings)
+      .innerJoin(facturas, eq(trackings.facturaId, facturas.facturaId))
+      .where(eq(trackings.trackingId, packageId))
+      .limit(1);
 
-    if (!tracking || !tracking.factura) {
+    if (!result.length || !result[0]) {
       logger.warn('Package not found', { packageId });
       return null;
     }
 
+    const tracking = result[0];
+
     // Authorization check
-    if (tracking.factura.clienteId !== clientId) {
+    if (tracking.facturaData.clienteId !== clientId) {
       logger.warn('Unauthorized package access attempt', { packageId, clientId });
       return null;
     }
@@ -229,8 +253,8 @@ class ClientDataService {
       pickedUpAt: tracking.retiradoAt,
       createdAt: tracking.createdAt,
       updatedAt: tracking.updatedAt,
-      facturaId: tracking.factura!.facturaId,
-      invoiceDate: tracking.factura!.fecha
+      facturaId: tracking.facturaData.facturaId,
+      invoiceDate: tracking.facturaData.fecha
     };
   }
 
@@ -238,26 +262,44 @@ class ClientDataService {
    * Get all invoices for a client
    */
   async getClientInvoices(clientId: number) {
-    const invoices = await db.query.facturas.findMany({
-      where: and(
-        eq(facturas.clienteId, clientId),
-        eq(facturas.cancelada, false)
-      ),
-      orderBy: [desc(facturas.createdAt)],
-      with: {
-        trackings: {
-          where: eq(trackings.cancelada, false),
-          columns: {
-            precio: true,
-            retirado: true
-          }
-        }
-      }
-    });
+    // Get invoices and trackings separately for MariaDB compatibility
+    const [invoices, allTrackings] = await Promise.all([
+      db.query.facturas.findMany({
+        where: and(
+          eq(facturas.clienteId, clientId),
+          eq(facturas.cancelada, false)
+        ),
+        orderBy: [desc(facturas.createdAt)]
+      }),
+
+      db
+        .select({
+          facturaId: trackings.facturaId,
+          precio: trackings.precio,
+          retirado: trackings.retirado
+        })
+        .from(trackings)
+        .innerJoin(facturas, eq(trackings.facturaId, facturas.facturaId))
+        .where(
+          and(
+            eq(facturas.clienteId, clientId),
+            eq(facturas.cancelada, false),
+            eq(trackings.cancelada, false)
+          )
+        )
+    ]);
+
+    // Group trackings by facturaId
+    const trackingsByFactura = allTrackings.reduce((acc, t) => {
+      if (!acc[t.facturaId]) acc[t.facturaId] = [];
+      acc[t.facturaId].push(t);
+      return acc;
+    }, {} as Record<number, typeof allTrackings>);
 
     return invoices.map(factura => {
-      const total = factura.trackings.reduce((sum, t) => sum + Number(t.precio || 0), 0);
-      const allPickedUp = factura.trackings.length > 0 && factura.trackings.every(t => t.retirado);
+      const facturaTrackings = trackingsByFactura[factura.facturaId] || [];
+      const total = facturaTrackings.reduce((sum, t) => sum + Number(t.precio || 0), 0);
+      const allPickedUp = facturaTrackings.length > 0 && facturaTrackings.every(t => t.retirado);
 
       return {
         id: factura.facturaId,
@@ -266,7 +308,7 @@ class ClientDataService {
         paid: factura.pagado!,
         paymentMethod: factura.metodoDePago,
         pickedUp: allPickedUp,
-        packageCount: factura.trackings.length,
+        packageCount: facturaTrackings.length,
         createdAt: factura.createdAt
       };
     });
@@ -276,39 +318,44 @@ class ClientDataService {
    * Get invoice detail by factura ID (with authorization check)
    */
   async getInvoiceDetail(facturaId: number, clientId: number) {
-    const factura = await db.query.facturas.findFirst({
-      where: and(
-        eq(facturas.facturaId, facturaId),
-        eq(facturas.cancelada, false)
-      ),
-      with: {
-        trackings: {
-          where: eq(trackings.cancelada, false)
-        }
-      }
-    });
+    // Get factura and trackings separately for MariaDB compatibility
+    const [facturaResult, facturaTrackings] = await Promise.all([
+      db.query.facturas.findFirst({
+        where: and(
+          eq(facturas.facturaId, facturaId),
+          eq(facturas.cancelada, false)
+        )
+      }),
 
-    if (!factura) {
+      db.query.trackings.findMany({
+        where: and(
+          eq(trackings.facturaId, facturaId),
+          eq(trackings.cancelada, false)
+        )
+      })
+    ]);
+
+    if (!facturaResult) {
       return null;
     }
 
     // Authorization check
-    if (factura.clienteId !== clientId) {
+    if (facturaResult.clienteId !== clientId) {
       logger.warn('Unauthorized invoice access attempt', { facturaId, clientId });
       return null;
     }
 
-    const total = factura.trackings.reduce((sum, t) => sum + Number(t.precio || 0), 0);
+    const total = facturaTrackings.reduce((sum, t) => sum + Number(t.precio || 0), 0);
 
     return {
-      id: factura.facturaId,
-      date: factura.createdAt!,
-      paid: factura.pagado!,
-      paymentMethod: factura.metodoDePago,
-      paidAt: factura.pagadoAt,
+      id: facturaResult.facturaId,
+      date: facturaResult.createdAt!,
+      paid: facturaResult.pagado!,
+      paymentMethod: facturaResult.metodoDePago,
+      paidAt: facturaResult.pagadoAt,
       total: Number(total.toFixed(2)),
-      allPickedUp: factura.retirados,
-      packages: factura.trackings.map(t => ({
+      allPickedUp: facturaResult.retirados,
+      packages: facturaTrackings.map(t => ({
         id: t.trackingId,
         tracking: t.numeroTracking || 'N/A',
         weight: t.peso,
