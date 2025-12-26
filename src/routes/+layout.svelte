@@ -7,6 +7,9 @@
   import SidebarPage from "$lib/components/sidebar-page.svelte";
   import { SyncLoader as Loader } from "svelte-loading-spinners";
   import { beforeNavigate, afterNavigate } from "$app/navigation";
+  import { onMount } from "svelte";
+  import { trackWebVitals } from "$lib/utils/performance";
+
   let protectedRoutes = new Set(["/admin/login", "/password_update", "/admin/onboarding"]);
 
   let { data, children } = $props();
@@ -17,6 +20,13 @@
   });
   afterNavigate(() => {
     loading = false;
+  });
+
+  // Track Core Web Vitals in development
+  onMount(() => {
+    if (import.meta.env.DEV) {
+      trackWebVitals();
+    }
   });
 </script>
 

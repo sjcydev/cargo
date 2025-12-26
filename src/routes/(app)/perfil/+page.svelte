@@ -155,7 +155,7 @@
           <div class="flex items-start gap-3 group">
             <div class="flex-1 min-w-0">
               <div class="text-xs text-gray-500 mb-1">Nombre</div>
-              <div class="text-sm text-gray-900 font-medium break-words">{nombre}</div>
+              <div class="text-sm text-gray-900 font-medium font-mono break-words">{nombre}</div>
             </div>
             <button
               onclick={() => copyToClipboard(nombre, 'Nombre')}
@@ -174,7 +174,7 @@
           <div class="flex items-start gap-3 group">
             <div class="flex-1 min-w-0">
               <div class="text-xs text-gray-500 mb-1">Dirección</div>
-              <div class="text-sm text-gray-900 font-medium break-words">{direccion}</div>
+              <div class="text-sm text-gray-900 font-medium font-mono break-words">{direccion}</div>
             </div>
             <button
               onclick={() => copyToClipboard(direccion, 'Dirección')}
@@ -193,7 +193,7 @@
           <div class="flex items-start gap-3 group">
             <div class="flex-1 min-w-0">
               <div class="text-xs text-gray-500 mb-1">Línea 2</div>
-              <div class="text-sm text-gray-900 font-medium break-words">{linea2}</div>
+              <div class="text-sm text-gray-900 font-medium font-mono break-words">{linea2}</div>
             </div>
             <button
               onclick={() => copyToClipboard(linea2, 'Línea 2')}
@@ -213,7 +213,7 @@
             <div class="flex items-start gap-2 group">
               <div class="flex-1 min-w-0">
                 <div class="text-xs text-gray-500 mb-1">Ciudad</div>
-                <div class="text-sm text-gray-900 font-medium break-words">{ciudad}</div>
+                <div class="text-sm text-gray-900 font-medium font-mono break-words">{ciudad}</div>
               </div>
               <button
                 onclick={() => copyToClipboard(ciudad, 'Ciudad')}
@@ -229,7 +229,7 @@
             <div class="flex items-start gap-2 group">
               <div class="flex-1 min-w-0">
                 <div class="text-xs text-gray-500 mb-1">Estado</div>
-                <div class="text-sm text-gray-900 font-medium break-words">{estado}</div>
+                <div class="text-sm text-gray-900 font-medium font-mono break-words">{estado}</div>
               </div>
               <button
                 onclick={() => copyToClipboard(estado, 'Estado')}
@@ -249,7 +249,7 @@
             <div class="flex items-start gap-2 group">
               <div class="flex-1 min-w-0">
                 <div class="text-xs text-gray-500 mb-1">Código Postal</div>
-                <div class="text-sm text-gray-900 font-medium break-words">{zipcode}</div>
+                <div class="text-sm text-gray-900 font-medium font-mono break-words">{zipcode}</div>
               </div>
               <button
                 onclick={() => copyToClipboard(zipcode, 'Código postal')}
@@ -265,7 +265,7 @@
             <div class="flex items-start gap-2 group">
               <div class="flex-1 min-w-0">
                 <div class="text-xs text-gray-500 mb-1">País</div>
-                <div class="text-sm text-gray-900 font-medium break-words">{pais}</div>
+                <div class="text-sm text-gray-900 font-medium font-mono break-words">{pais}</div>
               </div>
               <button
                 onclick={() => copyToClipboard(pais, 'País')}

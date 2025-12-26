@@ -7,7 +7,6 @@
   import DataTable from "$lib/components/data-table.svelte";
   import { columns } from "./columns";
   import Separator from "$lib/components/ui/separator/separator.svelte";
-  import { generateReport } from "$lib/facturacion/facturar/generatePDF";
   import { goto } from "$app/navigation";
   import DeleteDialog from "$lib/components/delete-dialog.svelte";
 
@@ -36,6 +35,8 @@
   }
 
   async function downloadReport() {
+    // Lazy load PDF generation library only when needed
+    const { generateReport } = await import("$lib/facturacion/facturar/generatePDF");
     await generateReport({
       reporte: data.report,
       facturas: data.facturas,

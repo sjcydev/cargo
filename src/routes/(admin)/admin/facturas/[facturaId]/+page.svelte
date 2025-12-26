@@ -13,7 +13,6 @@
   import { enhance } from "$app/forms";
   import { goto, invalidateAll } from "$app/navigation";
   import { toast } from "svelte-sonner";
-  import { generateInvoice } from "$lib/facturacion/facturar/generatePDF";
   import DeleteDialog from "$lib/components/delete-dialog.svelte";
   import DownloadDialog from "$lib/components/download-dialog.svelte";
 

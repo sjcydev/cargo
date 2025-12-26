@@ -46,6 +46,16 @@
 
 <svelte:head>
   <title>Iniciar Sesión - Portal de Carga</title>
+  <meta name="description" content="Accede a tu portal de cliente para rastrear paquetes, ver facturas y gestionar tus envíos internacionales." />
+  <meta name="robots" content="noindex, nofollow" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Iniciar Sesión - Portal de Carga" />
+  <meta property="og:description" content="Accede a tu portal de cliente para rastrear paquetes y ver facturas." />
+  <meta property="og:type" content="website" />
+
+  <!-- Language -->
+  <meta http-equiv="content-language" content="es" />
 </svelte:head>
 
 <div class="min-h-screen bg-white flex items-center justify-center p-4">
@@ -60,6 +70,8 @@
               <img
                 src={data.logoUrl}
                 alt={data.companyName}
+                width="200"
+                height="48"
                 class="h-12 max-w-[200px] object-contain"
               />
             {:else}
