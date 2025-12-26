@@ -39,6 +39,7 @@
     "formsnap": "^2.0.0-next.1",
     "mode-watcher": "^0.5.0",
     "svelte": "^5.0.0",
+    "svelte-check": "^4.3.5",
     "svelte-loading-spinners": "^0.3.6",
     "svelte-sonner": "^0.3.28",
     "sveltekit-superforms": "^2.20.1",
@@ -69,6 +70,7 @@
     "lucide-svelte": "^0.474.0",
     "luxon": "^3.5.0",
     "mysql2": "^3.11.0",
+    "resend": "^6.6.0",
     "svelte-droplet": "^1.1.0",
     "svelte-email-tailwind": "^2.0.1",
     "world-countries": "^5.1.0"

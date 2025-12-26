@@ -145,3 +145,34 @@
 ::-webkit-scrollbar {
   display: none;
 }
+
+/* iOS Safe Area Support */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+
+  .safe-top {
+    padding-top: calc(1rem + env(safe-area-inset-top));
+  }
+}
+
+/* Ensure minimum touch target size */
+@layer utilities {
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* Prevent layout shift on mobile */
+@layer base {
+  html {
+    overflow-x: hidden;
+  }
+
+  body {
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}

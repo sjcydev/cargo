@@ -295,6 +295,27 @@
       "when": 1766073589108,
       "tag": "0041_add_suffix_to_address",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "5",
+      "when": 1766336184316,
+      "tag": "0042_client-auth-tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "5",
+      "when": 1766782868537,
+      "tag": "0043_add_features_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "5",
+      "when": 1766783142537,
+      "tag": "0044_remove_features_table",
+      "breakpoints": true
     }
   ]
 }

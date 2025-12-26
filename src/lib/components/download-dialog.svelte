@@ -10,7 +10,6 @@
   } from "$lib/components/ui/select";
   import { Loader2, Download, Send } from "lucide-svelte";
   import type { Facturas } from "$lib/server/db";
-  import { generateInvoice } from "$lib/facturacion/facturar/generatePDF";
 
   let {
     open = $bindable(false),
@@ -54,6 +53,8 @@
 
   async function downloadLegacy() {
     descargando = true;
+    // Lazy load PDF generation library only when needed
+    const { generateInvoice } = await import("$lib/facturacion/facturar/generatePDF");
     await generateInvoice({
       info: data.factura,
       cliente: data.factura.cliente!,

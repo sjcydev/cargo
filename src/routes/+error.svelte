@@ -26,6 +26,10 @@
     title: `Error ${status}`,
     description: "Ha ocurrido un error inesperado."
   });
+
+  // Determine home path based on current route
+  const isAdminRoute = $derived(page.url.pathname.startsWith('/admin'));
+  const homePath = $derived(isAdminRoute ? '/admin' : '/');
 </script>
 
 <svelte:head>
@@ -68,7 +72,7 @@
           </Button>
           <Button
             class="flex-1"
-            onclick={() => window.location.href = '/'}
+            onclick={() => window.location.href = homePath}
           >
             <Home class="mr-2 h-4 w-4" />
             Ir al inicio

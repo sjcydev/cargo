@@ -18,3 +18,4 @@ export const db: MySql2Database<typeof schema> = drizzle(client, {
   schema: schema,
 });
 
+export type { Facturas, Sucursales } from "./schema";

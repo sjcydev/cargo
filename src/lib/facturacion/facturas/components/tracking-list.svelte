@@ -39,7 +39,7 @@
     }
   }
 
-  function canSelectTracking(tracking: Trackings): boolean {
+  function canSelectTracking(tracking: Partial<Trackings>): boolean {
     if (selectedTrackings.length === 0) return true;
     return selectionMode === (tracking.retirado ? "retirado" : "no_retirado");
   }
@@ -53,13 +53,13 @@
         (t) => t.numeroTracking === scannedTracking
       );
 
-      if (tracking) {
+      if (tracking && tracking.trackingId !== undefined) {
         const isSelected = selectedTrackings.includes(tracking.trackingId);
         if (!isSelected && canSelectTracking(tracking)) {
           handleTrackingSelection(
             tracking.trackingId,
             true,
-            tracking.retirado!
+            tracking.retirado ?? false
           );
         }
       }
@@ -140,25 +140,25 @@
         class:hover:bg-muted-50={isSelectable}
         class:cursor-pointer={isSelectable}
         class:opacity-50={!isSelectable && selectedTrackings.length > 0}
-        class:bg-muted={selectedTrackings.includes(tracking.trackingId)}
+        class:bg-muted={tracking.trackingId !== undefined && selectedTrackings.includes(tracking.trackingId)}
         onclick={() => {
-          if (isSelectable) {
+          if (isSelectable && tracking.trackingId !== undefined) {
             const checked = !selectedTrackings.includes(tracking.trackingId);
             handleTrackingSelection(
               tracking.trackingId,
               checked,
-              tracking.retirado!
+              tracking.retirado ?? false
             );
           }
         }}
         onkeydown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
-            if (isSelectable) {
+            if (isSelectable && tracking.trackingId !== undefined) {
               const checked = !selectedTrackings.includes(tracking.trackingId);
               handleTrackingSelection(
                 tracking.trackingId,
                 checked,
-                tracking.retirado!
+                tracking.retirado ?? false
               );
             }
           }
@@ -169,14 +169,17 @@
       >
         <div class="flex items-center gap-4">
           <Checkbox
-            checked={selectedTrackings.includes(tracking.trackingId)}
+            checked={tracking.trackingId !== undefined && selectedTrackings.includes(tracking.trackingId)}
             disabled={!isSelectable}
-            onCheckedChange={(checked) =>
-              handleTrackingSelection(
-                tracking.trackingId,
-                checked,
-                tracking.retirado!
-              )}
+            onCheckedChange={(checked) => {
+              if (tracking.trackingId !== undefined) {
+                handleTrackingSelection(
+                  tracking.trackingId,
+                  checked,
+                  tracking.retirado ?? false
+                );
+              }
+            }}
           />
           <div>
             <div class="font-medium">{tracking.numeroTracking}</div>
