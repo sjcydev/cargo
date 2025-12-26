@@ -3,7 +3,15 @@ import { z } from 'zod';
 import { apiHandler } from '$lib/server/api/handler';
 import { clientAuthService } from '$lib/server/services/clientAuth.service';
 import { logger } from '$lib/server/logger';
+import { Resend } from 'resend';
+import { PRIVATE_RESEND_API_KEY } from '$env/static/private';
+import { dev } from '$app/environment';
+import { db } from '$lib/server/db';
+import { companies } from '$lib/server/db/schema';
+import { getMagicLinkEmailHTML, getMagicLinkEmailText } from '$lib/server/email/templates/magic-link';
 import type { RequestHandler } from './$types';
+
+const resend = new Resend(PRIVATE_RESEND_API_KEY);
 
 // Rate limiting state (in-memory, simple implementation)
 // For production, consider Redis or database-backed rate limiting
@@ -57,15 +65,12 @@ export const POST: RequestHandler = apiHandler(async ({ request, getClientAddres
     const baseUrl = url.origin;
     const magicLink = `${baseUrl}/auth/verify?token=${token}`;
 
-    console.log(magicLink)
-
     // Send magic link email
     try {
       await sendMagicLinkEmail(email, magicLink);
-      logger.info('Magic link email sent', { email });
     } catch (error) {
-      logger.error('Failed to send magic link email', { email, error });
-      // Don't reveal error to user
+      // Error already logged in sendMagicLinkEmail
+      // Don't reveal error to user for security
     }
   }
 
@@ -78,40 +83,74 @@ export const POST: RequestHandler = apiHandler(async ({ request, getClientAddres
 });
 
 /**
- * Send magic link email via existing email infrastructure
- * For now, uses console.log in dev mode
- * TODO: Integrate with actual email service based on API_BASE_URL pattern
+ * Send magic link email via Resend
+ * In dev mode: sends to sjcydev12@gmail.com from noreply@resend.dev
+ * In production: sends to actual user email from company domain
  */
 async function sendMagicLinkEmail(email: string, magicLink: string): Promise<void> {
-  // Placeholder implementation
-  // In production, this should use the existing email service pattern from CLAUDE.md
-  // which delegates to external API service
+	const startTime = Date.now();
 
-  const emailPayload = {
-    to: email,
-    subject: 'Your Login Link - Cargo Portal',
-    html: `
-      <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #111827;">Welcome back!</h2>
-        <p style="color: #6B7280; font-size: 16px;">Click the link below to access your cargo portal:</p>
-        <a href="${magicLink}"
-           style="display: inline-block; background: #111827; color: white; padding: 12px 24px;
-                  text-decoration: none; border-radius: 8px; margin: 16px 0;">
-          Access My Account
-        </a>
-        <p style="color: #9CA3AF; font-size: 14px;">
-          This link will expire in 15 minutes for security.
-        </p>
-        <p style="color: #9CA3AF; font-size: 14px;">
-          If you didn't request this, you can safely ignore this email.
-        </p>
-      </div>
-    `
-  };
+	try {
+		// Fetch company info for branding
+		const companyResult = await db
+			.select({
+				company: companies.company,
+				dominio: companies.dominio
+			})
+			.from(companies)
+			.limit(1);
 
-  // Integration point for existing email service
-  // await emailService.send(emailPayload);
+		const companyName = companyResult[0]?.company || 'Cargo Portal';
+		const companyDomain = companyResult[0]?.dominio;
 
-  console.log('Magic link email (dev mode):', magicLink);
-  console.log('Email payload:', emailPayload);
+		// Determine email recipient and sender based on environment
+		const recipientEmail = dev ? 'sjcydev12@gmail.com' : email;
+		const fromEmail = dev
+			? `${companyName} <noreply@resend.dev>`
+			: `${companyName} <noreply@${companyDomain}>`;
+
+		// Log in dev mode for debugging
+		if (dev) {
+			console.log('='.repeat(80));
+			console.log('MAGIC LINK EMAIL (DEV MODE):');
+			console.log(`To: ${recipientEmail} (original: ${email})`);
+			console.log(`From: ${fromEmail}`);
+			console.log(`Magic Link: ${magicLink}`);
+			console.log('='.repeat(80));
+		}
+
+		// Send email via Resend
+		const { data, error } = await resend.emails.send({
+			from: fromEmail,
+			to: recipientEmail,
+			subject: 'Tu Enlace de Acceso - ' + companyName,
+			html: getMagicLinkEmailHTML(magicLink, companyName),
+			text: getMagicLinkEmailText(magicLink, companyName)
+		});
+
+		if (error) {
+			throw error;
+		}
+
+		const latencyMs = Date.now() - startTime;
+
+		logger.info('Magic link email sent successfully', {
+			email: dev ? `${email} (sent to ${recipientEmail})` : email,
+			messageId: data?.id,
+			provider: 'resend',
+			latencyMs,
+			isDev: dev
+		});
+	} catch (error) {
+		const latencyMs = Date.now() - startTime;
+
+		logger.error('Failed to send magic link email', {
+			email,
+			error,
+			latencyMs,
+			isDev: dev
+		});
+
+		throw error;
+	}
 }
