@@ -33,27 +33,27 @@
 <div in:fade={{ duration: 200 }}>
 <!-- Outstanding Balance Banner -->
 {#if data.totalOutstanding > 0}
-  <div class="bg-gradient-to-r from-red-500 to-rose-600 rounded-2xl p-6 mb-6 text-white shadow-lg">
+  <div class="bg-gradient-to-r from-red-500 to-rose-600 rounded-3xl p-6 lg:p-8 mb-6 lg:mb-8 text-white shadow-lg">
     <div class="flex items-center justify-between">
       <div>
-        <div class="text-sm opacity-90 mb-1">Saldo Pendiente Total</div>
-        <div class="text-3xl font-bold">${data.totalOutstanding.toFixed(2)}</div>
+        <div class="text-sm lg:text-base opacity-90 mb-1 lg:mb-2">Saldo Pendiente Total</div>
+        <div class="text-3xl lg:text-5xl font-bold">${data.totalOutstanding.toFixed(2)}</div>
       </div>
-      <svg class="w-12 h-12 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-12 h-12 lg:w-16 lg:h-16 opacity-75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
       </svg>
     </div>
   </div>
 {:else}
-  <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-6 mb-6 text-white shadow-lg">
-    <div class="flex items-center gap-3">
-      <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-3xl p-6 lg:p-8 mb-6 lg:mb-8 text-white shadow-lg">
+    <div class="flex items-center gap-3 lg:gap-4">
+      <svg class="w-12 h-12 lg:w-14 lg:h-14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
       <div>
-        <div class="text-2xl font-bold">¡Todo al Día!</div>
-        <div class="text-sm opacity-90">No tienes facturas pendientes</div>
+        <div class="text-2xl lg:text-3xl font-bold">¡Todo al Día!</div>
+        <div class="text-sm lg:text-base opacity-90">No tienes facturas pendientes</div>
       </div>
     </div>
   </div>
@@ -61,11 +61,11 @@
 
 <!-- Invoices List -->
 {#if data.invoices.length > 0}
-  <div class="mb-4">
-    <h2 class="text-lg font-semibold text-gray-900">Todas las Facturas</h2>
+  <div class="mb-4 lg:mb-6">
+    <h2 class="text-lg lg:text-xl font-semibold text-gray-900">Todas las Facturas</h2>
   </div>
 
-  <div class="space-y-3">
+  <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
     {#each data.invoices as invoice}
       <a
         href="/facturas/{invoice.id}"

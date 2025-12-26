@@ -50,75 +50,79 @@
 </svelte:head>
 
 <!-- Profile Header -->
-<div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-6 shadow-lg text-white mb-6">
-  <div class="flex items-center gap-4">
-    <div class="w-20 h-20 rounded-full bg-white/20 text-white text-2xl font-bold
+<div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-6 lg:p-8 shadow-lg text-white mb-6 lg:mb-8">
+  <div class="flex items-center gap-4 lg:gap-6">
+    <div class="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-white/20 text-white text-2xl lg:text-3xl font-bold
                 flex items-center justify-center shadow-lg border-2 border-white/30">
       {getInitials(data.client.nombre, data.client.apellido)}
     </div>
     <div class="flex-1">
-      <h2 class="text-2xl font-bold mb-1">
+      <h2 class="text-2xl lg:text-3xl font-bold mb-1 lg:mb-2">
         {data.client.nombre} {data.client.apellido}
       </h2>
-      <p class="text-white/80 text-sm">
+      <p class="text-white/80 text-sm lg:text-base">
         {data.client.correo}
       </p>
     </div>
   </div>
 </div>
 
-<!-- Casillero Card -->
-<div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-6 shadow-lg text-white mb-6">
-  <div class="flex items-center justify-between">
-    <div>
-      <div class="text-sm opacity-90 mb-1">Tu Casillero</div>
-      <div class="text-4xl font-bold font-mono tracking-tight">
-        {data.sucursalCode}{data.client.casillero}
-      </div>
-    </div>
-    <button
-      onclick={() => copyToClipboard(`${data.sucursalCode}${data.client.casillero}`, 'Casillero')}
-      aria-label="Copiar número de casillero"
-      class="w-12 h-12 rounded-2xl bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors active:scale-95"
-    >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-      </svg>
-    </button>
-  </div>
-  <div class="text-xs opacity-75 mt-3">
-    Usa este número para todas tus compras en línea
-  </div>
-</div>
-
-{#if data.client.codificacion}
-  <!-- Corporate Code Card -->
-  <div class="bg-white border border-gray-100 rounded-3xl p-6 mb-6 shadow-sm">
+<!-- Info Cards Grid: Desktop 2-col, Mobile 1-col -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-6 mb-6 lg:mb-8">
+  <!-- Casillero Card -->
+  <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-6 shadow-lg text-white">
     <div class="flex items-center justify-between">
       <div>
-        <div class="text-sm text-gray-500 mb-1">Código Corporativo</div>
-        <div class="font-bold text-gray-900 text-2xl font-mono">
-          {data.client.codificacion}
+        <div class="text-sm lg:text-base opacity-90 mb-1">Tu Casillero</div>
+        <div class="text-4xl lg:text-5xl font-bold font-mono tracking-tight">
+          {data.sucursalCode}{data.client.casillero}
         </div>
       </div>
       <button
-        onclick={() => copyToClipboard(data.client.codificacion || '', 'Código corporativo')}
-        aria-label="Copiar código corporativo"
-        class="w-10 h-10 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors active:scale-95"
+        onclick={() => copyToClipboard(`${data.sucursalCode}${data.client.casillero}`, 'Casillero')}
+        aria-label="Copiar número de casillero"
+        class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors active:scale-95"
       >
-        <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-6 h-6 lg:w-7 lg:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
         </svg>
       </button>
     </div>
+    <div class="text-xs lg:text-sm opacity-75 mt-3">
+      Usa este número para todas tus compras en línea
+    </div>
   </div>
-{/if}
+
+  {#if data.client.codificacion}
+    <!-- Corporate Code Card -->
+    <div class="bg-white border border-gray-100 rounded-3xl p-6 shadow-sm">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-sm lg:text-base text-gray-500 mb-1">Código Corporativo</div>
+          <div class="font-bold text-gray-900 text-2xl lg:text-3xl font-mono">
+            {data.client.codificacion}
+          </div>
+        </div>
+        <button
+          onclick={() => copyToClipboard(data.client.codificacion || '', 'Código corporativo')}
+          aria-label="Copiar código corporativo"
+          class="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors active:scale-95"
+        >
+          <svg class="w-5 h-5 lg:w-6 lg:h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  {/if}
+</div>
 
 <!-- Shipping Addresses -->
 {#if data.addresses && data.addresses.length > 0}
-  <div class="space-y-4 mb-6">
-    <h2 class="text-lg font-bold text-gray-900">Direcciones de Envío</h2>
+  <div class="mb-6 lg:mb-8">
+    <h2 class="text-xl lg:text-2xl font-bold text-gray-900 mb-4 lg:mb-6">Direcciones de Envío</h2>
 
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
     {#each data.addresses as dir}
       {@const nombre = `${data.sucursalCode} ${data.client.nombre} ${data.client.apellido}${dir.suffix ? ` ${dir.suffix}` : ""}`}
       {@const direccion = `${dir.address1} ${data.sucursalCode}`}
@@ -296,6 +300,7 @@
         </div>
       </div>
     {/each}
+    </div>
   </div>
 {/if}
 

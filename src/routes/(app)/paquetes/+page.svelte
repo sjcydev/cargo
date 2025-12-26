@@ -39,8 +39,8 @@
 {:else}
 <div in:fade={{ duration: 200 }}>
 <!-- Search Bar -->
-<div class="mb-4">
-  <div class="relative">
+<div class="mb-4 lg:mb-6">
+  <div class="relative max-w-2xl">
     <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
          fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -50,16 +50,16 @@
       type="text"
       bind:value={searchQuery}
       placeholder="Buscar por número de tracking"
-      class="w-full pl-12 pr-4 py-3 rounded-xl bg-white border border-gray-200
-             text-gray-900 placeholder-gray-400 text-base
+      class="w-full pl-12 pr-4 py-3 lg:py-3.5 rounded-xl bg-white border border-gray-200
+             text-gray-900 placeholder-gray-400 text-base lg:text-lg
              focus:ring-2 focus:ring-blue-500 focus:border-transparent
-             transition-all outline-none"
+             transition-all outline-none shadow-sm"
     />
   </div>
 </div>
 
 <!-- Filter Tabs -->
-<div class="flex gap-2 mb-6 border-b border-gray-200">
+<div class="flex gap-2 mb-6 lg:mb-8 border-b border-gray-200">
   <button
     onclick={() => setFilter('active')}
     class="px-4 py-2 font-medium transition-colors relative
@@ -88,7 +88,7 @@
 
 <!-- Packages List -->
 {#if filteredPackages.length > 0}
-  <div class="space-y-4">
+  <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-5">
     {#each filteredPackages as pkg}
       <a
         href="/paquetes/{pkg.id}"

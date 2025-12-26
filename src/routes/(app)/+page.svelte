@@ -40,55 +40,57 @@
 {:else}
 <div in:fade={{ duration: 200 }}>
 <!-- Greeting Section -->
-<div class="mb-6">
-  <h2 class="text-2xl font-bold text-gray-900 mb-1">
+<div class="mb-6 lg:mb-8">
+  <h2 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-1">
     {getGreeting()}, {data.client.nombre}
   </h2>
 </div>
 
 <!-- Summary Cards -->
 {#if data.summary}
-  <!-- Casillero Card - Prominent -->
-  <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-5 shadow-lg text-white mb-4">
-    <div class="flex items-center justify-between">
-      <div>
-        <div class="text-sm opacity-90 mb-1">Tu Casillero</div>
-        <div class="text-3xl font-bold font-mono tracking-tight">
-          {data.sucursalCode}{data.client.casillero}
+  <!-- Desktop: 2-column grid for casillero and main stats -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-4 lg:mb-6">
+    <!-- Casillero Card - Prominent -->
+    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-5 lg:p-6 shadow-lg text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-sm lg:text-base opacity-90 mb-1">Tu Casillero</div>
+          <div class="text-3xl lg:text-4xl font-bold font-mono tracking-tight">
+            {data.sucursalCode}{data.client.casillero}
+          </div>
+        </div>
+        <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-white/20 flex items-center justify-center">
+          <svg class="w-6 h-6 lg:w-7 lg:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+          </svg>
         </div>
       </div>
-      <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-        </svg>
+      <div class="text-xs lg:text-sm opacity-75 mt-2">
+        Usa este número para todas tus compras en línea
       </div>
     </div>
-    <div class="text-xs opacity-75 mt-2">
-      Usa este número para todas tus compras en línea
-    </div>
-  </div>
 
-  <div class="space-y-4 mb-8">
     <!-- Available for Pickup - Primary Card -->
     <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-6 shadow-lg text-white border border-gray-700">
       <div class="flex items-center justify-between mb-3">
-        <div class="text-base font-semibold">Listos para Retirar</div>
-        <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="text-base lg:text-lg font-semibold">Listos para Retirar</div>
+        <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-white/20 flex items-center justify-center">
+          <svg class="w-6 h-6 lg:w-7 lg:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
         </div>
       </div>
-      <div class="text-5xl font-bold mb-1">
+      <div class="text-5xl lg:text-6xl font-bold mb-1">
         {data.summary.availablePackages}
       </div>
-      <div class="text-sm opacity-90">
+      <div class="text-sm lg:text-base opacity-90">
         {data.summary.availablePackages === 1 ? 'Paquete Disponible' : 'Paquetes Disponibles'}
       </div>
     </div>
+  </div>
 
-    <!-- Quick Actions Grid -->
-    <div class="grid grid-cols-2 gap-4">
+  <!-- Quick Actions Grid -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4 lg:mb-6">
       <!-- WhatsApp Contact -->
       <a href="https://wa.me/{data.whatsappNumber}" target="_blank" rel="noopener noreferrer" class="bg-gradient-to-br from-green-500 to-green-600 rounded-3xl shadow-lg text-white block hover:shadow-xl transition-all active:scale-95 aspect-square p-5 flex flex-col justify-between">
         <div class="w-11 h-11 rounded-2xl bg-white/20 flex items-center justify-center">
@@ -126,26 +128,26 @@
 
     <!-- Outstanding Balance (if any) -->
     {#if data.summary.totalDue > 0}
-      <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-6 shadow-lg text-white">
+      <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-6 lg:p-7 shadow-lg text-white">
         <div class="flex items-start justify-between">
           <div class="flex-1">
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-2xl bg-white/20 flex items-center justify-center">
+                <svg class="w-6 h-6 lg:w-7 lg:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
               </div>
               <div>
-                <div class="text-sm opacity-90">Saldo Pendiente</div>
-                <div class="text-3xl font-bold">
+                <div class="text-sm lg:text-base opacity-90">Saldo Pendiente</div>
+                <div class="text-3xl lg:text-4xl font-bold">
                   ${data.summary.totalDue.toFixed(2)}
                 </div>
               </div>
             </div>
             <a
               href="/facturas"
-              class="inline-flex items-center gap-2 px-4 py-2.5 bg-white/20 hover:bg-white/30 text-white text-sm font-medium rounded-xl transition-colors backdrop-blur-sm"
+              class="inline-flex items-center gap-2 px-4 lg:px-5 py-2.5 lg:py-3 bg-white/20 hover:bg-white/30 text-white text-sm lg:text-base font-medium rounded-xl transition-colors backdrop-blur-sm"
             >
               Ver Facturas Pendientes
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,14 +158,13 @@
         </div>
       </div>
     {/if}
-  </div>
 {/if}
 
 <!-- Recent Activity -->
 {#if data.recentActivity && data.recentActivity.length > 0}
-  <div class="mb-6">
-    <h3 class="text-lg font-semibold text-gray-900 mb-4">Actividad Reciente</h3>
-    <div class="space-y-3">
+  <div class="mb-6 lg:mb-8">
+    <h3 class="text-lg lg:text-xl font-semibold text-gray-900 mb-4 lg:mb-6">Actividad Reciente</h3>
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
       {#each data.recentActivity as activity}
         <div
           class="block bg-white border border-gray-100 rounded-2xl p-4 shadow-sm
