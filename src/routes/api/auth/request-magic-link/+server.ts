@@ -9,6 +9,7 @@ import { dev } from '$app/environment';
 import { db } from '$lib/server/db';
 import { companies } from '$lib/server/db/schema';
 import { getMagicLinkEmailHTML, getMagicLinkEmailText } from '$lib/server/email/templates/magic-link';
+import { getFriendlyUrl } from '$lib/server/s3';
 import type { RequestHandler } from './$types';
 
 const resend = new Resend(PRIVATE_RESEND_API_KEY);
@@ -95,13 +96,15 @@ async function sendMagicLinkEmail(email: string, magicLink: string): Promise<voi
 		const companyResult = await db
 			.select({
 				company: companies.company,
-				dominio: companies.dominio
+				dominio: companies.dominio,
+				logo: companies.logo
 			})
 			.from(companies)
 			.limit(1);
 
 		const companyName = companyResult[0]?.company || 'Cargo Portal';
 		const companyDomain = companyResult[0]?.dominio;
+		const logoUrl = companyResult[0]?.logo ? getFriendlyUrl(companyResult[0].logo) : undefined;
 
 		// Determine email recipient and sender based on environment
 		const recipientEmail = dev ? 'sjcydev12@gmail.com' : email;
@@ -124,7 +127,7 @@ async function sendMagicLinkEmail(email: string, magicLink: string): Promise<voi
 			from: fromEmail,
 			to: recipientEmail,
 			subject: 'Tu Enlace de Acceso - ' + companyName,
-			html: getMagicLinkEmailHTML(magicLink, companyName),
+			html: getMagicLinkEmailHTML(magicLink, companyName, logoUrl),
 			text: getMagicLinkEmailText(magicLink, companyName)
 		});
 

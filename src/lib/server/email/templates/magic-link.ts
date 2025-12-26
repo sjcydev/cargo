@@ -6,7 +6,11 @@
 /**
  * Generate HTML email template for magic link
  */
-export function getMagicLinkEmailHTML(magicLink: string, companyName: string = 'Cargo Portal'): string {
+export function getMagicLinkEmailHTML(
+	magicLink: string,
+	companyName: string = 'Cargo Portal',
+	logoUrl?: string
+): string {
 	return `
 <!DOCTYPE html>
 <html lang="es">
@@ -35,6 +39,11 @@ export function getMagicLinkEmailHTML(magicLink: string, companyName: string = '
     .logo {
       text-align: center;
       margin-bottom: 32px;
+    }
+    .logo img {
+      max-width: 200px;
+      height: auto;
+      margin: 0 auto;
     }
     h1 {
       color: #111827;
@@ -94,7 +103,11 @@ export function getMagicLinkEmailHTML(magicLink: string, companyName: string = '
   <div class="container">
     <div class="card">
       <div class="logo">
-        <h2 style="color: #111827; margin: 0;">${companyName}</h2>
+        ${
+					logoUrl
+						? `<img src="${logoUrl}" alt="${companyName}" />`
+						: `<h2 style="color: #111827; margin: 0;">${companyName}</h2>`
+				}
       </div>
 
       <h1>¡Bienvenido de vuelta!</h1>
