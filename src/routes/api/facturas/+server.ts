@@ -5,8 +5,9 @@ import { facturasService } from "$lib/server/services";
 import { logger } from "$lib/server/logger";
 
 const requestSchema = z.object({
-  cursor: z.number().int().positive(),
-  sucursalId: z.number().int().positive().optional(),
+  cursor: z.number().int().positive().optional(),
+  last: z.number().int().optional(), // Alias for cursor for backward compatibility
+  sucursalId: z.number().int().positive().optional().nullable(),
 });
 
 export const POST = apiHandler(async (event) => {
@@ -14,6 +15,9 @@ export const POST = apiHandler(async (event) => {
 
   const body = await event.request.json();
   const validatedData = requestSchema.parse(body);
+
+  // Support both 'cursor' and 'last' for backward compatibility
+  const cursor = validatedData.cursor || validatedData.last;
 
   // If user is not ADMIN, force filtering by their sucursal
   const sucursalId =
@@ -23,12 +27,12 @@ export const POST = apiHandler(async (event) => {
 
   logger.info("Fetching facturas list", {
     userId: user.id,
-    cursor: validatedData.cursor,
+    cursor,
     sucursalId,
   });
 
   const facturas = await facturasService.list({
-    cursor: validatedData.cursor,
+    cursor,
     sucursalId,
     enviado: true,
   });
