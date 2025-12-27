@@ -29,25 +29,23 @@
     }
   }
 
-    if (data.facturas.length >= 100) {
-    onMount(async () => {
-      loadingMore = true;
+  onMount(async () => {
+    loadingMore = true;
 
-      const newData = await fetch("/api/facturas", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          last: data.last,
-          sucursalId: data.user?.rol !== "ADMIN" ? data.user?.sucursalId : null,
-        }),
-      }).then((res) => {
-        loadingMore = false;
-        return res.json();
-      });
-
-      facturas = [...facturas, ...newData.facturas];
+    const newData = await fetch("/api/facturas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        last: data.last,
+        sucursalId: data.user?.rol !== "ADMIN" ? data.user?.sucursalId : null,
+      }),
+    }).then((res) => {
+      loadingMore = false;
+      return res.json();
     });
-  }
+
+    facturas = [...facturas, ...newData.facturas];
+  });
 </script>
 
 <svelte:head>
@@ -71,7 +69,7 @@
 {/snippet}
 
 <InnerLayout title={"Facturas"} {actions}>
-  <SucursalTabs sucursales={sucursales} data={facturas} userRole={user?.rol}>
+  <SucursalTabs {sucursales} data={facturas} userRole={user?.rol}>
     {#snippet content({ data: filteredData })}
       <VerFacturas
         data={filteredData}
