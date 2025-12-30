@@ -19,7 +19,16 @@
   let selectedTrackings = $state<number[]>([]);
   let selectionMode = $state<"retirado" | "no_retirado" | null>(null);
   let isUpdatingTrackings = $state<boolean>(false);
+  let isMarkingAllRetirados = $state<boolean>(false);
   let scannerInput = $state<string>("");
+
+  // Check if all trackings are already retirados
+  let allRetirados = $derived(trackings.every((t) => t.retirado));
+
+  // Get all non-retirado tracking IDs
+  let allNonRetiradoTrackingIds = $derived(
+    trackings.filter((t) => !t.retirado && t.trackingId !== undefined).map((t) => t.trackingId!)
+  );
 
   function handleTrackingSelection(
     trackingId: number,
@@ -74,52 +83,98 @@
 <div>
   <div class="flex items-center justify-between mb-4">
     <h3 class="text-lg font-medium">Trackings</h3>
-    <form
-      method="POST"
-      action="?/updateTrackings"
-      use:enhance={() => {
-        isUpdatingTrackings = true;
-        return async ({ result }) => {
-          if (result.type === "success") {
-            selectedTrackings = [];
-            selectionMode = null;
-            await invalidateAll();
-          }
-          isUpdatingTrackings = false;
-        };
-      }}
-    >
-      <input
-        type="hidden"
-        name="facturaIds"
-        value={JSON.stringify(
-          Array.isArray(facturaIds) ? facturaIds : [facturaIds]
-        )}
-      />
-      <input
-        type="hidden"
-        name="trackingIds"
-        value={JSON.stringify(selectedTrackings)}
-      />
-      <input
-        type="hidden"
-        name="setRetirado"
-        value={selectionMode === "no_retirado"}
-      />
-      <Button
-        type="submit"
-        disabled={selectedTrackings.length === 0 || isUpdatingTrackings}
-        variant={selectedTrackings.length === 0 ? "outline" : "default"}
+    <div class="flex gap-2">
+      {#if !allRetirados}
+        <form
+          method="POST"
+          action="?/updateTrackings"
+          use:enhance={() => {
+            isMarkingAllRetirados = true;
+            return async ({ result }) => {
+              if (result.type === "success") {
+                await invalidateAll();
+              }
+              isMarkingAllRetirados = false;
+            };
+          }}
+        >
+          <input
+            type="hidden"
+            name="facturaIds"
+            value={JSON.stringify(
+              Array.isArray(facturaIds) ? facturaIds : [facturaIds]
+            )}
+          />
+          <input
+            type="hidden"
+            name="trackingIds"
+            value={JSON.stringify(allNonRetiradoTrackingIds)}
+          />
+          <input
+            type="hidden"
+            name="setRetirado"
+            value="true"
+          />
+          <Button
+            type="submit"
+            disabled={isMarkingAllRetirados || isUpdatingTrackings}
+            variant="secondary"
+          >
+            {#if isMarkingAllRetirados}
+              <Loader color="white" size="30" unit="px" />
+            {:else}
+              Marcar Todos como Retirados
+            {/if}
+          </Button>
+        </form>
+      {/if}
+      <form
+        method="POST"
+        action="?/updateTrackings"
+        use:enhance={() => {
+          isUpdatingTrackings = true;
+          return async ({ result }) => {
+            if (result.type === "success") {
+              selectedTrackings = [];
+              selectionMode = null;
+              await invalidateAll();
+            }
+            isUpdatingTrackings = false;
+          };
+        }}
       >
-        {#if isUpdatingTrackings}
-          <Loader color="white" size="30" unit="px" />
-        {:else}
-          {selectionMode === "retirado"
-            ? "Marcar como No Retirados"
-            : "Marcar como Retirados"}
-        {/if}
-      </Button>
-    </form>
+        <input
+          type="hidden"
+          name="facturaIds"
+          value={JSON.stringify(
+            Array.isArray(facturaIds) ? facturaIds : [facturaIds]
+          )}
+        />
+        <input
+          type="hidden"
+          name="trackingIds"
+          value={JSON.stringify(selectedTrackings)}
+        />
+        <input
+          type="hidden"
+          name="setRetirado"
+          value={selectionMode === "no_retirado"}
+        />
+        <Button
+          type="submit"
+          disabled={selectedTrackings.length === 0 || isUpdatingTrackings || isMarkingAllRetirados}
+          variant={selectedTrackings.length === 0 ? "outline" : "default"}
+        >
+          {#if isUpdatingTrackings}
+            <Loader color="white" size="30" unit="px" />
+          {:else}
+            {selectionMode === "retirado"
+              ? "Marcar como No Retirados"
+              : "Marcar como Retirados"}
+          {/if}
+        </Button>
+      </form>
+    </div>
   </div>
 
   <div class="mb-4">
