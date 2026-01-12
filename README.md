@@ -26,7 +26,7 @@ Sistema completo para administración de operaciones de envío y carga, incluyen
 1. **Clonar el repositorio**
    ```bash
    git clone <repository-url>
-   cd cargo-v2.5
+   cd cargo
    ```
 
 2. **Instalar dependencias**
@@ -58,11 +58,6 @@ Sistema completo para administración de operaciones de envío y carga, incluyen
    bun run db:migrate
    ```
 
-5. **Seed de datos (opcional)**
-   ```bash
-   bun run db:seed
-   ```
-
 ## 🎯 Comandos de Desarrollo
 
 ### Desarrollo
@@ -80,9 +75,8 @@ bun run check:watch
 bun run db:start      # Iniciar contenedor MySQL
 bun run db:push       # Aplicar cambios de schema
 bun run db:migrate    # Ejecutar migraciones
-bun run db:generate   # Generar nueva migración (usar --name flag)
+bun run db:generate   # Generar nueva migración
 bun run db:studio     # Abrir Drizzle Studio UI
-bun run db:seed       # Seed de datos de prueba
 ```
 
 ### Producción
@@ -185,7 +179,6 @@ API:
 ## 📚 Documentación Adicional
 
 Para guías detalladas de desarrollo, consultar:
-- `CLAUDE.md` - Guía completa del proyecto
 - `src/lib/server/db/schema.ts` - Schema de base de datos
 - `.env.example` - Variables de entorno requeridas
 
