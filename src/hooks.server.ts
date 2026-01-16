@@ -3,9 +3,14 @@ import * as auth from "$lib/server/auth.js";
 import { redirect, error } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { db } from "$lib/server/db";
-import { sucursales, companies, clientDeviceSessions } from "$lib/server/db/schema";
+import {
+  sucursales,
+  companies,
+  clientDeviceSessions,
+} from "$lib/server/db/schema";
 import { clientAuthService } from "$lib/server/services/clientAuth.service";
 import { eq } from "drizzle-orm";
+import { ADMIN_HOST, APP_HOST } from "$env/static/private";
 
 const BLOCKED_PATHS = [
   /\.php$/i,
@@ -13,6 +18,34 @@ const BLOCKED_PATHS = [
   /^\/admin\.php$/i,
   /^\/class\d+\.php$/i,
 ];
+
+const [companiesData] = await db
+  .select({
+    suspended: companies.suspended,
+    clientsPortal: companies.clientsPortal,
+  })
+  .from(companies)
+  .limit(1);
+
+const redirectToAppHandle: Handle = async ({ event, resolve }) => {
+  if (companiesData && companiesData.clientsPortal) {
+    const hostname = event.url.hostname;
+
+    if (hostname === ADMIN_HOST) {
+      const dest = new URL(event.url.toString());
+      dest.hostname = APP_HOST;
+
+      // prevent /admin/admin
+      if (!dest.pathname.startsWith("/admin")) {
+        dest.pathname = `/admin${dest.pathname}`;
+      }
+
+      throw redirect(302, dest.toString());
+    }
+  }
+
+  return await resolve(event);
+};
 
 const suspendHandle: Handle = async ({ event, resolve }) => {
   const [companiesData] = await db
@@ -170,25 +203,29 @@ const clientAuthHandle: Handle = async ({ event, resolve }) => {
 
   if (sessionId) {
     // Validate session and attach client data
-    const sessionData = await clientAuthService.validateClientSession(sessionId);
+    const sessionData =
+      await clientAuthService.validateClientSession(sessionId);
 
     if (sessionData) {
-      event.locals.clientUser = sessionData.client;
+      event.locals.clientUser = sessionData.client!;
       event.locals.clientSession = {
         id: sessionData.session.id,
         clientId: sessionData.session.clientId,
         userAgent: sessionData.session.userAgent,
         lastActive: sessionData.session.lastActive,
         expiresAt: sessionData.session.expiresAt,
-        createdAt: sessionData.session.createdAt
+        createdAt: sessionData.session.createdAt,
       };
 
       // Check if session needs renewal (< 15 days remaining)
-      const fifteenDaysFromNow = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+      const fifteenDaysFromNow = new Date(
+        Date.now() + 15 * 24 * 60 * 60 * 1000,
+      );
       if (sessionData.session.expiresAt < fifteenDaysFromNow) {
         // Renew session
         const newExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-        await db.update(clientDeviceSessions)
+        await db
+          .update(clientDeviceSessions)
           .set({ expiresAt: newExpiresAt })
           .where(eq(clientDeviceSessions.id, sessionId));
 
@@ -198,7 +235,7 @@ const clientAuthHandle: Handle = async ({ event, resolve }) => {
           httpOnly: true,
           sameSite: "lax",
           secure: process.env.NODE_ENV === "production",
-          maxAge: 60 * 60 * 24 * 30 // 30 days
+          maxAge: 60 * 60 * 24 * 30, // 30 days
         });
       }
     } else {
@@ -217,6 +254,7 @@ const clientAuthHandle: Handle = async ({ event, resolve }) => {
 
 export const handle: Handle = sequence(
   blockedHandle,
+  redirectToAppHandle,
   suspendHandle, // Company suspension check
   adminAuthHandle, // Admin session validation (/admin/* and /api/*) - MUST run early to populate locals.user
   onboardingHandle, // Onboarding check (admin only)
