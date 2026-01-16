@@ -10,7 +10,7 @@ import {
 } from "$lib/server/db/schema";
 import { clientAuthService } from "$lib/server/services/clientAuth.service";
 import { eq } from "drizzle-orm";
-import { ADMIN_HOST, APP_HOST } from "$env/static/private";
+import { env } from "$env/dynamic/private";
 
 const BLOCKED_PATHS = [
   /\.php$/i,
@@ -31,9 +31,9 @@ const redirectToAppHandle: Handle = async ({ event, resolve }) => {
   if (companiesData && companiesData.clientsPortal) {
     const hostname = event.url.hostname;
 
-    if (hostname === ADMIN_HOST) {
+    if (hostname === env.ADMIN_HOST) {
       const dest = new URL(event.url.toString());
-      dest.hostname = APP_HOST;
+      dest.hostname = env.APP_HOST!;
 
       // prevent /admin/admin
       if (!dest.pathname.startsWith("/admin")) {
