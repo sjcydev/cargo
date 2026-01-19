@@ -74,8 +74,19 @@ export const columns: ColumnDef<UsuariosWithSucursal>[] = [
 
       const nac = createRawSnippet<[string | null]>((getNacimiento) => {
         const nacimiento = getNacimiento();
+        if (!nacimiento) {
+          return {
+            render: () => `<div>-</div>`,
+          };
+        }
+        const date = new Date(nacimiento);
+        if (isNaN(date.getTime())) {
+          return {
+            render: () => `<div>-</div>`,
+          };
+        }
         return {
-          render: () => `<div>${formatter.format(new Date(nacimiento!))}</div>`,
+          render: () => `<div>${formatter.format(date)}</div>`,
         };
       });
 
