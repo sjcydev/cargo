@@ -22,7 +22,6 @@ const client = mysql.createPool({
   // Fail fast if no connection is available
   queueLimit: 0,
   waitForConnections: true,
-  acquireTimeout: 10000, // 10 seconds
 
   // Connection lifecycle settings
   // Close idle connections quickly to free up database resources
