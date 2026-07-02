@@ -102,16 +102,19 @@ const clientsPortalHandle: Handle = async ({ event, resolve }) => {
 };
 
 const onboardingHandle: Handle = async ({ event, resolve }) => {
+  const path = event.url.pathname;
+
+  if (!path.startsWith("/admin")) {
+    return resolve(event);
+  }
+
   // Only need to check if any sucursales exist
   const sucursalesData = await db
     .select({ sucursalId: sucursales.sucursalId })
     .from(sucursales)
     .limit(1);
 
-  if (
-    sucursalesData.length === 0 &&
-    event.url.pathname !== "/admin/onboarding"
-  ) {
+  if (sucursalesData.length === 0 && path !== "/admin/onboarding") {
     throw redirect(302, "/admin/onboarding");
   }
 
