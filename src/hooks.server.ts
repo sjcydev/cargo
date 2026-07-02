@@ -93,8 +93,9 @@ const clientsPortalHandle: Handle = async ({ event, resolve }) => {
     .from(companies)
     .limit(1);
 
-  // If clients portal is disabled, redirect all client routes to admin
-  if (companiesData && companiesData.clientsPortal === false) {
+  // If setup has not completed or the clients portal is disabled,
+  // redirect all client routes into the admin onboarding flow.
+  if (!companiesData || companiesData.clientsPortal === false) {
     throw redirect(302, "/admin");
   }
 
