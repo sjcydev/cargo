@@ -5,8 +5,8 @@ import { companies } from "$lib/server/db/schema";
 import { getFriendlyUrl } from "$lib/server/s3";
 
 export const load: LayoutServerLoad = async ({ locals, url }) => {
-  // Allow login page to load without auth (prevent redirect loop)
-  if (url.pathname === '/admin/login') {
+  // Allow public admin setup/auth pages to load without an existing session.
+  if (url.pathname === '/admin/login' || url.pathname === '/admin/onboarding') {
     return {};
   }
 
