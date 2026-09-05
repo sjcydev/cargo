@@ -46,16 +46,6 @@ export const db: MySql2Database<typeof schema> = drizzle(client, {
   schema: schema,
 });
 
-// Connection pool monitoring (useful for debugging connection issues)
-if (env.NODE_ENV !== 'production') {
-  client.on('acquire', () => {
-    console.log('[DB] Connection acquired from pool');
-  });
-  client.on('release', () => {
-    console.log('[DB] Connection released back to pool');
-  });
-}
-
 // Graceful shutdown handler for serverless environments
 // This ensures connections are properly closed when the function terminates
 export async function closePool() {
